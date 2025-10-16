@@ -1,0 +1,28 @@
+services:
+  backend:
+    restart: "no"
+    env_file:
+      - .env.dev
+    build:
+      args:
+        ENVIRONMENT: "develop"
+    volumes:
+      - type: bind
+        source: ./svc
+        target: /app/svc
+        read_only: true
+        consistency: delegated
+    environment:
+      DEBUG: "true"
+      LOG_LEVEL: "debug"
+
+  caddy:
+    restart: "no"
+    depends_on:
+      - backend
+    env_file:
+      - .env.dev
+    ports:
+      - "5002:5002"
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}

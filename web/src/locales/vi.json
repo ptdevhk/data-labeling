@@ -1,0 +1,104 @@
+{
+  "common": {
+    "appName": "Công Cụ Gắn Nhãn Dữ Liệu",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "register": "Đăng ký",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "create": "Tạo mới",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "export": "Xuất",
+    "import": "Nhập",
+    "upload": "Tải lên",
+    "download": "Tải xuống",
+    "settings": "Cài đặt",
+    "notifications": "Thông báo",
+    "help": "Trợ giúp",
+    "continue": "Tiếp tục",
+    "annotate": "Gắn nhãn",
+    "view": "Xem",
+    "openMenu": "Mở Menu",
+    "toggleSidebar": "Bật/Tắt Thanh Bên",
+    "toggleTheme": "Chuyển Đổi Chủ Đề"
+  },
+  "nav": {
+    "dashboard": "Bảng điều khiển",
+    "projects": "Dự án",
+    "datasets": "Dữ liệu",
+    "exports": "Xuất dữ liệu",
+    "settings": "Cài đặt"
+  },
+  "dashboard": {
+    "title": "Bảng điều khiển",
+    "createProject": "Tạo dự án",
+    "projectStats": "Thống kê dự án",
+    "recentProjects": "Dự án gần đây",
+    "totalProjects": "Tổng số dự án",
+    "totalImages": "Tổng số ảnh",
+    "labeledImages": "Ảnh đã gắn nhãn",
+    "completionRate": "Tỷ lệ hoàn thành"
+  },
+  "project": {
+    "name": "Tên dự án",
+    "description": "Mô tả",
+    "createdAt": "Ngày tạo",
+    "updatedAt": "Ngày cập nhật",
+    "status": "Trạng thái",
+    "actions": "Hành động"
+  },
+  "annotation": {
+    "tools": {
+      "select": "Chọn",
+      "rectangle": "Hình chữ nhật",
+      "polygon": "Đa giác",
+      "circle": "Hình tròn",
+      "line": "Đường thẳng",
+      "point": "Điểm",
+      "eraser": "Tẩy",
+      "undo": "Hoàn tác",
+      "redo": "Làm lại"
+    },
+    "canvas": {
+      "zoom": "Thu phóng",
+      "reset": "Đặt lại",
+      "pan": "Di chuyển",
+      "fullscreen": "Toàn màn hình"
+    },
+    "labels": {
+      "title": "Nhãn",
+      "addClass": "Thêm lớp",
+      "className": "Tên lớp",
+      "color": "Màu",
+      "attributes": "Thuộc tính"
+    }
+  },
+  "theme": {
+    "light": "Chế độ sáng",
+    "dark": "Chế độ tối",
+    "toggle": "Chuyển đổi chủ đề"
+  },
+  "dataset": {
+    "name": "Tên bộ dữ liệu",
+    "imageName": "Tên ảnh",
+    "status": "Trạng thái",
+    "images": "Số ảnh",
+    "createdAt": "Ngày tạo",
+    "upload": "Tải lên bộ dữ liệu"
+  },
+  "export": {
+    "name": "Tên xuất dữ liệu",
+    "format": "Định dạng",
+    "status": "Trạng thái",
+    "createdAt": "Ngày tạo"
+  },
+  "settings": {
+    "general": "Chung",
+    "language": "Ngôn ngữ",
+    "appearance": "Giao diện",
+    "darkMode": "Chế độ tối"
+  }
+}

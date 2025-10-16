@@ -1,0 +1,32 @@
+# https://caddyserver.com/docs/caddyfile/concepts
+# Local development Caddyfile - proxies to localhost:5001 instead of backend:5001
+
+:5002 {
+	# API routes - proxy to backend (order matters - these must come first)
+	handle /api* {
+		reverse_proxy localhost:5001
+	}
+	handle /token {
+		reverse_proxy localhost:5001
+	}
+	handle /health {
+		reverse_proxy localhost:5001
+	}
+	handle /docs {
+		reverse_proxy localhost:5001
+	}
+	handle /openapi.json {
+		reverse_proxy localhost:5001
+	}
+	handle /redoc {
+		reverse_proxy localhost:5001
+	}
+	
+	# Serve frontend static files
+	handle {
+		root * web/dist
+		encode zstd gzip
+		try_files {path} /index.html
+		file_server
+	}
+}

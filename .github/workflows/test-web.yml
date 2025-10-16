@@ -1,0 +1,63 @@
+name: Test Frontend
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'web/**'
+  #     - '.github/workflows/test-web.yml'
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'web/**'
+      - '.github/workflows/test-web.yml'
+
+  schedule:
+    # Every sunday at 8:10 UTC
+    - cron: "10 8 * * 0"
+
+# If you trigger a new workflow while the previous one is running,
+# this will cancel the previous one (but not on main branch).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  test-frontend:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node-version: ["20"]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        working-directory: ./web
+        run: |
+          echo "Installing frontend dependencies..."
+          bun install
+
+      - name: Run Linter
+        run: |
+          echo "Running frontend linter..."
+          make lint-react
+
+      - name: Build Frontend
+        working-directory: ./web
+        run: |
+          echo "Building frontend..."
+          bun run build

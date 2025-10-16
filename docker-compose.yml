@@ -1,0 +1,45 @@
+services:
+  backend:
+    restart: unless-stopped
+    env_file:
+      - .env
+    build:
+      context: ./
+      dockerfile: ./dockerfiles/python${PYTHON_VERSION}/Dockerfile
+      args:
+        TZ: ${TZ:-Asia/Hong_Kong}
+        ENVIRONMENT: ${ENVIRONMENT:-production}
+      labels:
+        - backend
+    # ports:
+    #   - "5001:5001"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:5002:5002"
+    volumes:
+      - type: bind
+        source: ./Caddyfile
+        target: /etc/caddy/Caddyfile
+        consistency: cached
+      - type: bind
+        source: ./web/dist
+        target: /web/dist
+        consistency: cached
+      - type: volume
+        source: caddy_data
+        target: /data
+      - type: volume
+        source: caddy_config
+        target: /config
+    depends_on:
+      - backend
+
+volumes:
+  caddy_data:
+  caddy_config:
