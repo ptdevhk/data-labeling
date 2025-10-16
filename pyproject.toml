@@ -5,7 +5,7 @@
 [project]
 requires-python = ">=3.11"
 name = "data-labeling"
-version = "1.0.0"
+version = "0.0.0"
 description = "A web-based image data labeling tool for manual annotation."
 readme = "README.md"
 keywords = ["fastapi", "react", "data-labeling", "annotation"]
