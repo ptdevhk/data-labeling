@@ -1,6 +1,6 @@
 # data-labeling
 
-[![Version](https://img.shields.io/github/v/tag/karlcc/data-labeling?label=version)](https://github.com/karlcc/data-labeling/releases)
+[![Version](https://img.shields.io/github/v/tag/ptdevhk/data-labeling?label=version)](https://github.com/ptdevhk/data-labeling/releases)
 [![Semantic Release](https://img.shields.io/badge/semantic--release-conventional-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
@@ -41,11 +41,11 @@ After creating a new repository, configure these settings to enable Dependabot a
 
 **Via GitHub CLI:**
 ```bash
-gh api -X PATCH repos/karlcc/data-labeling -f allow_auto_merge=true
+gh api -X PATCH repos/ptdevhk/data-labeling -f allow_auto_merge=true
 ```
 
 **Via GitHub UI:**
-1. Go to repository Settings: `https://github.com/karlcc/data-labeling/settings`
+1. Go to repository Settings: `https://github.com/ptdevhk/data-labeling/settings`
 2. Scroll to "Pull Requests" section
 3. ✅ Check "Allow auto-merge"
 4. Click "Save changes"
@@ -86,7 +86,7 @@ gh secret list
 
 **Via GitHub CLI:**
 ```bash
-gh api -X PUT repos/karlcc/data-labeling/branches/main/protection \
+gh api -X PUT repos/ptdevhk/data-labeling/branches/main/protection \
   --input - <<'EOF'
 {
   "required_status_checks": {
@@ -126,7 +126,7 @@ EOF
    - Safe because tests already passed
 
 **Via GitHub UI:**
-1. Go to: `https://github.com/karlcc/data-labeling/settings/branches`
+1. Go to: `https://github.com/ptdevhk/data-labeling/settings/branches`
 2. Click "Add branch protection rule" (or edit existing)
 3. Branch name pattern: `main`
 4. **Check these:**
@@ -143,7 +143,7 @@ EOF
 
 Check if auto-merge is enabled:
 ```bash
-gh api repos/karlcc/data-labeling --jq '.allow_auto_merge'
+gh api repos/ptdevhk/data-labeling --jq '.allow_auto_merge'
 # Expected output: true
 ```
 
@@ -155,7 +155,7 @@ gh secret list
 
 Check branch protection:
 ```bash
-gh api repos/karlcc/data-labeling/branches/main/protection --jq '{
+gh api repos/ptdevhk/data-labeling/branches/main/protection --jq '{
   required_checks: .required_status_checks.checks[].context,
   strict: .required_status_checks.strict,
   pr_reviews: .required_pull_request_reviews,
