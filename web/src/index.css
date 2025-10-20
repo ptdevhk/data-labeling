@@ -282,6 +282,20 @@ body.sidebar-collapsed {
 .semi-navigation-item {
   margin-bottom: 4px !important;
   padding: 4px 12px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.semi-navigation-item:hover {
+  background-color: var(--semi-color-fill-0) !important;
+  transform: translateX(2px);
+}
+
+.semi-navigation-item.semi-navigation-item-selected {
+  background-color: var(--semi-color-primary-light-default) !important;
+}
+
+.semi-navigation-item.semi-navigation-item-selected:hover {
+  background-color: var(--semi-color-primary-light-hover) !important;
 }
 
 .semi-navigation-sub-title {
@@ -291,6 +305,11 @@ body.sidebar-collapsed {
 .semi-navigation-item-icon {
   justify-items: center;
   align-items: center;
+  transition: color 0.2s ease;
+}
+
+.semi-navigation-item:hover .semi-navigation-item-icon {
+  color: var(--semi-color-primary);
 }
 
 .semi-navigation-item-icon-info {

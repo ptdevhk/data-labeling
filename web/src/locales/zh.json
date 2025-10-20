@@ -26,7 +26,14 @@
     "toggleTheme": "切换主题",
     "profile": "个人资料",
     "workspace": "工作区",
-    "collapseSidebar": "收起侧边栏"
+    "collapseSidebar": "收起侧边栏",
+    "changeLanguage": "切换语言",
+    "lightMode": "浅色模式",
+    "darkMode": "深色模式",
+    "autoMode": "自动模式",
+    "alwaysLight": "始终使用浅色主题",
+    "alwaysDark": "始终使用深色主题",
+    "followSystem": "跟随系统主题设置"
   },
   "nav": {
     "dashboard": "仪表板",
@@ -107,5 +114,18 @@
     "language": "语言",
     "appearance": "外观",
     "darkMode": "深色模式"
+  },
+  "footer": {
+    "about": "关于",
+    "github": "GitHub仓库",
+    "documentation": "文档",
+    "resources": "资源",
+    "exportFormats": "导出格式",
+    "settings": "设置",
+    "version": "版本",
+    "buildInfo": "最新稳定版本",
+    "rights": "版权所有",
+    "license": "MIT许可证",
+    "reportIssue": "报告问题"
   }
 }

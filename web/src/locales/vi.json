@@ -26,7 +26,14 @@
     "toggleTheme": "Chuyển Đổi Chủ Đề",
     "profile": "Hồ sơ",
     "workspace": "Không gian làm việc",
-    "collapseSidebar": "Thu gọn thanh bên"
+    "collapseSidebar": "Thu gọn thanh bên",
+    "changeLanguage": "Đổi ngôn ngữ",
+    "lightMode": "Chế độ sáng",
+    "darkMode": "Chế độ tối",
+    "autoMode": "Chế độ tự động",
+    "alwaysLight": "Luôn sử dụng giao diện sáng",
+    "alwaysDark": "Luôn sử dụng giao diện tối",
+    "followSystem": "Theo cài đặt hệ thống"
   },
   "nav": {
     "dashboard": "Bảng điều khiển",
@@ -107,5 +114,18 @@
     "language": "Ngôn ngữ",
     "appearance": "Giao diện",
     "darkMode": "Chế độ tối"
+  },
+  "footer": {
+    "about": "Giới thiệu",
+    "github": "GitHub Repository",
+    "documentation": "Tài liệu",
+    "resources": "Tài nguyên",
+    "exportFormats": "Định dạng xuất",
+    "settings": "Cài đặt",
+    "version": "Phiên bản",
+    "buildInfo": "Phiên bản ổn định mới nhất",
+    "rights": "Bản quyền",
+    "license": "Giấy phép MIT",
+    "reportIssue": "Báo cáo lỗi"
   }
 }

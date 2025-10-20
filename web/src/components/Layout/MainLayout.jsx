@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Layout } from '@douyinfe/semi-ui';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import Footer from './Footer';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useSidebarCollapsed } from '../../hooks/useSidebarCollapsed';
 
@@ -91,7 +92,7 @@ const MainLayout = () => {
           <Content
             style={{
               flex: '1 0 auto',
-              overflowY: isMobile ? 'visible' : 'hidden',
+              overflowY: isMobile ? 'visible' : 'auto',
               WebkitOverflowScrolling: 'touch',
               padding: shouldInnerPadding ? (isMobile ? '5px' : '24px') : '0',
               position: 'relative',
@@ -99,6 +100,11 @@ const MainLayout = () => {
           >
             <Outlet />
           </Content>
+          {!isAnnotationPage && (
+            <Layout.Footer style={{ padding: 0, marginTop: 'auto' }}>
+              <Footer />
+            </Layout.Footer>
+          )}
         </Layout>
       </Layout>
     </Layout>

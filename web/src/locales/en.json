@@ -26,7 +26,14 @@
     "toggleTheme": "Toggle Theme",
     "profile": "Profile",
     "workspace": "Workspace",
-    "collapseSidebar": "Collapse Sidebar"
+    "collapseSidebar": "Collapse Sidebar",
+    "changeLanguage": "Change Language",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "autoMode": "Auto Mode",
+    "alwaysLight": "Always use light theme",
+    "alwaysDark": "Always use dark theme",
+    "followSystem": "Follow system theme"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -107,5 +114,18 @@
     "language": "Language",
     "appearance": "Appearance",
     "darkMode": "Dark Mode"
+  },
+  "footer": {
+    "about": "About",
+    "github": "GitHub Repository",
+    "documentation": "Documentation",
+    "resources": "Resources",
+    "exportFormats": "Export Formats",
+    "settings": "Settings",
+    "version": "Version",
+    "buildInfo": "Latest stable release",
+    "rights": "All rights reserved",
+    "license": "MIT License",
+    "reportIssue": "Report Issue"
   }
 }
