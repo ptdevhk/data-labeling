@@ -9,7 +9,6 @@ import SettingsPage from '@/pages/SettingsPage';
 import Annotation from '@/pages/Annotation';
 import ProjectDetail from '@/pages/ProjectDetail';
 import '@/utils/i18n';
-import '@douyinfe/semi-ui/dist/css/semi.css';
 
 function App() {
   return (

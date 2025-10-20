@@ -1,8 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+// @ts-ignore - CommonJS module
+import semiPluginPkg from '@douyinfe/vite-plugin-semi'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { readFileSync } from 'fs'
+
+const { vitePluginSemi } = semiPluginPkg
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -11,7 +15,10 @@ const version = readFileSync(path.resolve(__dirname, '../VERSION'), 'utf-8').tri
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    vitePluginSemi({ cssLayer: true }),
+  ],
   define: {
     __APP_VERSION__: JSON.stringify(version),
   },

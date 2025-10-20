@@ -65,14 +65,16 @@ When working on this project, frequently query these repositories:
 - `i18next/react-i18next` - Internationalization patterns, language switching
 - `vitejs/vite` - Build configuration, plugins, optimization
 - `TanStack/query` - Server state management, caching, mutations
+- `tailwindlabs/tailwindcss` - Tailwind CSS v3 patterns, CSS layers, integration
 
 **Backend Libraries:**
 - `fastapi/fastapi` - API design, dependency injection, async patterns
 - `encode/starlette` - ASGI server, middleware, routing
 - `pydantic/pydantic` - Data validation, schema design
 
-**Reference Template:**
+**Reference Templates:**
 - `karlorz/full-stack-fastapi-template` - TypeScript migration patterns, OpenAPI client generation, TanStack Query integration
+- `QuantumNous/new-api` - **Semi Design + Tailwind CSS v3 integration patterns**, CSS layer management, Vite plugin configuration
 
 **Common Questions to Ask:**
 - "What are the latest best practices for [library name]?"
@@ -170,7 +172,7 @@ cd web && bun add <pkg>           # Add frontend dep
 - React Router DOM 7 (nested routes)
 - Semi Design 2.86 (UI components)
 - Fabric.js 6 (canvas annotations)
-- Tailwind CSS 4 + PostCSS
+- **Tailwind CSS 3.4.18** (integrated with Semi Design via CSS layers)
 - i18next + react-i18next (i18n)
 
 **Structure:**
@@ -178,6 +180,21 @@ cd web && bun add <pkg>           # Add frontend dep
 - `components/Layout/`: MainLayout, Sidebar, Header
 - `components/Canvas/`: AnnotationCanvas, AnnotationToolsToolbar, LabelsPanel
 - `contexts/`: ThemeContext (dark/light mode)
+
+**CSS Architecture (Tailwind v3 + Semi Design Integration):**
+- Semi Design CSS is imported in `web/src/main.tsx` (line 4): `import '@douyinfe/semi-ui/dist/css/semi.css';`
+- The `@douyinfe/vite-plugin-semi` with `cssLayer: true` automatically wraps Semi CSS in `@layer semi`
+- **DO NOT** import Semi Design CSS in other files (App.tsx, components, or use `@import` in CSS)
+- CSS layer order (web/src/index.css:4):
+  1. `tailwind-base` - Tailwind reset/normalize
+  2. `semi` - Semi Design components (auto-wrapped by Vite plugin from main.tsx import)
+  3. `tailwind-components` - Custom component styles
+  4. `tailwind-utils` - Tailwind utilities (highest priority)
+- Tailwind config (web/tailwind.config.js) maps Semi Design CSS variables:
+  - Colors: `var(--semi-color-primary)`, `var(--semi-color-success)`, etc.
+  - Border radius: `var(--semi-border-radius-small)`, etc.
+  - Use Semi tokens via Tailwind classes: `bg-primary`, `text-semi-text-0`, `rounded-semi-medium`
+- **Reference**: Follow patterns from `QuantumNous/new-api` repository (imports semi.css in index.jsx)
 
 ### Deployment (Docker Compose)
 **Services:**
@@ -264,9 +281,15 @@ data-labeling/
 │   │   ├── pages/        # 7 pages (Dashboard, Projects, ProjectDetail, etc.)
 │   │   ├── components/   # Layout/, Canvas/
 │   │   ├── contexts/     # ThemeContext
-│   │   └── utils/        # i18n config
+│   │   ├── utils/        # i18n config
+│   │   ├── index.css     # CSS layers: tailwind-base, semi, tailwind-components, tailwind-utils
+│   │   ├── main.tsx      # App entry, imports semi.css + index.css
+│   │   └── App.tsx       # Routes, NO CSS imports
 │   ├── dist/             # Built frontend (git-ignored)
-│   └── package.json      # bun deps
+│   ├── package.json      # bun deps
+│   ├── vite.config.ts    # Vite + Semi plugin with cssLayer: true
+│   ├── tailwind.config.js # Tailwind v3 with Semi Design token mapping
+│   └── postcss.config.js  # PostCSS with tailwindcss plugin (NOT @tailwindcss/postcss)
 ├── svc/                  # FastAPI backend
 │   ├── main.py           # App entry point
 │   ├── routes/           # API routing
@@ -279,10 +302,10 @@ data-labeling/
 ├── Makefile              # Dev workflow automation
 ├── pyproject.toml        # Python deps (uv)
 ├── .env                  # Environment config
-└── AGENTS.md             # Agent instructions (this file)
+└── CLAUDE.local.md       # Agent instructions (this file)
 ```
 
-## Implementation Status (as of 2025-10-11)
+## Implementation Status (as of 2025-10-20)
 
 ### ✅ Completed
 **Frontend:**
@@ -294,6 +317,7 @@ data-labeling/
 - Background image loading (`/samples/image_{ID}.jpg`)
 - Zoom controls (50%-300%)
 - 3-panel annotation layout (64px toolbar + flex canvas + 250px labels panel)
+- **Tailwind CSS v3 + Semi Design integration** (CSS layers, Vite plugin, token mapping)
 
 **Backend:**
 - FastAPI with JWT auth (`/token` endpoint)
@@ -370,7 +394,7 @@ data-labeling/
 
 **Design System:**
 - Responsive: 480px, 768px, 1024px, 1440px breakpoints
-- Colors: Light (#FFFFFF bg, #3B82F6 primary), Dark (#111827 bg)
+- Colors: Use Semi Design tokens via Tailwind (`bg-primary`, `text-semi-text-0`)
 - Typography: Inter font (32px H1, 24px H2, 16px body)
 - Accessibility: WCAG 2.1 AA (≥4.5:1 contrast)
 
@@ -386,6 +410,63 @@ data-labeling/
 - semantic-release requires `SEMANTIC_RELEASE_TOKEN` (PAT) to bypass branch protection
 - Dependabot auto-merge requires required status checks in branch protection
 - Both work together with PAT-based approach (documented in README.md)
+
+### Tailwind CSS + Semi Design
+
+**CSS not loading correctly**:
+- Verify Semi Design CSS is imported in `web/src/main.tsx`: `import '@douyinfe/semi-ui/dist/css/semi.css';`
+- Check `@douyinfe/vite-plugin-semi` is installed: `bun pm ls | grep vite-plugin-semi`
+- Verify Vite config has `vitePluginSemi({ cssLayer: true })` (web/vite.config.ts:17)
+- Ensure PostCSS uses `tailwindcss` plugin, NOT `@tailwindcss/postcss` (web/postcss.config.js:3)
+- Verify CSS layer order in index.css: `@layer tailwind-base, semi, tailwind-components, tailwind-utils`
+- **DO NOT** import Semi Design CSS in App.tsx, components, or use `@import` in index.css
+
+**Tailwind styles not overriding Semi Design**:
+- Check CSS layer order - `tailwind-utils` should be last (highest priority)
+- Use Tailwind utilities in JSX, not custom CSS classes
+- Use `!important` sparingly - rely on CSS layers instead
+
+**Semi Design components not styled**:
+- Verify build output contains `@layer semi` (check dist/assets/*.css)
+- Ensure Vite plugin is properly configured with CommonJS import workaround
+- Check browser console for CSS loading errors
+
+**Duplicate CSS styles / Large bundle**:
+- Semi Design CSS should be ~679 KB (imported in main.tsx)
+- Expected total CSS bundle: ~1,040 kB (Semi 679 KB + Tailwind + custom styles)
+- **DO NOT** import Semi Design CSS in multiple places - only in main.tsx
+- Let Vite plugin wrap the import with `@layer semi` automatically
+
+**Verifying Tailwind v3 installation** (run these commands to confirm complete downgrade):
+```bash
+# 1. Check package.json shows v3
+grep "tailwindcss" web/package.json
+# Expected: "tailwindcss": "^3.4.17"
+
+# 2. Check installed version
+cat web/node_modules/tailwindcss/package.json | grep '"version"'
+# Expected: "version": "3.4.18"
+
+# 3. Verify bun.lock has no v4 references
+grep -E "@tailwindcss/postcss|tailwindcss@[^3]" web/bun.lock
+# Expected: (empty output - no matches)
+
+# 4. Check bun package list
+cd web && bun pm ls | grep tailwind
+# Expected: ├── tailwindcss@3.4.18
+
+# 5. Clean install to regenerate lock file
+cd web && rm -rf node_modules && bun install
+# Should show: tailwindcss@3.4.18
+
+# 6. Verify build works
+cd web && bun run build
+# Expected: Build succeeds, CSS ~445 kB
+
+# 7. Verify CSS layers in output
+grep "@layer tailwind-base,semi,tailwind-components,tailwind-utils" web/dist/assets/index-*.css
+# Expected: @layer tailwind-base,semi,tailwind-components,tailwind-utils
+```
 
 ### Docker
 **"gunicorn: not found"**: `.dockerignore` must exclude `.venv/`. Fix: `docker compose build --no-cache`
@@ -420,6 +501,10 @@ data-labeling/
 - **.env.example**: Template config (checked into git)
 - **.dockerignore**: Excludes `.venv/`, `node_modules/`, `.env.local` (but NOT `.env` or `.env.dev`)
 - **Makefile**: Build/test/deploy orchestration
+- **web/vite.config.ts**: Vite + Semi Design plugin configuration
+- **web/tailwind.config.js**: Tailwind v3 with Semi Design token mapping
+- **web/postcss.config.js**: PostCSS with tailwindcss plugin (v3 syntax)
+- **web/src/index.css**: CSS layer definitions and custom styles
 
 ## Workflow Examples
 
@@ -494,4 +579,6 @@ docker compose restart
 - FastAPI: https://fastapi.tiangolo.com/
 - Vite: https://vitejs.dev/
 - Semi Design: https://semi.design/
+- Semi Design + Tailwind: https://semi.design/zh-CN/start/tailwind
+- Tailwind CSS v3: https://tailwindcss.com/docs
 - Fabric.js: http://fabricjs.com/
