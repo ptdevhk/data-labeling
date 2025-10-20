@@ -1,3 +1,9 @@
+## [0.1.1](https://github.com/ptdevhk/data-labeling/compare/v0.1.0...v0.1.1) (2025-10-20)
+
+### Bug Fixes
+
+* Integrate Tailwind CSS v3 with Semi Design ([7fac8f6](https://github.com/ptdevhk/data-labeling/commit/7fac8f6b9af0b6035babc187e28c88873b25b05c))
+
 ## [0.1.0](https://github.com/ptdevhk/data-labeling/compare/v0.0.0...v0.1.0) (2025-10-16)
 
 ### Features
