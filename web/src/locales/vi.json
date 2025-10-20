@@ -23,14 +23,21 @@
     "view": "Xem",
     "openMenu": "Mở Menu",
     "toggleSidebar": "Bật/Tắt Thanh Bên",
-    "toggleTheme": "Chuyển Đổi Chủ Đề"
+    "toggleTheme": "Chuyển Đổi Chủ Đề",
+    "profile": "Hồ sơ",
+    "workspace": "Không gian làm việc",
+    "collapseSidebar": "Thu gọn thanh bên"
   },
   "nav": {
     "dashboard": "Bảng điều khiển",
     "projects": "Dự án",
     "datasets": "Dữ liệu",
     "exports": "Xuất dữ liệu",
-    "settings": "Cài đặt"
+    "settings": "Cài đặt",
+    "workspace": "Không gian làm việc",
+    "collapseSidebar": "Thu gọn thanh bên",
+    "home": "Trang chủ",
+    "console": "Bảng điều khiển"
   },
   "dashboard": {
     "title": "Bảng điều khiển",

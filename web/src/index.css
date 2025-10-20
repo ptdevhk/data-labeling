@@ -171,82 +171,93 @@ body.sidebar-collapsed {
 }
 
 .sidebar-container {
-  width: var(--sidebar-current-width);
   height: 100%;
   display: flex;
   flex-direction: column;
   transition: width 0.3s ease;
+}
+
+.sidebar-nav {
+  flex: 1;
+  width: 100%;
+  background: var(--semi-color-bg-0);
+  height: 100%;
   overflow: hidden;
+  border-right: none;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.sidebar-nav .semi-navigation-item-text {
+  flex: 1;
+  min-width: 0;
 }
 
 .sidebar-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 16px;
   border-radius: 6px;
-  transition: background-color 0.2s ease;
+  margin: 3px 8px;
+  transition: all 0.15s ease;
+  padding: 8px 12px;
 }
 
 .sidebar-nav-item:hover {
-  background-color: var(--neutral-color);
+  background-color: rgba(var(--semi-blue-0), 0.08);
+  color: var(--semi-color-primary);
 }
 
 .sidebar-nav-item-selected {
-  background-color: var(--primary-color);
-  color: white;
+  background-color: rgba(var(--semi-blue-0), 0.12);
+  color: var(--semi-color-primary);
+  font-weight: 500;
 }
 
 .sidebar-icon-container {
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
+  margin-right: 10px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-divider {
+  margin: 4px 8px;
+  opacity: 0.15;
+}
+
+.sidebar-group-label {
+  padding: 4px 15px 8px;
+  color: var(--semi-color-text-2);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+
+.sidebar-section {
+  padding-top: 12px;
 }
 
 .sidebar-collapse-button {
-  margin-top: auto;
-  padding: 12px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  border-top: 1px solid var(--neutral-color);
-  transition: transform 0.3s ease;
-}
-
-body.sidebar-collapsed .sidebar-collapse-button svg {
-  transform: rotate(180deg);
-}
-
-/* ==================== Mobile Drawer Styles ==================== */
-.drawer-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.drawer-container {
-  position: fixed;
-  top: 0;
-  left: 0;
+  align-items: center;
+  padding: 12px;
+  margin-top: auto;
+  cursor: pointer;
+  background-color: var(--semi-color-bg-0);
+  position: sticky;
   bottom: 0;
-  width: var(--sidebar-width);
-  background-color: var(--bg-color);
-  z-index: 1000;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(0); }
+  z-index: 10;
+  box-shadow: 0 -10px 10px -5px var(--semi-color-bg-0);
+  backdrop-filter: blur(4px);
+  border-top: 1px solid rgba(var(--semi-grey-0), 0.08);
 }
 
 /* ==================== Semi Design Component Customizations ==================== */

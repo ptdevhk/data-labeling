@@ -23,14 +23,21 @@
     "view": "查看",
     "openMenu": "打开菜单",
     "toggleSidebar": "切换侧边栏",
-    "toggleTheme": "切换主题"
+    "toggleTheme": "切换主题",
+    "profile": "个人资料",
+    "workspace": "工作区",
+    "collapseSidebar": "收起侧边栏"
   },
   "nav": {
     "dashboard": "仪表板",
     "projects": "项目",
     "datasets": "数据集",
     "exports": "导出",
-    "settings": "设置"
+    "settings": "设置",
+    "workspace": "工作区",
+    "collapseSidebar": "收起侧边栏",
+    "home": "首页",
+    "console": "控制台"
   },
   "dashboard": {
     "title": "仪表板",

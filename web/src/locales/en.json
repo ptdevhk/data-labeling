@@ -23,14 +23,21 @@
     "view": "View",
     "openMenu": "Open Menu",
     "toggleSidebar": "Toggle Sidebar",
-    "toggleTheme": "Toggle Theme"
+    "toggleTheme": "Toggle Theme",
+    "profile": "Profile",
+    "workspace": "Workspace",
+    "collapseSidebar": "Collapse Sidebar"
   },
   "nav": {
     "dashboard": "Dashboard",
     "projects": "Projects",
     "datasets": "Datasets",
     "exports": "Exports",
-    "settings": "Settings"
+    "settings": "Settings",
+    "workspace": "Workspace",
+    "collapseSidebar": "Collapse Sidebar",
+    "home": "Home",
+    "console": "Console"
   },
   "dashboard": {
     "title": "Dashboard",

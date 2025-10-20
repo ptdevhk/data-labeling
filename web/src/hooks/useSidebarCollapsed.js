@@ -1,31 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+
+const KEY = 'default_collapse_sidebar';
 
 /**
  * Hook to manage sidebar collapsed state
- * Syncs state with body class for CSS variable control
+ * Syncs state with body class and localStorage
  */
-export function useSidebarCollapsed() {
-  const [collapsed, setCollapsed] = useState(() => {
-    // Check localStorage for persisted state
-    const saved = localStorage.getItem('sidebar-collapsed');
-    return saved === 'true';
-  });
+export const useSidebarCollapsed = () => {
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem(KEY) === 'true',
+  );
 
-  useEffect(() => {
-    // Apply body class for CSS variables
-    if (collapsed) {
-      document.body.classList.add('sidebar-collapsed');
-    } else {
-      document.body.classList.remove('sidebar-collapsed');
-    }
+  const toggle = useCallback(() => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem(KEY, next.toString());
+      return next;
+    });
+  }, []);
 
-    // Persist state
-    localStorage.setItem('sidebar-collapsed', collapsed.toString());
-  }, [collapsed]);
+  const set = useCallback((value) => {
+    setCollapsed(value);
+    localStorage.setItem(KEY, value.toString());
+  }, []);
 
-  const toggleCollapsed = () => {
-    setCollapsed((prev) => !prev);
-  };
-
-  return { collapsed, toggleCollapsed, setCollapsed };
-}
+  return [collapsed, toggle, set];
+};

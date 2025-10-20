@@ -6,85 +6,100 @@ import Sidebar from './Sidebar';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useSidebarCollapsed } from '../../hooks/useSidebarCollapsed';
 
+const { Sider, Content } = Layout;
+
 const MainLayout = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { collapsed, toggleCollapsed, setCollapsed } = useSidebarCollapsed();
+  const [collapsed, , setCollapsed] = useSidebarCollapsed();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Check if current page is annotation page
   const isAnnotationPage = location.pathname.includes('/annotation');
+  const shouldInnerPadding = !isAnnotationPage;
+  const showSider = !isMobile || drawerOpen;
 
-  // Handle auto-collapse on annotation page for desktop
   useEffect(() => {
-    if (!isMobile) {
-      // Desktop behavior: Auto-collapse on annotation page
-      if (isAnnotationPage) {
-        setCollapsed(true);
-      } else {
-        setCollapsed(false);
-      }
+    if (isMobile && drawerOpen && collapsed) {
+      setCollapsed(false);
     }
-  }, [isAnnotationPage, location.pathname, isMobile, setCollapsed]);
-
-  const handleMobileMenuToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
-
-  const handleDrawerClose = () => {
-    setDrawerOpen(false);
-  };
+  }, [isMobile, drawerOpen, collapsed, setCollapsed]);
 
   return (
-    <Layout style={{ height: '100vh', width: '100vw', overflow: 'hidden' }}>
-      {/* Mobile: Drawer with overlay */}
-      {isMobile ? (
-        <>
-          {drawerOpen && (
-            <>
-              <div className="drawer-overlay" onClick={handleDrawerClose} />
-              <div className="drawer-container">
-                <Sidebar
-                  isCollapsed={false}
-                  isMobile={isMobile}
-                  onNavigate={handleDrawerClose}
-                />
-              </div>
-            </>
-          )}
-        </>
-      ) : (
-        /* Desktop: Always-visible sidebar */
-        <Sidebar
-          isCollapsed={collapsed}
-          onToggleCollapse={toggleCollapsed}
-          isMobile={false}
-        />
-      )}
-
-      <Layout
+    <Layout
+      style={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: isMobile ? 'visible' : 'hidden',
+      }}
+    >
+      <Layout.Header
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          marginLeft: isMobile ? 0 : 'var(--sidebar-current-width)',
-          transition: 'margin-left 0.3s ease'
+          padding: 0,
+          height: 'auto',
+          lineHeight: 'normal',
+          position: 'fixed',
+          width: '100%',
+          top: 0,
+          zIndex: 100,
         }}
       >
         <Header
-          onToggleSidebar={isMobile ? handleMobileMenuToggle : toggleCollapsed}
-          isMobile={isMobile}
+          onMobileMenuToggle={() => setDrawerOpen((prev) => !prev)}
+          drawerOpen={drawerOpen}
         />
-        <Layout.Content
+      </Layout.Header>
+      <Layout
+        style={{
+          overflow: isMobile ? 'visible' : 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {showSider && (
+          <Sider
+            style={{
+              position: 'fixed',
+              left: 0,
+              top: '64px',
+              zIndex: 99,
+              border: 'none',
+              paddingRight: '0',
+              height: 'calc(100vh - 64px)',
+              width: 'var(--sidebar-current-width)',
+            }}
+          >
+            <Sidebar
+              onNavigate={() => {
+                if (isMobile) setDrawerOpen(false);
+              }}
+            />
+          </Sider>
+        )}
+        <Layout
           style={{
-            padding: isAnnotationPage ? '0' : '24px',
-            overflow: 'auto',
-            flex: 1,
-            minHeight: 0
+            marginLeft: isMobile
+              ? '0'
+              : showSider
+                ? 'var(--sidebar-current-width)'
+                : '0',
+            flex: '1 1 auto',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
-          <Outlet />
-        </Layout.Content>
+          <Content
+            style={{
+              flex: '1 0 auto',
+              overflowY: isMobile ? 'visible' : 'hidden',
+              WebkitOverflowScrolling: 'touch',
+              padding: shouldInnerPadding ? (isMobile ? '5px' : '24px') : '0',
+              position: 'relative',
+            }}
+          >
+            <Outlet />
+          </Content>
+        </Layout>
       </Layout>
     </Layout>
   );

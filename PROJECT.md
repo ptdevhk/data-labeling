@@ -24,11 +24,11 @@ Adopt Gitflow for structured collaboration: Develop features in isolated branche
 
 ### Design Requirements
 
-The UI/UX design establishes a professional, accessible foundation optimized for extended labeling sessions, blending dashboard efficiency with precise canvas interactions. Emphasize minimalism to reduce cognitive load, ensuring scalability for future LLM elements.
+The UI/UX design establishes a professional, accessible foundation optimized for extended labeling sessions, blending Console efficiency with precise canvas interactions. Emphasize minimalism to reduce cognitive load, ensuring scalability for future LLM elements.
 
 - **Layout Structure**:
   - **Global Navigation**: Collapsible sidebar (20% width on desktop, hamburger on mobile) for projects, datasets, exports, and settings; top header with search, notifications bell, user avatar dropdown, and dark/light mode toggle.
-  - **Main Content Areas**: Dashboard uses card grids (3-column on desktop, 1-column mobile) for project overviews; annotation view employs split layout (tools sidebar: 15%, canvas: 70%, properties panel: 15%).
+  - **Main Content Areas**: Console uses card grids (3-column on desktop, 1-column mobile) for project overviews; annotation view employs split layout (tools sidebar: 15%, canvas: 70%, properties panel: 15%).
   - **Responsive System**: CSS Grid/Flexbox with media queries; breakpoints: 480px (mobile: stack vertically), 768px (tablet: horizontal nav), 1024px (desktop: full split-view), 1440px (large: expanded previews).
 
   #### Responsive Sidebar Implementation (✅ Completed - 2025-10-09)
@@ -73,7 +73,7 @@ The UI/UX design establishes a professional, accessible foundation optimized for
 - **Header and Sidebar Navigation**:
   - **Top Header**: A fixed, slim bar (64px height) spanning the full width, providing quick-access global controls. Key items from left to right:
     - **Toggle Sidebar Button**
-    - **Logo/Branding**: App icon and name (e.g., "DataLabel Pro") with link to dashboard; clickable for home navigation.
+    - **Logo/Branding**: App icon and name (e.g., "Data Labeling Tool") with link to console; clickable for home navigation.
     - **Configurable Navigation Links (useNavigation)**: Home, Console, Projects.
     - **Search Bar**: Compact input field (Semi Design Input) for global search across projects, datasets, or annotations; placeholder "Search projects or images..."; supports autocomplete for recent items.
     - **Notifications Bell**: Icon button (Lucide Bell) with badge for unread count; dropdown menu (Semi Design Popover) showing toast-like alerts (e.g., "Annotation saved", "Upload complete"); integrates with React-Toastify for persistence.
@@ -81,7 +81,7 @@ The UI/UX design establishes a professional, accessible foundation optimized for
     - **Dark/Light Mode Toggle**: Switch icon (Lucide Moon/Sun) at far right; persists via localStorage; animates smoothly with 300ms transition.
     - **Hamburger Menu (Mobile Only)**: Three-line icon to toggle sidebar drawer; positioned after logo.
   - **Sidebar Menu**: Vertical navigation (Semi Design Nav) in a collapsible aside (250px expanded, 64px collapsed on desktop); full drawer overlay on mobile (slide-in from left with backdrop). Items structured hierarchically with icons and labels (hidden in collapsed state):
-    - **Dashboard**: Home icon; overview page with project cards and stats.
+    - **Console**: Home icon; overview page with project cards and stats.
     - **Projects**: Folder icon; list view with create/new button; sub-items: "My Projects", "Shared Projects".
     - **Datasets**: Image icon; upload/browse interface; sub-items: "All Datasets", "Pending Review".
     - **Annotations**: Edit icon; active labeling workspace; sub-items: "In Progress", "Completed".
@@ -202,13 +202,13 @@ The UI/UX design establishes a professional, accessible foundation optimized for
   - Ensure 100% keyboard operability (e.g., Tab to tools, Enter to confirm shapes).
 
 ### Scope for Frontend Phase
-Focus on a functional MVP: Standalone React SPA supporting manual labeling with mock APIs. Boot locally via Vite; persist via IndexedDB. Implement core design elements (dashboard, canvas) for desktop/tablet responsiveness. Defer full backend/LLM until Phase 2.
+Focus on a functional MVP: Standalone React SPA supporting manual labeling with mock APIs. Boot locally via Vite; persist via IndexedDB. Implement core design elements (Console, canvas) for desktop/tablet responsiveness. Defer full backend/LLM until Phase 2.
 
 ### Functional Requirements
 
 #### 1. User Authentication and Project Management
 - **Authentication**: Form-based login/register (mock JWT tokens); guest mode with limited exports.
-- **Dashboard**: Grid of project cards (create/edit: name, desc, class YAML import); stats (e.g., 80% labeled) with VChart pie charts; search/filter by name/date.
+- **Console**: Grid of project cards (create/edit: name, desc, class YAML import); stats (e.g., 80% labeled) with VChart pie charts; search/filter by name/date.
 - **Datasets**: Drag-and-drop batch upload (≤10MB/image, JPEG/PNG); thumbnail carousel with lazy loading; bulk delete.
 
 #### 2. Image Annotation Interface

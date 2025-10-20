@@ -74,7 +74,7 @@ When working on this project, frequently query these repositories:
 
 **Reference Templates:**
 - `karlorz/full-stack-fastapi-template` - TypeScript migration patterns, OpenAPI client generation, TanStack Query integration
-- `QuantumNous/new-api` - **Semi Design + Tailwind CSS v3 integration patterns**, CSS layer management, Vite plugin configuration
+- `QuantumNous/new-api` - **Semi Design + Tailwind CSS v3 integration patterns**, CSS layer management, Vite plugin configuration, **layout architecture** (Header/Sidebar/useNavigation hook pattern)
 
 **Common Questions to Ask:**
 - "What are the latest best practices for [library name]?"
@@ -99,6 +99,13 @@ make generate-client
 ## Project Overview
 
 Web-based image annotation tool with React SPA frontend + FastAPI backend. Browser-only, manual labeling (no auto-segmentation/SAM). Monorepo structure: `./web` (React+Vite) and `./svc` (FastAPI+Python).
+
+**Layout Architecture** (Updated 2025-10-20):
+- Follows **new-api** design pattern (`QuantumNous/new-api`)
+- **Routes**: `/` redirects to `/console`, main pages: `/console`, `/projects`, `/datasets`, `/exports`, `/settings`
+- **Header**: Logo + configurable nav links (Home, Console, Projects) + language/theme/user controls
+- **Sidebar**: Collapsible navigation (Console, Projects, Datasets, Exports, Settings)
+- **Hooks**: `useNavigation` (header links), `useSidebarCollapsed` (sidebar state), `useIsMobile` (768px breakpoint)
 
 **Quick Start:**
 ```bash
@@ -175,11 +182,54 @@ cd web && bun add <pkg>           # Add frontend dep
 - **Tailwind CSS 3.4.18** (integrated with Semi Design via CSS layers)
 - i18next + react-i18next (i18n)
 
-**Structure:**
-- `pages/`: Dashboard, Projects, ProjectDetail, Datasets, Exports, Settings, Annotation
-- `components/Layout/`: MainLayout, Sidebar, Header
-- `components/Canvas/`: AnnotationCanvas, AnnotationToolsToolbar, LabelsPanel
-- `contexts/`: ThemeContext (dark/light mode)
+**Layout Structure** (Updated 2025-10-20, based on new-api):
+```
+web/src/
+├── components/Layout/
+│   ├── MainLayout.jsx      # Fixed header + sidebar layout
+│   ├── Header.jsx          # Logo + nav links + actions
+│   └── Sidebar.jsx         # Collapsible navigation menu
+├── hooks/
+│   ├── useNavigation.js    # Header nav links configuration
+│   ├── useSidebarCollapsed.js  # Sidebar collapse state
+│   └── useIsMobile.js      # 768px breakpoint detection
+├── pages/
+│   ├── Console.jsx         # Main dashboard (was Dashboard.jsx)
+│   ├── Projects.jsx        # Projects list
+│   ├── Datasets.jsx        # Datasets management
+│   ├── Exports.jsx         # Export formats
+│   ├── Settings.jsx        # Settings page
+│   └── Annotation.jsx      # Annotation workspace
+└── App.tsx                 # Routes: / → /console redirect
+```
+
+**Routing:**
+- `/` → Redirects to `/console`
+- `/console` → Console page (dashboard overview)
+- `/projects` → Projects list
+- `/projects/:id` → Project detail
+- `/datasets` → Datasets management
+- `/exports` → Export page
+- `/settings` → Settings
+- `/annotation/:id` → Annotation workspace
+
+**Header Navigation** (Desktop only, `useNavigation` hook):
+- Home → `/` (redirects to `/console`)
+- Console → `/console`
+- Projects → `/projects`
+- Active link highlighting with Semi Design primary color
+
+**Sidebar Navigation** (All pages except annotation):
+- Console → `/console`
+- Projects → `/projects`
+- Datasets → `/datasets`
+- Exports → `/exports`
+- Settings → `/settings`
+- Collapse button at bottom (persistent via localStorage)
+
+**Responsive Behavior:**
+- **Desktop (>768px)**: Fixed sidebar (250px expanded, 64px collapsed), header nav links visible
+- **Mobile (≤768px)**: Drawer sidebar, header nav links hidden, hamburger menu
 
 **CSS Architecture (Tailwind v3 + Semi Design Integration):**
 - Semi Design CSS is imported in `web/src/main.tsx` (line 4): `import '@douyinfe/semi-ui/dist/css/semi.css';`
@@ -488,6 +538,32 @@ grep "@layer tailwind-base,semi,tailwind-components,tailwind-utils" web/dist/ass
 
 ### React
 **`findDOMNode` error**: Semi Design incompatible with React 19. Fix: `bun install react@^18.3.1 react-dom@^18.3.1`
+
+### Vite Dev Server
+**Vite hangs after printing "$ vite"** (no further output, doesn't bind to port 5173):
+
+**Root Cause**: Bun cache corruption triggered by Node.js v24 + Vite v7 incompatibility. This is NOT a code issue - it's a known tooling bug where Bun's dependency cache becomes stale and Vite's ESM loader gets stuck during module resolution.
+
+**Quick Fix**:
+```bash
+make clean-frontend-cache    # Clears node_modules, bun.lockb, .vite cache
+cd web && bun install --force
+bun run dev                  # Should start in <1 second
+```
+
+**Why This Happens**:
+- Vite 7.x uses experimental Node.js ESM loader hooks
+- Node 24 introduced breaking changes to the loader API  
+- Bun's caching can create a corrupted state that triggers the hang
+- The hang occurs BEFORE `vite.config.ts` is even loaded
+
+**Evidence**: Confirmed by GitHub issues:
+- [oven-sh/bun#16968](https://github.com/oven-sh/bun/issues/16968) - "The service was stopped"
+- [vitejs/vite#19691](https://github.com/vitejs/vite/discussions/19691) - "failed to load config with bun"
+
+**Long-term Solution**: Migrate to Node.js v22 LTS for stable development environment (avoids Node 24 + Vite 7 incompatibility altogether).
+
+**Prevention**: Run `make clean-frontend-cache` whenever switching branches or after major dependency updates.
 
 ## Key Files
 
