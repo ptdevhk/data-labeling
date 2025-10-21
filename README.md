@@ -6,6 +6,21 @@
 
 Web-based image annotation tool with automated semantic versioning.
 
+## Troubleshooting
+
+### Vite Dev Server Hangs on Startup
+
+**Symptom**: Running `make start-frontend` or `bun run dev` hangs after printing "$ vite" with no further output.
+
+**Cause**: Bun/Vite cache corruption due to Node.js v24 + Vite v7 incompatibility.
+
+**Solution**:
+```bash
+make clean-frontend-cache
+cd web && bun install --force
+bun run dev
+```
+
 ## Quick Links
 
 - [Versioning & CI/CD Guide](./docs/VERSIONING.md) - Version management and workflows

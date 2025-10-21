@@ -23,24 +23,42 @@
     "view": "Xem",
     "openMenu": "Mở Menu",
     "toggleSidebar": "Bật/Tắt Thanh Bên",
-    "toggleTheme": "Chuyển Đổi Chủ Đề"
+    "toggleTheme": "Chuyển Đổi Chủ Đề",
+    "profile": "Hồ sơ",
+    "workspace": "Không gian làm việc",
+    "collapseSidebar": "Thu gọn thanh bên",
+    "changeLanguage": "Đổi ngôn ngữ",
+    "lightMode": "Chế độ sáng",
+    "darkMode": "Chế độ tối",
+    "autoMode": "Chế độ tự động",
+    "alwaysLight": "Luôn sử dụng giao diện sáng",
+    "alwaysDark": "Luôn sử dụng giao diện tối",
+    "followSystem": "Theo cài đặt hệ thống"
   },
   "nav": {
-    "dashboard": "Bảng điều khiển",
     "projects": "Dự án",
     "datasets": "Dữ liệu",
     "exports": "Xuất dữ liệu",
-    "settings": "Cài đặt"
+    "settings": "Cài đặt",
+    "workspace": "Không gian làm việc",
+    "collapseSidebar": "Thu gọn thanh bên",
+    "home": "Trang chủ",
+    "console": "Bảng điều khiển"
   },
-  "dashboard": {
+  "console": {
     "title": "Bảng điều khiển",
+    "subtitle": "Tổng quan các dự án gắn nhãn của bạn",
     "createProject": "Tạo dự án",
-    "projectStats": "Thống kê dự án",
+    "projectStats": "Thông tin dự án",
     "recentProjects": "Dự án gần đây",
     "totalProjects": "Tổng số dự án",
     "totalImages": "Tổng số ảnh",
     "labeledImages": "Ảnh đã gắn nhãn",
-    "completionRate": "Tỷ lệ hoàn thành"
+    "completionRate": "Tỷ lệ hoàn thành",
+    "noProjects": "Chưa có dự án nào. Tạo dự án đầu tiên để bắt đầu.",
+    "quickActions": "Hành động nhanh",
+    "projectActivity": "Hoạt động dự án",
+    "noActivity": "Hoạt động sẽ hiển thị khi bạn bắt đầu gắn nhãn."
   },
   "project": {
     "name": "Tên dự án",
@@ -100,5 +118,18 @@
     "language": "Ngôn ngữ",
     "appearance": "Giao diện",
     "darkMode": "Chế độ tối"
+  },
+  "footer": {
+    "about": "Giới thiệu",
+    "github": "GitHub Repository",
+    "documentation": "Tài liệu",
+    "resources": "Tài nguyên",
+    "exportFormats": "Định dạng xuất",
+    "settings": "Cài đặt",
+    "version": "Phiên bản",
+    "buildInfo": "Phiên bản ổn định mới nhất",
+    "rights": "Bản quyền",
+    "license": "Giấy phép MIT",
+    "reportIssue": "Báo cáo lỗi"
   }
 }

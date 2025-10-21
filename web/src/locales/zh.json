@@ -23,24 +23,42 @@
     "view": "查看",
     "openMenu": "打开菜单",
     "toggleSidebar": "切换侧边栏",
-    "toggleTheme": "切换主题"
+    "toggleTheme": "切换主题",
+    "profile": "个人资料",
+    "workspace": "工作区",
+    "collapseSidebar": "收起侧边栏",
+    "changeLanguage": "切换语言",
+    "lightMode": "浅色模式",
+    "darkMode": "深色模式",
+    "autoMode": "自动模式",
+    "alwaysLight": "始终使用浅色主题",
+    "alwaysDark": "始终使用深色主题",
+    "followSystem": "跟随系统主题设置"
   },
   "nav": {
-    "dashboard": "仪表板",
     "projects": "项目",
     "datasets": "数据集",
     "exports": "导出",
-    "settings": "设置"
+    "settings": "设置",
+    "workspace": "工作区",
+    "collapseSidebar": "收起侧边栏",
+    "home": "首页",
+    "console": "控制台"
   },
-  "dashboard": {
-    "title": "仪表板",
+  "console": {
+    "title": "控制台",
+    "subtitle": "查看您的标注项目概览",
     "createProject": "创建项目",
     "projectStats": "项目统计",
     "recentProjects": "最近项目",
     "totalProjects": "总项目数",
     "totalImages": "总图片数",
     "labeledImages": "已标注图片",
-    "completionRate": "完成率"
+    "completionRate": "完成率",
+    "noProjects": "暂无项目。创建您的第一个项目开始使用吧。",
+    "quickActions": "快捷操作",
+    "projectActivity": "项目动态",
+    "noActivity": "开始标注后，活动将显示在此。"
   },
   "project": {
     "name": "项目名称",
@@ -100,5 +118,18 @@
     "language": "语言",
     "appearance": "外观",
     "darkMode": "深色模式"
+  },
+  "footer": {
+    "about": "关于",
+    "github": "GitHub仓库",
+    "documentation": "文档",
+    "resources": "资源",
+    "exportFormats": "导出格式",
+    "settings": "设置",
+    "version": "版本",
+    "buildInfo": "最新稳定版本",
+    "rights": "版权所有",
+    "license": "MIT许可证",
+    "reportIssue": "报告问题"
   }
 }

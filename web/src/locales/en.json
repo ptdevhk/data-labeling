@@ -23,24 +23,42 @@
     "view": "View",
     "openMenu": "Open Menu",
     "toggleSidebar": "Toggle Sidebar",
-    "toggleTheme": "Toggle Theme"
+    "toggleTheme": "Toggle Theme",
+    "profile": "Profile",
+    "workspace": "Workspace",
+    "collapseSidebar": "Collapse Sidebar",
+    "changeLanguage": "Change Language",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "autoMode": "Auto Mode",
+    "alwaysLight": "Always use light theme",
+    "alwaysDark": "Always use dark theme",
+    "followSystem": "Follow system theme"
   },
   "nav": {
-    "dashboard": "Dashboard",
     "projects": "Projects",
     "datasets": "Datasets",
     "exports": "Exports",
-    "settings": "Settings"
+    "settings": "Settings",
+    "workspace": "Workspace",
+    "collapseSidebar": "Collapse Sidebar",
+    "home": "Home",
+    "console": "Console"
   },
-  "dashboard": {
-    "title": "Dashboard",
+  "console": {
+    "title": "Console",
+    "subtitle": "Overview of your annotation projects",
     "createProject": "Create Project",
-    "projectStats": "Project Statistics",
+    "projectStats": "Project Insights",
     "recentProjects": "Recent Projects",
     "totalProjects": "Total Projects",
     "totalImages": "Total Images",
     "labeledImages": "Labeled Images",
-    "completionRate": "Completion Rate"
+    "completionRate": "Completion Rate",
+    "noProjects": "No projects yet. Create your first project to get started.",
+    "quickActions": "Quick Actions",
+    "projectActivity": "Project Activity",
+    "noActivity": "Activity will appear here once you start labeling."
   },
   "project": {
     "name": "Project Name",
@@ -100,5 +118,18 @@
     "language": "Language",
     "appearance": "Appearance",
     "darkMode": "Dark Mode"
+  },
+  "footer": {
+    "about": "About",
+    "github": "GitHub Repository",
+    "documentation": "Documentation",
+    "resources": "Resources",
+    "exportFormats": "Export Formats",
+    "settings": "Settings",
+    "version": "Version",
+    "buildInfo": "Latest stable release",
+    "rights": "All rights reserved",
+    "license": "MIT License",
+    "reportIssue": "Report Issue"
   }
 }

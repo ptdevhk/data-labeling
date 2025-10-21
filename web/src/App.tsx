@@ -1,7 +1,7 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import MainLayout from '@/components/Layout/MainLayout';
-import Dashboard from '@/pages/Dashboard';
+import Console from '@/pages/Console';
 import Projects from '@/pages/Projects';
 import Datasets from '@/pages/Datasets';
 import Exports from '@/pages/Exports';
@@ -16,7 +16,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<MainLayout />}>
-            <Route index element={<Dashboard />} />
+            <Route index element={<Navigate to="/console" replace />} />
+            <Route path="console" element={<Console />} />
             <Route path="projects" element={<Projects />} />
             <Route path="projects/:id" element={<ProjectDetail />} />
             <Route path="datasets" element={<Datasets />} />

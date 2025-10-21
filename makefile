@@ -2,10 +2,15 @@ FRONTEND_DIR = ./web
 BACKEND_DIR = .
 VERSION_FILE = ./VERSION
 
-.PHONY: all build-frontend start-frontend start-backend stop-backend docker-up docker-down docker-build docker-restart generate-client version-sync version-bump version-current
+.PHONY: all build-frontend start-frontend start-backend stop-backend clean-frontend-cache docker-up docker-down docker-build docker-restart generate-client version-sync version-bump version-current
 
 # Local development: build frontend and start backend with auto-restart
 all: build-frontend start-backend
+
+clean-frontend-cache: ## Clear frontend cache and dependencies (fixes Vite hangs)
+	@echo "🧹 Clearing frontend cache and dependencies..."
+	@cd $(FRONTEND_DIR) && rm -rf node_modules bun.lockb .vite
+	@echo "✅ Frontend cache cleared. Run 'cd web && bun install' to reinstall."
 
 build-frontend:
 	@echo "Building frontend..."

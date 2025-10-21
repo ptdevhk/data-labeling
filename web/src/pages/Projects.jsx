@@ -46,11 +46,11 @@ const Projects = () => {
       ),
     },
     {
-      title: t('dashboard.totalImages'),
+      title: t('console.totalImages'),
       dataIndex: 'images',
     },
     {
-      title: t('dashboard.labeledImages'),
+      title: t('console.labeledImages'),
       dataIndex: 'labeled',
     },
     {
@@ -74,7 +74,7 @@ const Projects = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <Title heading={2}>{t('nav.projects')}</Title>
         <Button type="primary" icon={<IconPlus />}>
-          {t('dashboard.createProject')}
+          {t('console.createProject')}
         </Button>
       </div>
       <Card>

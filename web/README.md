@@ -51,7 +51,7 @@ bun run lint
 - Global header with search, language selector, theme toggle, notifications, user menu
 - Main layout with responsive grid system
 
-### ✅ Dashboard Page
+### ✅ Console Page
 - Statistics cards (total projects, images, labeled, completion rate)
 - Recent projects table with progress bars
 - Mock data integration ready for backend API
@@ -87,7 +87,7 @@ src/
 ├── contexts/                # React contexts
 │   └── ThemeContext.jsx
 ├── pages/                   # Route pages
-│   ├── Dashboard.jsx
+│   ├── Console.jsx
 │   ├── Projects.jsx
 │   ├── Datasets.jsx
 │   ├── Exports.jsx

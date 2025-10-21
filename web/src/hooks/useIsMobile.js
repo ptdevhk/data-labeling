@@ -1,27 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useSyncExternalStore } from 'react';
+
+export const MOBILE_BREAKPOINT = 768;
 
 /**
  * Hook to detect if the current viewport is mobile size
- * Breakpoint: 480px (matches PROJECT.md responsive design spec)
+ * Breakpoint: 768px (matches new-api design pattern)
  */
-export function useIsMobile() {
-  // Initialize with a function to get the correct initial value
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth <= 480;
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 480px)');
-
-    // Listen for changes
-    const handler = (e) => setIsMobile(e.matches);
-    mediaQuery.addEventListener('change', handler);
-
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
-
-  return isMobile;
-}
+export const useIsMobile = () => {
+  const query = `(max-width: ${MOBILE_BREAKPOINT - 1}px)`;
+  return useSyncExternalStore(
+    (callback) => {
+      const mql = window.matchMedia(query);
+      mql.addEventListener('change', callback);
+      return () => mql.removeEventListener('change', callback);
+    },
+    () => window.matchMedia(query).matches,
+    () => false,
+  );
+};
