@@ -24,167 +24,138 @@ const Console = () => {
         value: '0',
         icon: <IconFolder />,
         accent: 'console-stat-primary',
-        helper: t('console.projectStats'),
       },
       {
         label: t('console.totalImages'),
         value: '0',
         icon: <IconGallery />,
         accent: 'console-stat-success',
-        helper: t('console.totalImages'),
       },
       {
         label: t('console.labeledImages'),
         value: '0',
         icon: <IconCheckCircleStroked />,
         accent: 'console-stat-warning',
-        helper: t('console.labeledImages'),
       },
       {
         label: t('console.completionRate'),
         value: '0%',
         icon: <IconBarChartVStroked />,
         accent: 'console-stat-info',
-        helper: t('console.completionRate'),
       },
     ],
     [t],
   );
 
-  return (
-    <div className="console-page">
-      <Card
-        bordered={false}
-        className="console-hero"
-        title={
-          <div className="console-hero__titles">
-            <Text strong className="console-hero__title">
-              {t('console.title')}
-            </Text>
-            <Text type="tertiary" className="console-hero__subtitle">
-              {t('console.subtitle')}
-            </Text>
-          </div>
-        }
-        headerExtraContent={
-          <div className="console-hero__actions">
-            <Button
-              icon={<IconPlus />}
-              theme="solid"
-              type="primary"
-              onClick={() => navigate('/projects')}
-            >
-              {t('console.createProject')}
-            </Button>
-            <Button
-              icon={<IconExternalOpen />}
-              theme="light"
-              onClick={() => navigate('/projects')}
-            >
-              {t('common.view')}
-            </Button>
-          </div>
-        }
-        bodyStyle={{ padding: 0 }}
-      />
+  const quickActions = useMemo(
+    () => [
+      {
+        label: t('console.createProject'),
+        icon: <IconPlus />,
+        onClick: () => navigate('/projects'),
+      },
+      {
+        label: t('nav.datasets'),
+        icon: <IconGallery />,
+        onClick: () => navigate('/datasets'),
+      },
+      {
+        label: t('nav.exports'),
+        icon: <IconExternalOpen />,
+        onClick: () => navigate('/exports'),
+      },
+    ],
+    [navigate, t],
+  );
 
-      <section className="console-stats" aria-label={t('console.projectStats')}>
+  return (
+    <div className="console">
+      <section className="console-stats-grid" aria-label={t('console.projectStats')}>
         {stats.map((stat) => (
           <Card
             key={stat.label}
             bordered={false}
-            className={`console-stats-card ${stat.accent}`}
-            bodyStyle={{ padding: '24px' }}
+            className="console-stat-card"
+            bodyStyle={{ padding: '20px 22px' }}
           >
-            <div className="console-stats-card__icon">{stat.icon}</div>
-            <div className="console-stats-card__content">
-              <Text className="console-stats-card__helper" type="tertiary">
-                {stat.helper}
-              </Text>
-              <Title heading={3} className="console-stats-card__value">
-                {stat.value}
-              </Title>
-              <Text className="console-stats-card__label">{stat.label}</Text>
+            <div className="console-stat-card__inner">
+              <div className={`console-stat-card__icon ${stat.accent}`}>{stat.icon}</div>
+              <div className="console-stat-card__content">
+                <Text className="console-stat-card__label">{stat.label}</Text>
+                <Title heading={4} className="console-stat-card__value">
+                  {stat.value}
+                </Title>
+              </div>
             </div>
           </Card>
         ))}
       </section>
 
-      <section className="console-main-grid">
-        <Card
-          bordered={false}
-          className="console-card"
-          title={t('console.recentProjects')}
-          headerExtraContent={
-            <Button size="small" onClick={() => navigate('/projects')}>
-              {t('common.viewAll', 'View All')}
-            </Button>
-          }
-          bodyStyle={{ padding: '32px' }}
-        >
-          <div className="console-empty-state">
-            <div className="console-empty-state__content">
-              <Text type="tertiary">{t('console.noProjects')}</Text>
-              <Button
-                size="large"
-                theme="solid"
-                type="primary"
-                icon={<IconPlus />}
-                onClick={() => navigate('/projects')}
-              >
-                {t('console.createProject')}
+      <section className="console-content-grid">
+        <div className="console-content-grid__primary">
+          <Card
+            bordered={false}
+            className="console-card"
+            title={t('console.recentProjects')}
+            headerExtraContent={
+              <Button size="small" onClick={() => navigate('/projects')}>
+                {t('common.viewAll', 'View All')}
               </Button>
+            }
+            bodyStyle={{ padding: '26px' }}
+          >
+            <div className="console-empty-state">
+              <div className="console-empty-state__content">
+                <Text type="tertiary">{t('console.noProjects')}</Text>
+                <Button
+                  size="large"
+                  theme="solid"
+                  type="primary"
+                  icon={<IconPlus />}
+                  onClick={() => navigate('/projects')}
+                >
+                  {t('console.createProject')}
+                </Button>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
 
-        <div className="console-side-column">
+          <Card
+            bordered={false}
+            className="console-card console-card--muted"
+            title={t('console.projectActivity', 'Project Activity')}
+            bodyStyle={{ padding: '26px' }}
+          >
+            <div className="console-empty-state console-empty-state--compact">
+              <div className="console-empty-state__content">
+                <Text type="tertiary">{t('console.noActivity', 'Activity will appear here once you start labeling.')}</Text>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <aside className="console-content-grid__secondary">
           <Card
             bordered={false}
             className="console-card console-card--compact"
-            title={t('console.projectStats')}
-            bodyStyle={{ padding: '28px' }}
+            title={t('console.quickActions', 'Quick Actions')}
+            bodyStyle={{ padding: '24px' }}
           >
-            <ul className="console-resource-list">
-              <li>
-                <div>
-                  <Text strong>{t('footer.exportFormats')}</Text>
-                  <Text type="tertiary">{t('console.totalImages')}</Text>
-                </div>
+            <div className="console-quick-actions">
+              {quickActions.map((action) => (
                 <Button
-                  theme="borderless"
-                  icon={<IconExternalOpen />}
-                  aria-label={t('footer.exportFormats')}
-                  onClick={() => navigate('/exports')}
-                />
-              </li>
-              <li>
-                <div>
-                  <Text strong>{t('footer.settings')}</Text>
-                  <Text type="tertiary">{t('console.labeledImages')}</Text>
-                </div>
-                <Button
-                  theme="borderless"
-                  icon={<IconExternalOpen />}
-                  aria-label={t('footer.settings')}
-                  onClick={() => navigate('/settings')}
-                />
-              </li>
-              <li>
-                <div>
-                  <Text strong>{t('footer.documentation')}</Text>
-                  <Text type="tertiary">{t('console.projectStats')}</Text>
-                </div>
-                <Button
-                  theme="borderless"
-                  icon={<IconExternalOpen />}
-                  aria-label={t('footer.documentation')}
-                  onClick={() => window.open('https://github.com/quantumnous/data-labeling', '_blank')}
-                />
-              </li>
-            </ul>
+                  key={action.label}
+                  icon={action.icon}
+                  theme="light"
+                  block
+                  onClick={action.onClick}
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </div>
           </Card>
-        </div>
+        </aside>
       </section>
     </div>
   );

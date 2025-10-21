@@ -55,7 +55,10 @@
     "totalImages": "Total Images",
     "labeledImages": "Labeled Images",
     "completionRate": "Completion Rate",
-    "noProjects": "No projects yet. Create your first project to get started."
+    "noProjects": "No projects yet. Create your first project to get started.",
+    "quickActions": "Quick Actions",
+    "projectActivity": "Project Activity",
+    "noActivity": "Activity will appear here once you start labeling."
   },
   "project": {
     "name": "Project Name",
