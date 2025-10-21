@@ -254,7 +254,7 @@ Focus on a functional MVP: Standalone React SPA supporting manual labeling with 
 | **Framework**         | React 18+                          | Modular components for complex UIs. |
 | **Build Tool**        | Vite 5+                            | HMR and ES modules for dev efficiency. |
 | **State Management**  | React Context API                  | Simple global state without external deps. |
-| **UI Library**        | Semi Design 2.69+ (@douyinfe/semi-ui) | Rich, themeable components for dashboards. |
+| **UI Library**        | Semi Design 2.69+ (@douyinfe/semi-ui) | Rich, themeable components for console views. |
 | **Icons**             | Lucide React                       | Lightweight, customizable SVGs. |
 | **Charts**            | VChart (@visactor)                 | Interactive viz for progress metrics. |
 | **Canvas**            | Fabric.js                          | Declarative shapes with export support. |

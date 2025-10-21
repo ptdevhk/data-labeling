@@ -36,7 +36,6 @@
     "followSystem": "Theo cài đặt hệ thống"
   },
   "nav": {
-    "dashboard": "Bảng điều khiển",
     "projects": "Dự án",
     "datasets": "Dữ liệu",
     "exports": "Xuất dữ liệu",
@@ -46,15 +45,17 @@
     "home": "Trang chủ",
     "console": "Bảng điều khiển"
   },
-  "dashboard": {
+  "console": {
     "title": "Bảng điều khiển",
+    "subtitle": "Tổng quan các dự án gắn nhãn của bạn",
     "createProject": "Tạo dự án",
-    "projectStats": "Thống kê dự án",
+    "projectStats": "Thông tin dự án",
     "recentProjects": "Dự án gần đây",
     "totalProjects": "Tổng số dự án",
     "totalImages": "Tổng số ảnh",
     "labeledImages": "Ảnh đã gắn nhãn",
-    "completionRate": "Tỷ lệ hoàn thành"
+    "completionRate": "Tỷ lệ hoàn thành",
+    "noProjects": "Chưa có dự án nào. Tạo dự án đầu tiên để bắt đầu."
   },
   "project": {
     "name": "Tên dự án",

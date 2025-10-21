@@ -36,7 +36,6 @@
     "followSystem": "Follow system theme"
   },
   "nav": {
-    "dashboard": "Dashboard",
     "projects": "Projects",
     "datasets": "Datasets",
     "exports": "Exports",
@@ -46,15 +45,17 @@
     "home": "Home",
     "console": "Console"
   },
-  "dashboard": {
-    "title": "Dashboard",
+  "console": {
+    "title": "Console",
+    "subtitle": "Overview of your annotation projects",
     "createProject": "Create Project",
-    "projectStats": "Project Statistics",
+    "projectStats": "Project Insights",
     "recentProjects": "Recent Projects",
     "totalProjects": "Total Projects",
     "totalImages": "Total Images",
     "labeledImages": "Labeled Images",
-    "completionRate": "Completion Rate"
+    "completionRate": "Completion Rate",
+    "noProjects": "No projects yet. Create your first project to get started."
   },
   "project": {
     "name": "Project Name",

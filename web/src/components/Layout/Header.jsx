@@ -15,7 +15,7 @@ import { useNavigation } from '../../hooks/useNavigation';
 
 const Header = ({ onMobileMenuToggle }) => {
   const { t, i18n } = useTranslation();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, resolvedTheme, setThemeMode } = useTheme();
   const isMobile = useIsMobile();
   const [, toggleCollapsed] = useSidebarCollapsed();
   const location = useLocation();
@@ -73,16 +73,15 @@ const Header = ({ onMobileMenuToggle }) => {
   ];
 
   const getCurrentThemeIcon = () => {
-    if (theme === 'dark') return <IconMoon size={18} />;
-    if (theme === 'light') return <IconSun size={18} />;
+    if (resolvedTheme === 'dark') return <IconMoon size={18} />;
+    if (resolvedTheme === 'light') return <IconSun size={18} />;
     return <IconDesktop size={18} />;
   };
 
-  const setThemeMode = (newTheme) => {
-    if (newTheme === theme) return;
-    toggleTheme(); // This cycles through light -> dark -> light
-    // For proper implementation, we need to update ThemeContext to support 'auto' mode
-    localStorage.setItem('theme', newTheme);
+  const handleThemeModeChange = (newTheme) => {
+    if (newTheme !== theme) {
+      setThemeMode(newTheme);
+    }
   };
 
   return (
@@ -189,7 +188,7 @@ const Header = ({ onMobileMenuToggle }) => {
                     <Dropdown.Item
                       key={option.key}
                       icon={option.icon}
-                      onClick={() => setThemeMode(option.key)}
+                      onClick={() => handleThemeModeChange(option.key)}
                       className={`!px-3 !py-1.5 transition-colors ${
                         theme === option.key
                           ? '!bg-semi-color-primary-light-default dark:!bg-blue-600 !font-semibold'

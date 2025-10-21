@@ -182,6 +182,11 @@ cd web && bun add <pkg>           # Add frontend dep
 - **Tailwind CSS 3.4.18** (integrated with Semi Design via CSS layers)
 - i18next + react-i18next (i18n)
 
+**Theme handling:**
+- `ThemeContext` persists `light` / `dark` / `auto` and toggles `<html>` classes
+- Applies `body` `theme-mode="dark"` for Semi Design compatibility
+- Header dropdown uses `setThemeMode` to avoid cycling toggle behavior
+
 **Layout Structure** (Updated 2025-10-20, based on new-api):
 ```
 web/src/
@@ -194,7 +199,7 @@ web/src/
 │   ├── useSidebarCollapsed.js  # Sidebar collapse state
 │   └── useIsMobile.js      # 768px breakpoint detection
 ├── pages/
-│   ├── Console.jsx         # Main dashboard (was Dashboard.jsx)
+│   ├── Console.jsx         # Console overview (hero banner + stat grid)
 │   ├── Projects.jsx        # Projects list
 │   ├── Datasets.jsx        # Datasets management
 │   ├── Exports.jsx         # Export formats
@@ -205,7 +210,7 @@ web/src/
 
 **Routing:**
 - `/` → Redirects to `/console`
-- `/console` → Console page (dashboard overview)
+- `/console` → Console overview page
 - `/projects` → Projects list
 - `/projects/:id` → Project detail
 - `/datasets` → Datasets management
@@ -230,6 +235,11 @@ web/src/
 **Responsive Behavior:**
 - **Desktop (>768px)**: Fixed sidebar (250px expanded, 64px collapsed), header nav links visible
 - **Mobile (≤768px)**: Drawer sidebar, header nav links hidden, hamburger menu
+
+**Console page layout notes:**
+- Hero card renders inline title + subtitle with primary/secondary CTAs; stats grid mirrors `new-api` styling
+- Left-aligned footer shown only on `/console` (removed global border line)
+- Stats cards use icon accents with Tailwind utilities mapped to Semi tokens
 
 **CSS Architecture (Tailwind v3 + Semi Design Integration):**
 - Semi Design CSS is imported in `web/src/main.tsx` (line 4): `import '@douyinfe/semi-ui/dist/css/semi.css';`
@@ -328,7 +338,7 @@ API_ACCESS_TOKEN_EXPIRE_MINUTES="5256000000"
 data-labeling/
 ├── web/                  # React frontend
 │   ├── src/
-│   │   ├── pages/        # 7 pages (Dashboard, Projects, ProjectDetail, etc.)
+│   │   ├── pages/        # 7 pages (Console, Projects, ProjectDetail, etc.)
 │   │   ├── components/   # Layout/, Canvas/
 │   │   ├── contexts/     # ThemeContext
 │   │   ├── utils/        # i18n config

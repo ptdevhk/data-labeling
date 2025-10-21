@@ -14,8 +14,10 @@ const MainLayout = () => {
   const isMobile = useIsMobile();
   const [collapsed, , setCollapsed] = useSidebarCollapsed();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const headerHeight = isMobile ? 56 : 64;
 
   const isAnnotationPage = location.pathname.includes('/annotation');
+  const shouldShowFooter = !isAnnotationPage && location.pathname.startsWith('/console');
   const shouldInnerPadding = !isAnnotationPage;
   const showSider = !isMobile || drawerOpen;
 
@@ -55,6 +57,7 @@ const MainLayout = () => {
           overflow: isMobile ? 'visible' : 'auto',
           display: 'flex',
           flexDirection: 'column',
+          marginTop: `${headerHeight}px`,
         }}
       >
         {showSider && (
@@ -62,11 +65,11 @@ const MainLayout = () => {
             style={{
               position: 'fixed',
               left: 0,
-              top: '64px',
+              top: `${headerHeight}px`,
               zIndex: 99,
               border: 'none',
               paddingRight: '0',
-              height: 'calc(100vh - 64px)',
+              height: `calc(100vh - ${headerHeight}px)`,
               width: 'var(--sidebar-current-width)',
             }}
           >
@@ -100,7 +103,7 @@ const MainLayout = () => {
           >
             <Outlet />
           </Content>
-          {!isAnnotationPage && (
+          {shouldShowFooter && (
             <Layout.Footer style={{ padding: 0, marginTop: 'auto' }}>
               <Footer />
             </Layout.Footer>

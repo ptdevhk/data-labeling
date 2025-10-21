@@ -36,7 +36,6 @@
     "followSystem": "跟随系统主题设置"
   },
   "nav": {
-    "dashboard": "仪表板",
     "projects": "项目",
     "datasets": "数据集",
     "exports": "导出",
@@ -46,15 +45,17 @@
     "home": "首页",
     "console": "控制台"
   },
-  "dashboard": {
-    "title": "仪表板",
+  "console": {
+    "title": "控制台",
+    "subtitle": "查看您的标注项目概览",
     "createProject": "创建项目",
     "projectStats": "项目统计",
     "recentProjects": "最近项目",
     "totalProjects": "总项目数",
     "totalImages": "总图片数",
     "labeledImages": "已标注图片",
-    "completionRate": "完成率"
+    "completionRate": "完成率",
+    "noProjects": "暂无项目。创建您的第一个项目开始使用吧。"
   },
   "project": {
     "name": "项目名称",

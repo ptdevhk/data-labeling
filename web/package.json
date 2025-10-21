@@ -4,7 +4,7 @@
   "version": "0.1.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "BUN_RUNTIME_TRANSPILER_CACHE_PATH=0 bunx --bun vite",
     "build": "tsc && vite build",
     "lint": "eslint .",
     "lint:i18n": "node scripts/i18n-helper.js",
