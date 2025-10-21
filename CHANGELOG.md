@@ -1,3 +1,9 @@
+## [0.1.3](https://github.com/ptdevhk/data-labeling/compare/v0.1.2...v0.1.3) (2025-10-21)
+
+### Code Refactoring
+
+* Update routes to use /console/* namespace ([02a97c0](https://github.com/ptdevhk/data-labeling/commit/02a97c031d1811a7c6331436b41b78e410904f49))
+
 ## [0.1.2](https://github.com/ptdevhk/data-labeling/compare/v0.1.1...v0.1.2) (2025-10-21)
 
 ### Documentation
