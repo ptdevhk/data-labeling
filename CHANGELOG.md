@@ -1,3 +1,17 @@
+## [0.1.2](https://github.com/ptdevhk/data-labeling/compare/v0.1.1...v0.1.2) (2025-10-21)
+
+### Documentation
+
+* AGENTS.md ([387f121](https://github.com/ptdevhk/data-labeling/commit/387f121f453361b2d371bec60d5879b43fe1f185))
+* AGENTS.md [skip ci] ([c45901c](https://github.com/ptdevhk/data-labeling/commit/c45901cdb298793df5a4a737dc49250adee46ab5))
+
+### Code Refactoring
+
+* Add footer component and enhance header UI ([ff6611b](https://github.com/ptdevhk/data-labeling/commit/ff6611b7229737f09648c0afd9de5551a1006469))
+* Refactor dashboard to console, improve theme and layout ([debffda](https://github.com/ptdevhk/data-labeling/commit/debffda8d958c190b167ef3066c9a525e5f51910))
+* Refactor layout to Console page, improve sidebar/header ([fc1e98c](https://github.com/ptdevhk/data-labeling/commit/fc1e98c0ada3525d876e8366baecf3b1290539c7))
+* Revamp Console page layout and styles ([937838d](https://github.com/ptdevhk/data-labeling/commit/937838d4efbf2c54b40fc50732d7f852bc94edfd))
+
 ## [0.1.1](https://github.com/ptdevhk/data-labeling/compare/v0.1.0...v0.1.1) (2025-10-20)
 
 ### Bug Fixes
