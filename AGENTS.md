@@ -237,9 +237,10 @@ web/src/
 - **Mobile (≤768px)**: Drawer sidebar, header nav links hidden, hamburger menu
 
 **Console page layout notes:**
-- Hero card renders inline title + subtitle with primary/secondary CTAs; stats grid mirrors `new-api` styling
-- Left-aligned footer shown only on `/console` (removed global border line)
-- Stats cards use icon accents with Tailwind utilities mapped to Semi tokens
+- Page uses the shared Semi Layout padding without a dedicated hero card.
+- The top section is a responsive grid of compact stat cards (icon + two-line label/value).
+- Main column stacks "Recent Projects" and "Project Activity" cards; side column shows "Quick Actions" shortcuts.
+- Stats and cards follow the `new-api` spacing/pill icon patterns.
 
 **CSS Architecture (Tailwind v3 + Semi Design Integration):**
 - Semi Design CSS is imported in `web/src/main.tsx` (line 4): `import '@douyinfe/semi-ui/dist/css/semi.css';`
