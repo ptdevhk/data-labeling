@@ -55,7 +55,10 @@
     "totalImages": "Tổng số ảnh",
     "labeledImages": "Ảnh đã gắn nhãn",
     "completionRate": "Tỷ lệ hoàn thành",
-    "noProjects": "Chưa có dự án nào. Tạo dự án đầu tiên để bắt đầu."
+    "noProjects": "Chưa có dự án nào. Tạo dự án đầu tiên để bắt đầu.",
+    "quickActions": "Hành động nhanh",
+    "projectActivity": "Hoạt động dự án",
+    "noActivity": "Hoạt động sẽ hiển thị khi bạn bắt đầu gắn nhãn."
   },
   "project": {
     "name": "Tên dự án",

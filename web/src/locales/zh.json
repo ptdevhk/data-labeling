@@ -55,7 +55,10 @@
     "totalImages": "总图片数",
     "labeledImages": "已标注图片",
     "completionRate": "完成率",
-    "noProjects": "暂无项目。创建您的第一个项目开始使用吧。"
+    "noProjects": "暂无项目。创建您的第一个项目开始使用吧。",
+    "quickActions": "快捷操作",
+    "projectActivity": "项目动态",
+    "noActivity": "开始标注后，活动将显示在此。"
   },
   "project": {
     "name": "项目名称",
