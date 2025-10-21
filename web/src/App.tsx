@@ -16,14 +16,14 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<MainLayout />}>
-            <Route index element={<Navigate to="/console" replace />} />
-            <Route path="console" element={<Console />} />
-            <Route path="projects" element={<Projects />} />
-            <Route path="projects/:id" element={<ProjectDetail />} />
-            <Route path="datasets" element={<Datasets />} />
-            <Route path="exports" element={<Exports />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="annotation/:id" element={<Annotation />} />
+          <Route index element={<Navigate to="/console" replace />} />
+          <Route path="console" element={<Console />} />
+          <Route path="console/projects" element={<Projects />} />
+          <Route path="console/projects/:id" element={<ProjectDetail />} />
+          <Route path="console/datasets" element={<Datasets />} />
+          <Route path="console/exports" element={<Exports />} />
+          <Route path="console/settings" element={<SettingsPage />} />
+          <Route path="console/annotation/:id" element={<Annotation />} />
           </Route>
         </Routes>
       </BrowserRouter>

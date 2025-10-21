@@ -21,11 +21,7 @@ const Header = ({ onMobileMenuToggle }) => {
   const location = useLocation();
   const { mainNavLinks } = useNavigation(t);
 
-  const isConsoleRoute = location.pathname.startsWith('/console') || 
-                        location.pathname.startsWith('/projects') || 
-                        location.pathname.startsWith('/datasets') ||
-                        location.pathname.startsWith('/exports') ||
-                        location.pathname.startsWith('/settings');
+  const isConsoleRoute = location.pathname.startsWith('/console');
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -221,13 +217,13 @@ const Header = ({ onMobileMenuToggle }) => {
               render={
                 <Dropdown.Menu className='!bg-semi-color-bg-overlay !border-semi-color-border !shadow-lg !rounded-lg dark:!bg-gray-700 dark:!border-gray-600'>
                   <Dropdown.Item
-                    onClick={() => window.location.href = '/settings'}
+                    onClick={() => window.location.href = '/console/settings'}
                     className='!px-3 !py-1.5 !text-sm !text-semi-color-text-0 hover:!bg-semi-color-fill-1 dark:!text-gray-200 dark:hover:!bg-blue-500 dark:hover:!text-white transition-colors'
                   >
                     {t('common.profile')}
                   </Dropdown.Item>
                   <Dropdown.Item
-                    onClick={() => window.location.href = '/settings'}
+                    onClick={() => window.location.href = '/console/settings'}
                     className='!px-3 !py-1.5 !text-sm !text-semi-color-text-0 hover:!bg-semi-color-fill-1 dark:!text-gray-200 dark:hover:!bg-blue-500 dark:hover:!text-white transition-colors'
                   >
                     {t('common.settings')}

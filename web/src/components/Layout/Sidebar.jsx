@@ -14,10 +14,10 @@ import { useSidebarCollapsed } from '../../hooks/useSidebarCollapsed';
 
 const routerMap = {
   console: '/console',
-  projects: '/projects',
-  datasets: '/datasets',
-  exports: '/exports',
-  settings: '/settings',
+  projects: '/console/projects',
+  datasets: '/console/datasets',
+  exports: '/console/exports',
+  settings: '/console/settings',
 };
 
 const Sidebar = ({ onNavigate = () => {} }) => {

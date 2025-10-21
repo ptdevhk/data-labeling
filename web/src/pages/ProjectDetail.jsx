@@ -36,7 +36,7 @@ const ProjectDetail = () => {
       title: t('project.actions'),
       dataIndex: 'actions',
       render: (text, record) => (
-        <NavLink to={`/annotation/${record.key}`}>
+        <NavLink to={`/console/annotation/${record.key}`}>
           <Button>{t('common.annotate')}</Button>
         </NavLink>
       ),

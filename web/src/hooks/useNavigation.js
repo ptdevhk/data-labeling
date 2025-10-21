@@ -23,7 +23,7 @@ export const useNavigation = (t) => {
       {
         text: t('nav.projects'),
         itemKey: 'projects',
-        to: '/projects',
+        to: '/console/projects',
       },
     ];
 

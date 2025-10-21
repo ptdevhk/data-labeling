@@ -52,17 +52,17 @@ const Console = () => {
       {
         label: t('console.createProject'),
         icon: <IconPlus />,
-        onClick: () => navigate('/projects'),
+        onClick: () => navigate('/console/projects'),
       },
       {
         label: t('nav.datasets'),
         icon: <IconGallery />,
-        onClick: () => navigate('/datasets'),
+        onClick: () => navigate('/console/datasets'),
       },
       {
         label: t('nav.exports'),
         icon: <IconExternalOpen />,
-        onClick: () => navigate('/exports'),
+        onClick: () => navigate('/console/exports'),
       },
     ],
     [navigate, t],
@@ -98,7 +98,7 @@ const Console = () => {
             className="console-card"
             title={t('console.recentProjects')}
             headerExtraContent={
-              <Button size="small" onClick={() => navigate('/projects')}>
+              <Button size="small" onClick={() => navigate('/console/projects')}>
                 {t('common.viewAll', 'View All')}
               </Button>
             }
@@ -112,7 +112,7 @@ const Console = () => {
                   theme="solid"
                   type="primary"
                   icon={<IconPlus />}
-                  onClick={() => navigate('/projects')}
+                  onClick={() => navigate('/console/projects')}
                 >
                   {t('console.createProject')}
                 </Button>

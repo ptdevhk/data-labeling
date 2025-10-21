@@ -37,7 +37,7 @@ const Projects = () => {
       title: t('project.name'),
       dataIndex: 'name',
       render: (text, record) => (
-        <NavLink to={`/projects/${record.key}`}>
+        <NavLink to={`/console/projects/${record.key}`}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <IconFolder style={{ marginRight: 8, color: 'var(--semi-color-primary)' }} />
             <Text strong>{text}</Text>
@@ -62,7 +62,7 @@ const Projects = () => {
       title: t('project.actions'),
       dataIndex: 'actions',
       render: (text, record) => (
-        <NavLink to={`/projects/${record.key}`}>
+        <NavLink to={`/console/projects/${record.key}`}>
           <Button>{t('common.continue')}</Button>
         </NavLink>
       ),

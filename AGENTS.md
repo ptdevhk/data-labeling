@@ -102,7 +102,7 @@ Web-based image annotation tool with React SPA frontend + FastAPI backend. Brows
 
 **Layout Architecture** (Updated 2025-10-20):
 - Follows **new-api** design pattern (`QuantumNous/new-api`)
-- **Routes**: `/` redirects to `/console`, main pages: `/console`, `/projects`, `/datasets`, `/exports`, `/settings`
+- **Routes**: `/` redirects to `/console`, main pages: `/console`, `/console/projects`, `/console/datasets`, `/console/exports`, `/console/settings`
 - **Header**: Logo + configurable nav links (Home, Console, Projects) + language/theme/user controls
 - **Sidebar**: Collapsible navigation (Console, Projects, Datasets, Exports, Settings)
 - **Hooks**: `useNavigation` (header links), `useSidebarCollapsed` (sidebar state), `useIsMobile` (768px breakpoint)
@@ -211,25 +211,25 @@ web/src/
 **Routing:**
 - `/` → Redirects to `/console`
 - `/console` → Console overview page
-- `/projects` → Projects list
-- `/projects/:id` → Project detail
-- `/datasets` → Datasets management
-- `/exports` → Export page
-- `/settings` → Settings
-- `/annotation/:id` → Annotation workspace
+- `/console/projects` → Projects list
+- `/console/projects/:id` → Project detail
+- `/console/datasets` → Datasets management
+- `/console/exports` → Export page
+- `/console/settings` → Settings
+- `/console/annotation/:id` → Annotation workspace
 
 **Header Navigation** (Desktop only, `useNavigation` hook):
 - Home → `/` (redirects to `/console`)
 - Console → `/console`
-- Projects → `/projects`
+- Projects → `/console/projects`
 - Active link highlighting with Semi Design primary color
 
 **Sidebar Navigation** (All pages except annotation):
 - Console → `/console`
-- Projects → `/projects`
-- Datasets → `/datasets`
-- Exports → `/exports`
-- Settings → `/settings`
+- Projects → `/console/projects`
+- Datasets → `/console/datasets`
+- Exports → `/console/exports`
+- Settings → `/console/settings`
 - Collapse button at bottom (persistent via localStorage)
 
 **Responsive Behavior:**
