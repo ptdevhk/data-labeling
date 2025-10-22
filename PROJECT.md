@@ -324,7 +324,7 @@ Ensures parity between dev/prod; multi-stage builds minimize image size.
 cp .env.example .env  # Generate secrets: API_SECRET_KEY=$(openssl rand -hex 32)
 make docker-up        # Auto-builds frontend, spins up services
 ```
-- URLs: App (`http://localhost:5002/`), Docs (`/docs`).
+- URLs: App (`http://localhost:5002/`), API Docs (`/api/docs`), ReDoc (`/api/redoc`).
 - Management: `make docker-down` (stop); `docker compose logs -f` (monitor).
 
 #### Configuration Files

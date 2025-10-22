@@ -169,7 +169,7 @@ cd web && bun add <pkg>           # Add frontend dep
 - **Config**: `.env` loaded via `starlette.config.Config`
 
 **Routing Order (critical):**
-1. API routers (`/api*`, `/token`, `/health`, `/docs`)
+1. API routers (`/api*`, `/token`, `/health`, `/api/docs`, `/api/redoc`)
 2. Static files (`/assets` → `web/dist/assets`)
 3. SPA catch-all (`/{full_path:path}` → `index.html`)
 
@@ -294,7 +294,8 @@ docker compose up -d
     handle /api* { reverse_proxy backend:5001 }
     handle /token { reverse_proxy backend:5001 }
     handle /health { reverse_proxy backend:5001 }
-    handle /docs { reverse_proxy backend:5001 }
+    handle /api/docs { reverse_proxy backend:5001 }
+    handle /api/redoc { reverse_proxy backend:5001 }
 
     # Frontend static files with SPA fallback
     handle {
