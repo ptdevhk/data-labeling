@@ -91,7 +91,8 @@
       "addClass": "添加类别",
       "className": "类别名称",
       "color": "颜色",
-      "attributes": "属性"
+      "attributes": "属性",
+      "totalAnnotations": "标注总数：{{count}}"
     }
   },
   "theme": {

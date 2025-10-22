@@ -1,12 +1,51 @@
-import { useEffect, useLayoutEffect, useRef, useState, useImperativeHandle } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useImperativeHandle } from 'react';
 import { Canvas, Rect, Circle, Polygon, Line, FabricImage } from 'fabric';
+import { useAnnotations } from '@/contexts/AnnotationContext';
 
 const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, imagePath }) => {
   const canvasRef = useRef(null);
   const fabricCanvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
   const drawingShapeRef = useRef(null);
   const backgroundImageRef = useRef(null);
+  const isDrawingRef = useRef(false);
+  const activeToolRef = useRef(activeTool);
+  const { addAnnotation, removeAnnotation } = useAnnotations();
+
+  const MIN_RECT_SIZE = 5;
+
+  useEffect(() => {
+    activeToolRef.current = activeTool;
+  }, [activeTool]);
+
+  const finalizeRectangle = useCallback((canvas, rectShape) => {
+    const normalizedWidth = (rectShape.width || 0) * (rectShape.scaleX || 1);
+    const normalizedHeight = (rectShape.height || 0) * (rectShape.scaleY || 1);
+
+    if (normalizedWidth < MIN_RECT_SIZE || normalizedHeight < MIN_RECT_SIZE) {
+      canvas.remove(rectShape);
+      canvas.requestRenderAll();
+      return;
+    }
+
+    const annotation = addAnnotation({
+      type: 'rectangle',
+      coordinates: {
+        x: rectShape.left,
+        y: rectShape.top,
+        width: normalizedWidth,
+        height: normalizedHeight,
+      },
+      meta: {
+        stroke: rectShape.stroke,
+        fill: rectShape.fill,
+      },
+    });
+
+    rectShape.annotationId = annotation.id;
+    rectShape.set({ name: annotation.id, selectable: true, evented: true });
+    rectShape.setCoords();
+    canvas.requestRenderAll();
+  }, [addAnnotation]);
 
   // Expose methods to parent
   useImperativeHandle(parentCanvasRef, () => ({
@@ -73,6 +112,10 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
 
     fabricCanvasRef.current = canvas;
 
+    if (typeof window !== 'undefined') {
+      window.__fabricCanvas = canvas;
+    }
+
     // Use ResizeObserver to watch the parent container size changes
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -93,9 +136,204 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       resizeObserver.disconnect();
       canvas.dispose();
       fabricCanvasRef.current = null;
+      if (typeof window !== 'undefined' && window.__fabricCanvas === canvas) {
+        delete window.__fabricCanvas;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) {
+      return undefined;
+    }
+
+    const handleMouseDown = (opt) => {
+      const currentTool = activeToolRef.current;
+      if (currentTool === 'select') {
+        return;
+      }
+
+      if (currentTool === 'eraser') {
+        const target = opt.target;
+        if (target) {
+          if (target.annotationId) {
+            removeAnnotation(target.annotationId);
+          }
+          canvas.remove(target);
+          canvas.requestRenderAll();
+        }
+        return;
+      }
+
+      const pointer = canvas.getPointer(opt.e);
+      isDrawingRef.current = true;
+
+      switch (currentTool) {
+        case 'rectangle': {
+          const rect = new Rect({
+            left: pointer.x,
+            top: pointer.y,
+            width: 0,
+            height: 0,
+            fill: 'rgba(59, 130, 246, 0.3)',
+            stroke: '#3B82F6',
+            strokeWidth: 2,
+            selectable: false,
+            evented: false,
+          });
+          canvas.add(rect);
+          drawingShapeRef.current = rect;
+          break;
+        }
+        case 'circle': {
+          const circle = new Circle({
+            left: pointer.x,
+            top: pointer.y,
+            radius: 0,
+            fill: 'rgba(16, 185, 129, 0.3)',
+            stroke: '#10B981',
+            strokeWidth: 2,
+            selectable: false,
+            evented: false,
+          });
+          canvas.add(circle);
+          drawingShapeRef.current = circle;
+          break;
+        }
+        case 'polygon': {
+          if (!drawingShapeRef.current) {
+            const polygon = new Polygon([pointer], {
+              fill: 'rgba(239, 68, 68, 0.3)',
+              stroke: '#EF4444',
+              strokeWidth: 2,
+              objectCaching: false,
+              selectable: false,
+              evented: false,
+            });
+            canvas.add(polygon);
+            drawingShapeRef.current = polygon;
+          } else {
+            const polygon = drawingShapeRef.current;
+            polygon.points.push(pointer);
+          }
+          break;
+        }
+        case 'line': {
+          const line = new Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+            stroke: '#F59E0B',
+            strokeWidth: 2,
+            selectable: false,
+            evented: false,
+          });
+          canvas.add(line);
+          drawingShapeRef.current = line;
+          break;
+        }
+        default:
+          break;
+      }
+    };
+
+    const handleMouseMove = (opt) => {
+      if (!isDrawingRef.current || !drawingShapeRef.current) {
+        return;
+      }
+
+      const currentTool = activeToolRef.current;
+      const pointer = canvas.getPointer(opt.e);
+      const shape = drawingShapeRef.current;
+
+      switch (currentTool) {
+        case 'rectangle': {
+          const width = pointer.x - shape.left;
+          const height = pointer.y - shape.top;
+          shape.set({ width: Math.abs(width), height: Math.abs(height) });
+          if (width < 0) {
+            shape.set({ left: pointer.x });
+          }
+          if (height < 0) {
+            shape.set({ top: pointer.y });
+          }
+          shape.setCoords();
+          break;
+        }
+        case 'circle': {
+          const radius = Math.sqrt(
+            Math.pow(pointer.x - shape.left, 2) + Math.pow(pointer.y - shape.top, 2)
+          );
+          shape.set({ radius });
+          shape.setCoords();
+          break;
+        }
+        case 'polygon': {
+          const polygon = drawingShapeRef.current;
+          if (polygon) {
+            const points = polygon.points;
+            points[points.length - 1].x = pointer.x;
+            points[points.length - 1].y = pointer.y;
+            polygon.set({ points });
+          }
+          break;
+        }
+        case 'line': {
+          shape.set({ x2: pointer.x, y2: pointer.y });
+          break;
+        }
+        default:
+          break;
+      }
+
+      canvas.requestRenderAll();
+    };
+
+    const handleMouseUp = () => {
+      const shape = drawingShapeRef.current;
+      const currentTool = activeToolRef.current;
+
+      if (currentTool === 'polygon' && shape) {
+        return;
+      }
+
+      if (shape) {
+        switch (currentTool) {
+          case 'rectangle':
+            finalizeRectangle(canvas, shape);
+            break;
+          default:
+            break;
+        }
+      }
+
+      isDrawingRef.current = false;
+      drawingShapeRef.current = null;
+    };
+
+    const handleDoubleClick = () => {
+      const currentTool = activeToolRef.current;
+      if (currentTool === 'polygon' && drawingShapeRef.current) {
+        const polygon = drawingShapeRef.current;
+        polygon.points.pop();
+        polygon.set({ objectCaching: false });
+        canvas.requestRenderAll();
+        isDrawingRef.current = false;
+        drawingShapeRef.current = null;
+      }
+    };
+
+    canvas.on('mouse:down', handleMouseDown);
+    canvas.on('mouse:move', handleMouseMove);
+    canvas.on('mouse:up', handleMouseUp);
+    canvas.on('mouse:dblclick', handleDoubleClick);
+
+    return () => {
+      canvas.off('mouse:down', handleMouseDown);
+      canvas.off('mouse:move', handleMouseMove);
+      canvas.off('mouse:up', handleMouseUp);
+      canvas.off('mouse:dblclick', handleDoubleClick);
+    };
+  }, [addAnnotation, finalizeRectangle, removeAnnotation]);
 
   // Handle image loading separately
   useEffect(() => {
@@ -133,160 +371,24 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
   // Update canvas selection mode when tool changes
   useEffect(() => {
     if (fabricCanvasRef.current) {
-      fabricCanvasRef.current.selection = activeTool === 'select';
-      fabricCanvasRef.current.defaultCursor = activeTool === 'select' ? 'default' : 'crosshair';
+      const canvas = fabricCanvasRef.current;
+      const isSelectionTool = activeTool === 'select';
+      canvas.selection = isSelectionTool;
+
+      if (isSelectionTool) {
+        canvas.defaultCursor = 'default';
+      } else if (activeTool === 'eraser') {
+        canvas.defaultCursor = 'not-allowed';
+      } else {
+        canvas.defaultCursor = 'crosshair';
+      }
     }
   }, [activeTool]);
-
-  // Handle mouse down for drawing
-  const handleMouseDown = (event) => {
-    if (activeTool === 'select') return;
-
-    const canvas = fabricCanvasRef.current;
-    const pointer = canvas.getPointer(event.e);
-    setIsDrawing(true);
-
-    switch (activeTool) {
-      case 'rectangle': {
-        const rect = new Rect({
-          left: pointer.x,
-          top: pointer.y,
-          width: 0,
-          height: 0,
-          fill: 'rgba(59, 130, 246, 0.3)',
-          stroke: '#3B82F6',
-          strokeWidth: 2,
-        });
-        canvas.add(rect);
-        drawingShapeRef.current = rect;
-        break;
-      }
-      case 'circle': {
-        const circle = new Circle({
-          left: pointer.x,
-          top: pointer.y,
-          radius: 0,
-          fill: 'rgba(16, 185, 129, 0.3)',
-          stroke: '#10B981',
-          strokeWidth: 2,
-        });
-        canvas.add(circle);
-        drawingShapeRef.current = circle;
-        break;
-      }
-      case 'polygon': {
-        if (!drawingShapeRef.current) {
-          const polygon = new Polygon([pointer], {
-            fill: 'rgba(239, 68, 68, 0.3)',
-            stroke: '#EF4444',
-            strokeWidth: 2,
-            objectCaching: false,
-          });
-          canvas.add(polygon);
-          drawingShapeRef.current = polygon;
-        } else {
-          const polygon = drawingShapeRef.current;
-          polygon.points.push(pointer);
-        }
-        break;
-      }
-      case 'line': {
-        const line = new Line([pointer.x, pointer.y, pointer.x, pointer.y], {
-          stroke: '#F59E0B',
-          strokeWidth: 2,
-        });
-        canvas.add(line);
-        drawingShapeRef.current = line;
-        break;
-      }
-      default:
-        break;
-    }
-  };
-
-  // Handle mouse move for drawing
-  const handleMouseMove = (event) => {
-    if (!isDrawing || !drawingShapeRef.current) return;
-
-    const canvas = fabricCanvasRef.current;
-    const pointer = canvas.getPointer(event.e);
-    const shape = drawingShapeRef.current;
-
-    switch (activeTool) {
-      case 'rectangle': {
-        const width = pointer.x - shape.left;
-        const height = pointer.y - shape.top;
-        shape.set({ width: Math.abs(width), height: Math.abs(height) });
-        if (width < 0) shape.set({ left: pointer.x });
-        if (height < 0) shape.set({ top: pointer.y });
-        break;
-      }
-      case 'circle': {
-        const radius = Math.sqrt(
-          Math.pow(pointer.x - shape.left, 2) + Math.pow(pointer.y - shape.top, 2)
-        );
-        shape.set({ radius });
-        break;
-      }
-      case 'polygon': {
-        const polygon = drawingShapeRef.current;
-        if (polygon) {
-          const points = polygon.points;
-          points[points.length - 1].x = pointer.x;
-          points[points.length - 1].y = pointer.y;
-          polygon.set({
-            points: points,
-          });
-        }
-        break;
-      }
-      case 'line': {
-        shape.set({ x2: pointer.x, y2: pointer.y });
-        break;
-      }
-      default:
-        break;
-    }
-
-    canvas.renderAll();
-  };
-
-  // Handle mouse up for drawing
-  const handleMouseUp = () => {
-    if (activeTool === 'polygon' && drawingShapeRef.current) {
-      // For polygons, don't finish drawing on mouse up
-      return;
-    }
-    setIsDrawing(false);
-    drawingShapeRef.current = null;
-  };
-
-  // Handle double click for finishing polygon
-  const handleDoubleClick = () => {
-    if (activeTool === 'polygon' && drawingShapeRef.current) {
-      const canvas = fabricCanvasRef.current;
-      const polygon = drawingShapeRef.current;
-      // Remove the last point, which is the same as the first point
-      polygon.points.pop();
-      polygon.set({
-        objectCaching: false,
-      });
-      canvas.renderAll();
-      setIsDrawing(false);
-      drawingShapeRef.current = null;
-    }
-  };
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', flex: 1 }}>
       {/* Canvas */}
-      <canvas
-        ref={canvasRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onDoubleClick={handleDoubleClick}
-      />
+      <canvas ref={canvasRef} />
     </div>
   );
 };

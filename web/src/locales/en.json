@@ -89,10 +89,11 @@
     "labels": {
       "title": "Labels",
       "addClass": "Add Class",
-      "className": "Class Name",
-      "color": "Color",
-      "attributes": "Attributes"
-    }
+  "className": "Class Name",
+  "color": "Color",
+  "attributes": "Attributes",
+  "totalAnnotations": "Total annotations: {{count}}"
+}
   },
   "theme": {
     "light": "Light Mode",
