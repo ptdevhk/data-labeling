@@ -1,3 +1,14 @@
+## [0.2.0](https://github.com/ptdevhk/data-labeling/compare/v0.1.3...v0.2.0) (2025-10-23)
+
+### Features
+
+* Add annotation context and integrate with canvas ([77e1d43](https://github.com/ptdevhk/data-labeling/commit/77e1d439a1704944163c6dd3c553a56176e0d254))
+* Add label assignment dialog and shape editing ([bdd07c6](https://github.com/ptdevhk/data-labeling/commit/bdd07c69741f1bf59b9e6d0befa7ec46d02becb1))
+
+### Documentation
+
+* update docs path ([ac66dad](https://github.com/ptdevhk/data-labeling/commit/ac66dad4fb2d21323fa69dfeefa4c1c28c8ca41c))
+
 ## [0.1.3](https://github.com/ptdevhk/data-labeling/compare/v0.1.2...v0.1.3) (2025-10-21)
 
 ### Code Refactoring
