@@ -33,7 +33,9 @@
     "autoMode": "Auto Mode",
     "alwaysLight": "Always use light theme",
     "alwaysDark": "Always use dark theme",
-    "followSystem": "Follow system theme"
+    "followSystem": "Follow system theme",
+    "skip": "Skip",
+    "assign": "Assign"
   },
   "nav": {
     "projects": "Projects",
@@ -89,11 +91,15 @@
     "labels": {
       "title": "Labels",
       "addClass": "Add Class",
-  "className": "Class Name",
-  "color": "Color",
-  "attributes": "Attributes",
-  "totalAnnotations": "Total annotations: {{count}}"
-}
+      "className": "Class Name",
+      "color": "Color",
+      "attributes": "Attributes",
+      "totalAnnotations": "Total annotations: {{count}}",
+      "assignLabel": "Assign Label",
+      "selectOrCreateLabel": "Select an existing label or create a new one",
+      "createNew": "Create New",
+      "labelName": "Label Name"
+    }
   },
   "theme": {
     "light": "Light Mode",

@@ -215,6 +215,7 @@ Focus on a functional MVP: Standalone React SPA supporting manual labeling with 
 - **Viewer**: Fabric.js canvas integrated with zoom/pan; navigation sidebar for dataset thumbnails; full-screen toggle.
 - **Tools** (Manual):
   - Rectangle/Polygon/Circle/Line/Point: Intuitive drawing modes with snap-to-grid option.
+  - Move and edit the selected polygons: Highlight active polygon with semi-transparent fill, allow dragging the entire shape, and expose vertex handles for precise adjustments and arrow-key nudges.
   - Eraser/Undo/Redo: Visual undo stack preview; max 50 actions.
 - **Labels**: Dynamic class dropdown; per-shape attributes (e.g., confidence slider 0-100%); multi-select for batch labeling.
 - **LLM Placeholder**: Grayed-out "Assist" button linking to future sidebar chat.

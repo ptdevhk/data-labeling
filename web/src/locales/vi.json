@@ -33,7 +33,9 @@
     "autoMode": "Chế độ tự động",
     "alwaysLight": "Luôn sử dụng giao diện sáng",
     "alwaysDark": "Luôn sử dụng giao diện tối",
-    "followSystem": "Theo cài đặt hệ thống"
+    "followSystem": "Theo cài đặt hệ thống",
+    "skip": "Bỏ qua",
+    "assign": "Gán nhãn"
   },
   "nav": {
     "projects": "Dự án",
@@ -92,7 +94,11 @@
       "className": "Tên lớp",
       "color": "Màu",
       "attributes": "Thuộc tính",
-      "totalAnnotations": "Tổng số chú thích: {{count}}"
+      "totalAnnotations": "Tổng số chú thích: {{count}}",
+      "assignLabel": "Gán nhãn",
+      "selectOrCreateLabel": "Chọn nhãn có sẵn hoặc tạo mới",
+      "createNew": "Tạo mới",
+      "labelName": "Tên nhãn"
     }
   },
   "theme": {

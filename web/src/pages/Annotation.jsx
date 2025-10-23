@@ -7,7 +7,7 @@ import { AnnotationProvider } from '@/contexts/AnnotationContext';
 
 const Annotation = () => {
   const { id } = useParams();
-  const [activeTool, setActiveTool] = useState('rectangle');
+  const [activeTool, setActiveTool] = useState('select');
   const [zoom, setZoom] = useState(1);
   const canvasRef = useRef(null);
 

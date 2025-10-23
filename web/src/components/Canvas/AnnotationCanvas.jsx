@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useImperativeHandle } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useImperativeHandle, useState } from 'react';
 import { Canvas, Rect, Circle, Polygon, Line, FabricImage } from 'fabric';
 import { useAnnotations } from '@/contexts/AnnotationContext';
+import LabelAssignmentDialog from './LabelAssignmentDialog';
 
 const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, imagePath }) => {
   const canvasRef = useRef(null);
@@ -9,7 +10,9 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
   const backgroundImageRef = useRef(null);
   const isDrawingRef = useRef(false);
   const activeToolRef = useRef(activeTool);
-  const { addAnnotation, removeAnnotation } = useAnnotations();
+  const { addAnnotation, removeAnnotation, updateAnnotation } = useAnnotations();
+  const [showLabelDialog, setShowLabelDialog] = useState(false);
+  const [pendingShape, setPendingShape] = useState(null);
 
   const MIN_RECT_SIZE = 5;
 
@@ -27,25 +30,52 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       return;
     }
 
+    // Show label assignment dialog
+    setPendingShape({ canvas, shape: rectShape, type: 'rectangle' });
+    setShowLabelDialog(true);
+  }, []);
+
+  const handleLabelAssigned = useCallback((labelId) => {
+    if (!pendingShape) return;
+
+    const { canvas, shape, type } = pendingShape;
+    const normalizedWidth = (shape.width || 0) * (shape.scaleX || 1);
+    const normalizedHeight = (shape.height || 0) * (shape.scaleY || 1);
+
     const annotation = addAnnotation({
-      type: 'rectangle',
+      type,
+      labelId,
       coordinates: {
-        x: rectShape.left,
-        y: rectShape.top,
+        x: shape.left,
+        y: shape.top,
         width: normalizedWidth,
         height: normalizedHeight,
       },
       meta: {
-        stroke: rectShape.stroke,
-        fill: rectShape.fill,
+        stroke: shape.stroke,
+        fill: shape.fill,
       },
     });
 
-    rectShape.annotationId = annotation.id;
-    rectShape.set({ name: annotation.id, selectable: true, evented: true });
-    rectShape.setCoords();
+    shape.annotationId = annotation.id;
+    shape.set({ name: annotation.id, selectable: true, evented: true, hasControls: true, hasBorders: true });
+    shape.setCoords();
     canvas.requestRenderAll();
-  }, [addAnnotation]);
+
+    setShowLabelDialog(false);
+    setPendingShape(null);
+  }, [pendingShape, addAnnotation]);
+
+  const handleLabelSkipped = useCallback(() => {
+    if (!pendingShape) return;
+
+    const { canvas, shape } = pendingShape;
+    canvas.remove(shape);
+    canvas.requestRenderAll();
+
+    setShowLabelDialog(false);
+    setPendingShape(null);
+  }, [pendingShape]);
 
   // Expose methods to parent
   useImperativeHandle(parentCanvasRef, () => ({
@@ -116,6 +146,29 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       window.__fabricCanvas = canvas;
     }
 
+    // Add event handler for object modifications
+    const handleObjectModified = (e) => {
+      const target = e.target;
+      if (target && target.annotationId) {
+        const normalizedWidth = (target.width || 0) * (target.scaleX || 1);
+        const normalizedHeight = (target.height || 0) * (target.scaleY || 1);
+
+        updateAnnotation(target.annotationId, {
+          coordinates: {
+            x: target.left,
+            y: target.top,
+            width: normalizedWidth,
+            height: normalizedHeight,
+          },
+        });
+      }
+    };
+
+    canvas.on('object:modified', handleObjectModified);
+    canvas.on('object:moving', handleObjectModified);
+    canvas.on('object:scaling', handleObjectModified);
+    canvas.on('object:rotating', handleObjectModified);
+
     // Use ResizeObserver to watch the parent container size changes
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -133,6 +186,10 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
 
     // Cleanup
     return () => {
+      canvas.off('object:modified', handleObjectModified);
+      canvas.off('object:moving', handleObjectModified);
+      canvas.off('object:scaling', handleObjectModified);
+      canvas.off('object:rotating', handleObjectModified);
       resizeObserver.disconnect();
       canvas.dispose();
       fabricCanvasRef.current = null;
@@ -141,7 +198,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [updateAnnotation]);
 
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
@@ -389,6 +446,15 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     <div style={{ position: 'relative', width: '100%', height: '100%', flex: 1 }}>
       {/* Canvas */}
       <canvas ref={canvasRef} />
+      
+      {/* Label Assignment Dialog */}
+      {showLabelDialog && (
+        <LabelAssignmentDialog
+          visible={showLabelDialog}
+          onAssign={handleLabelAssigned}
+          onSkip={handleLabelSkipped}
+        />
+      )}
     </div>
   );
 };
