@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AnnotationCanvas from '@/components/Canvas/AnnotationCanvas';
 import AnnotationToolsToolbar from '@/components/Canvas/AnnotationToolsToolbar';
 import LabelsPanel from '@/components/Canvas/LabelsPanel';
+import { AnnotationProvider } from '@/contexts/AnnotationContext';
 
 const Annotation = () => {
   const { id } = useParams();
-  const [activeTool, setActiveTool] = useState('rectangle');
+  const [activeTool, setActiveTool] = useState('select');
   const [zoom, setZoom] = useState(1);
-  const canvasRef = { current: null };
+  const canvasRef = useRef(null);
 
   // Map project ID to sample images
   const imagePath = `/samples/image_${String(id).padStart(3, '0')}.jpg`;
@@ -36,52 +37,82 @@ const Annotation = () => {
     }
   };
 
-  return (
-    <div 
-      className="h-full flex" 
-      style={{ 
-        overflow: 'hidden',
-        minWidth: '800px',
-        margin: '0',
-        padding: '0'
-      }}
-    >
-      {/* Tools Toolbar - Fixed 64px width */}
-      <div style={{ flexShrink: 0, width: '64px' }}>
-        <AnnotationToolsToolbar
-          activeTool={activeTool}
-          onToolChange={setActiveTool}
-          zoom={zoom}
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          onResetView={handleResetView}
-        />
-      </div>
+  const handleToolChange = useCallback((toolKey) => {
+    // Tools that change drawing interaction on the canvas
+    const drawableTools = new Set([
+      'select',
+      'rectangle',
+      'circle',
+      'polygon',
+      'line',
+      'point',
+      'eraser',
+    ]);
 
-      {/* Canvas Area - Flexible, takes remaining space */}
+    if (drawableTools.has(toolKey)) {
+      setActiveTool(toolKey);
+      return;
+    }
+
+    // Action tools (undo/redo etc.) will be implemented later
+    switch (toolKey) {
+      case 'undo':
+      case 'redo':
+        console.info(`Action "${toolKey}" is not implemented yet.`);
+        break;
+      default:
+        console.warn(`Unhandled tool action: ${toolKey}`);
+    }
+  }, [setActiveTool]);
+
+  return (
+    <AnnotationProvider>
       <div
-        className="flex-1 bg-gray-50 dark:bg-gray-900"
+        className="h-full flex"
         style={{
-          minWidth: '400px',  // Minimum canvas width
           overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column'
+          minWidth: '800px',
+          margin: '0',
+          padding: '0'
         }}
       >
-        <AnnotationCanvas
-          activeTool={activeTool}
-          canvasRef={canvasRef}
-          zoom={zoom}
-          setZoom={setZoom}
-          imagePath={imagePath}
-        />
-      </div>
+        {/* Tools Toolbar - Fixed 64px width */}
+        <div style={{ flexShrink: 0, width: '64px' }}>
+          <AnnotationToolsToolbar
+            activeTool={activeTool}
+            onToolChange={handleToolChange}
+            zoom={zoom}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onResetView={handleResetView}
+          />
+        </div>
 
-      {/* Labels/Properties Panel - Fixed 250px minimum width */}
-      <div style={{ flexShrink: 0, width: '250px', minWidth: '250px' }}>
-        <LabelsPanel />
+        {/* Canvas Area - Flexible, takes remaining space */}
+        <div
+          className="flex-1 bg-gray-50 dark:bg-gray-900"
+          style={{
+            minWidth: '400px',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          <AnnotationCanvas
+            activeTool={activeTool}
+            canvasRef={canvasRef}
+            zoom={zoom}
+            setZoom={setZoom}
+            imagePath={imagePath}
+          />
+        </div>
+
+        {/* Labels/Properties Panel - Fixed 250px minimum width */}
+        <div style={{ flexShrink: 0, width: '250px', minWidth: '250px' }}>
+          <LabelsPanel />
+        </div>
       </div>
-    </div>
+    </AnnotationProvider>
   );
 };
 

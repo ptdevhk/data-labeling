@@ -4,14 +4,16 @@ import {
   Square,
   Eraser,
   Undo,
-  Redo
+  Redo,
+  MousePointer
 } from 'lucide-react';
 
 const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZoomOut, onResetView }) => {
   const drawingTools = [
-    // Uncomment other tools as needed
-    // { key: 'polygon', icon: Square, label: 'Polygon (P)', aria: 'Draw polygon' }, // Placeholder; use custom SVG if needed
+    { key: 'select', icon: MousePointer, label: 'Select (V)', aria: 'Select and move shapes' },
     { key: 'rectangle', icon: Square, label: 'Rectangle (R)', aria: 'Draw rectangle' },
+    // Uncomment other tools as needed
+    // { key: 'polygon', icon: Square, label: 'Polygon (P)', aria: 'Draw polygon' },
     // { key: 'circle', icon: Circle, label: 'Circle (C)', aria: 'Draw circle' },
     // { key: 'line', icon: LineIcon, label: 'Line (L)', aria: 'Draw line' },
     // { key: 'point', icon: PointIcon, label: 'Point (O)', aria: 'Add point' },

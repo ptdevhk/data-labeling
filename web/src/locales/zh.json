@@ -33,7 +33,9 @@
     "autoMode": "自动模式",
     "alwaysLight": "始终使用浅色主题",
     "alwaysDark": "始终使用深色主题",
-    "followSystem": "跟随系统主题设置"
+    "followSystem": "跟随系统主题设置",
+    "skip": "跳过",
+    "assign": "分配标签"
   },
   "nav": {
     "projects": "项目",
@@ -91,7 +93,12 @@
       "addClass": "添加类别",
       "className": "类别名称",
       "color": "颜色",
-      "attributes": "属性"
+      "attributes": "属性",
+      "totalAnnotations": "标注总数：{{count}}",
+      "assignLabel": "分配标签",
+      "selectOrCreateLabel": "选择现有标签或创建新标签",
+      "createNew": "创建新标签",
+      "labelName": "标签名称"
     }
   },
   "theme": {

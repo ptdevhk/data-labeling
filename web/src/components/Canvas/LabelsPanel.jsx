@@ -1,14 +1,24 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Tag } from 'lucide-react';
+import { useAnnotations } from '@/contexts/AnnotationContext';
 
 const LabelsPanel = () => {
   const { t } = useTranslation();
+  const { annotations } = useAnnotations();
   const [labels, setLabels] = useState([
     { id: 1, name: 'Defect1', color: '#3B82F6', count: 5 },
     { id: 2, name: 'Defect2', color: '#10B981', count: 3 },
     { id: 3, name: 'Defect3', color: '#EF4444', count: 2 },
   ]);
+
+  const totalAnnotations = annotations.length;
+  const labelCounts = useMemo(() => {
+    return labels.map((label) => ({
+      ...label,
+      count: annotations.filter((annotation) => annotation.labelId === label.id).length,
+    }));
+  }, [annotations, labels]);
 
   const [showAddLabel, setShowAddLabel] = useState(false);
   const [newLabelName, setNewLabelName] = useState('');
@@ -151,8 +161,14 @@ const LabelsPanel = () => {
       )}
 
       {/* Labels List */}
+      <div style={{ marginBottom: '0.75rem' }}>
+        <span className="text-sm text-gray-600 dark:text-gray-400">
+          {t('annotation.labels.totalAnnotations', { count: totalAnnotations })}
+        </span>
+      </div>
+
       <div className="flex-1 overflow-y-auto" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        {labels.map((label) => (
+        {labelCounts.map((label) => (
           <div
             key={label.id}
             className="hover:border-primary transition-colors cursor-pointer"
