@@ -5,12 +5,13 @@ import { useAnnotations } from '@/contexts/AnnotationContext';
 
 const LabelsPanel = () => {
   const { t } = useTranslation();
-  const { annotations } = useAnnotations();
-  const [labels, setLabels] = useState([
-    { id: 1, name: 'Defect1', color: '#3B82F6', count: 5 },
-    { id: 2, name: 'Defect2', color: '#10B981', count: 3 },
-    { id: 3, name: 'Defect3', color: '#EF4444', count: 2 },
-  ]);
+  const {
+    annotations,
+    labels,
+    addLabel,
+    activeLabelId,
+    setActiveLabelId,
+  } = useAnnotations();
 
   const totalAnnotations = annotations.length;
   const labelCounts = useMemo(() => {
@@ -26,13 +27,8 @@ const LabelsPanel = () => {
 
   const handleAddLabel = () => {
     if (newLabelName.trim()) {
-      const newLabel = {
-        id: labels.length + 1,
-        name: newLabelName,
-        color: newLabelColor,
-        count: 0,
-      };
-      setLabels([...labels, newLabel]);
+      const newLabel = addLabel({ name: newLabelName, color: newLabelColor });
+      setActiveLabelId(newLabel.id);
       setNewLabelName('');
       setShowAddLabel(false);
     }
@@ -175,10 +171,11 @@ const LabelsPanel = () => {
             style={{
               padding: '0.75rem',
               borderRadius: '0.5rem',
-              border: '2px solid transparent',
+              border: label.id === activeLabelId ? '2px solid #3B82F6' : '2px solid transparent',
               backgroundColor: `${label.color}20`,
               transition: 'border-color 0.15s ease'
             }}
+            onClick={() => setActiveLabelId(label.id)}
           >
             <div className="flex items-center" style={{ gap: '0.5rem', marginBottom: '0.5rem' }}>
               <div
@@ -190,6 +187,20 @@ const LabelsPanel = () => {
                 }}
               ></div>
               <span className="font-medium">{label.name}</span>
+              {label.id === activeLabelId && (
+                <span
+                  className="text-xs"
+                  style={{
+                    padding: '0.125rem 0.375rem',
+                    borderRadius: '0.375rem',
+                    backgroundColor: '#DBEAFE',
+                    color: '#1D4ED8',
+                    fontWeight: 500,
+                  }}
+                >
+                  {t('common.active', 'Active')}
+                </span>
+              )}
             </div>
             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400" style={{ gap: '0.5rem' }}>
               <Tag size={14} />

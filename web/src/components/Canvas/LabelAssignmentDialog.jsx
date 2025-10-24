@@ -2,27 +2,25 @@ import { useState } from 'react';
 import { Modal, Button, Input } from '@douyinfe/semi-ui';
 import { useTranslation } from 'react-i18next';
 import { Plus, Tag } from 'lucide-react';
+import { useAnnotations } from '@/contexts/AnnotationContext';
 
 const LabelAssignmentDialog = ({ visible, onAssign, onSkip }) => {
   const { t } = useTranslation();
-  const [labels, setLabels] = useState([
-    { id: 1, name: 'Defect1', color: '#3B82F6' },
-    { id: 2, name: 'Defect2', color: '#10B981' },
-    { id: 3, name: 'Defect3', color: '#EF4444' },
-  ]);
-  const [selectedLabel, setSelectedLabel] = useState(null);
+  const {
+    labels,
+    addLabel,
+    activeLabelId,
+    setActiveLabelId,
+  } = useAnnotations();
+  const initialSelectedLabel = activeLabelId ?? labels[0]?.id ?? null;
+  const [selectedLabel, setSelectedLabel] = useState(initialSelectedLabel);
   const [showNewLabel, setShowNewLabel] = useState(false);
   const [newLabelName, setNewLabelName] = useState('');
-  const [newLabelColor, setNewLabelColor] = useState('#3B82F6');
+  const [newLabelColor, setNewLabelColor] = useState(labels[0]?.color ?? '#3B82F6');
 
   const handleCreateLabel = () => {
     if (newLabelName.trim()) {
-      const newLabel = {
-        id: Date.now(),
-        name: newLabelName,
-        color: newLabelColor,
-      };
-      setLabels([...labels, newLabel]);
+      const newLabel = addLabel({ name: newLabelName, color: newLabelColor });
       setSelectedLabel(newLabel.id);
       setNewLabelName('');
       setShowNewLabel(false);
@@ -31,6 +29,7 @@ const LabelAssignmentDialog = ({ visible, onAssign, onSkip }) => {
 
   const handleAssign = () => {
     if (selectedLabel) {
+      setActiveLabelId(selectedLabel);
       onAssign(selectedLabel);
     }
   };

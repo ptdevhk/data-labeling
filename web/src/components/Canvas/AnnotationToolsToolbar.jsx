@@ -111,10 +111,10 @@ const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZo
         style={{
           background: 'var(--toolbar-bg)',
           border: '1px solid var(--toolbar-border)',
-          width: '4rem',
-          height: '400px',
-          minWidth: '4rem',
-          padding: '0.5rem',
+          width: '4.5rem',
+          height: '100%',
+          minWidth: '4.5rem',
+          padding: '0.75rem 0.5rem',
           alignItems: 'center',
           borderRadius: '0.5rem',
           boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'

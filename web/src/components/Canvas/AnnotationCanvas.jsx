@@ -1,16 +1,49 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useImperativeHandle, useState } from 'react';
-import { Canvas, Rect, Circle, Polygon, Line, FabricImage } from 'fabric';
+import { Canvas, Rect, FabricImage } from 'fabric';
 import { useAnnotations } from '@/contexts/AnnotationContext';
 import LabelAssignmentDialog from './LabelAssignmentDialog';
+
+const hexToRgba = (hex, alpha = 1) => {
+  if (!hex) {
+    return `rgba(59, 130, 246, ${alpha})`;
+  }
+
+  let parsed = hex.replace('#', '');
+  if (parsed.length === 3) {
+    parsed = parsed
+      .split('')
+      .map((char) => `${char}${char}`)
+      .join('');
+  }
+
+  const bigint = parseInt(parsed, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
 
 const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, imagePath }) => {
   const canvasRef = useRef(null);
   const fabricCanvasRef = useRef(null);
   const drawingShapeRef = useRef(null);
+  const startPointRef = useRef({ x: 0, y: 0 });
   const backgroundImageRef = useRef(null);
   const isDrawingRef = useRef(false);
   const activeToolRef = useRef(activeTool);
-  const { addAnnotation, removeAnnotation, updateAnnotation } = useAnnotations();
+  const {
+    annotations,
+    addAnnotation,
+    removeAnnotation,
+    updateAnnotation,
+    labels,
+    activeLabelId,
+    setActiveLabelId,
+    activeAnnotationId,
+    selectAnnotation,
+    clearSelection,
+  } = useAnnotations();
+  const shapeRegistryRef = useRef(new Map());
   const [showLabelDialog, setShowLabelDialog] = useState(false);
   const [pendingShape, setPendingShape] = useState(null);
 
@@ -20,9 +53,42 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     activeToolRef.current = activeTool;
   }, [activeTool]);
 
+  const computeDimension = (shape, axis) => {
+    const dimension = shape[axis] ?? 0;
+    const scale = axis === 'width' ? (shape.scaleX ?? 1) : (shape.scaleY ?? 1);
+    const scaledDimension = Math.abs(dimension * scale);
+    if (scaledDimension > 0) {
+      return scaledDimension;
+    }
+
+    if (axis === 'width' && typeof shape.getScaledWidth === 'function') {
+      const fallback = Math.abs(shape.getScaledWidth() ?? 0);
+      if (fallback > 0) {
+        return fallback;
+      }
+    }
+
+    if (axis === 'height' && typeof shape.getScaledHeight === 'function') {
+      const fallback = Math.abs(shape.getScaledHeight() ?? 0);
+      if (fallback > 0) {
+        return fallback;
+      }
+    }
+
+    const bounds = shape.getBoundingRect?.(true, true);
+    if (bounds) {
+      const boundDimension = axis === 'width' ? bounds.width : bounds.height;
+      if (boundDimension && boundDimension > 0) {
+        return boundDimension;
+      }
+    }
+
+    return 0;
+  };
+
   const finalizeRectangle = useCallback((canvas, rectShape) => {
-    const normalizedWidth = (rectShape.width || 0) * (rectShape.scaleX || 1);
-    const normalizedHeight = (rectShape.height || 0) * (rectShape.scaleY || 1);
+    const normalizedWidth = computeDimension(rectShape, 'width');
+    const normalizedHeight = computeDimension(rectShape, 'height');
 
     if (normalizedWidth < MIN_RECT_SIZE || normalizedHeight < MIN_RECT_SIZE) {
       canvas.remove(rectShape);
@@ -30,17 +96,67 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       return;
     }
 
-    // Show label assignment dialog
+    if (activeLabelId) {
+      const activeLabel = labels.find((label) => label.id === activeLabelId);
+      const strokeColor = activeLabel?.color ?? '#3B82F6';
+      rectShape.set({
+        stroke: strokeColor,
+        fill: hexToRgba(strokeColor, 0.16),
+        width: normalizedWidth,
+        height: normalizedHeight,
+        scaleX: 1,
+        scaleY: 1,
+        originX: 'left',
+        originY: 'top',
+      });
+
+      const annotation = addAnnotation({
+        type: 'rectangle',
+        labelId: activeLabelId,
+        coordinates: {
+          x: rectShape.left,
+          y: rectShape.top,
+          width: normalizedWidth,
+          height: normalizedHeight,
+        },
+        meta: {
+          stroke: strokeColor,
+          fill: hexToRgba(strokeColor, 0.16),
+        },
+      });
+      rectShape.annotationId = annotation.id;
+      rectShape.set({
+        name: annotation.id,
+        selectable: true,
+        evented: true,
+        hasControls: true,
+        hasBorders: true,
+      });
+      rectShape.setCoords();
+      shapeRegistryRef.current.set(annotation.id, rectShape);
+      selectAnnotation(annotation.id);
+      canvas.setActiveObject(rectShape);
+      canvas.requestRenderAll();
+      return;
+    }
+
     setPendingShape({ canvas, shape: rectShape, type: 'rectangle' });
     setShowLabelDialog(true);
-  }, []);
+  }, [activeLabelId, addAnnotation, labels, selectAnnotation]);
 
   const handleLabelAssigned = useCallback((labelId) => {
     if (!pendingShape) return;
 
     const { canvas, shape, type } = pendingShape;
-    const normalizedWidth = (shape.width || 0) * (shape.scaleX || 1);
-    const normalizedHeight = (shape.height || 0) * (shape.scaleY || 1);
+    const normalizedWidth = computeDimension(shape, 'width');
+    const normalizedHeight = computeDimension(shape, 'height');
+    const assignedLabel = labels.find((label) => label.id === labelId);
+    const strokeColor = assignedLabel?.color ?? '#3B82F6';
+
+    shape.set({
+      stroke: strokeColor,
+      fill: hexToRgba(strokeColor, 0.16),
+    });
 
     const annotation = addAnnotation({
       type,
@@ -52,25 +168,44 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         height: normalizedHeight,
       },
       meta: {
-        stroke: shape.stroke,
-        fill: shape.fill,
+        stroke: strokeColor,
+        fill: hexToRgba(strokeColor, 0.16),
       },
     });
 
     shape.annotationId = annotation.id;
-    shape.set({ name: annotation.id, selectable: true, evented: true, hasControls: true, hasBorders: true });
+    shape.set({
+      name: annotation.id,
+      selectable: true,
+      evented: true,
+      hasControls: true,
+      hasBorders: true,
+      width: normalizedWidth,
+      height: normalizedHeight,
+      scaleX: 1,
+      scaleY: 1,
+      originX: 'left',
+      originY: 'top',
+    });
     shape.setCoords();
+    shapeRegistryRef.current.set(annotation.id, shape);
+    setActiveLabelId(labelId);
+    selectAnnotation(annotation.id);
+    canvas.setActiveObject(shape);
     canvas.requestRenderAll();
 
     setShowLabelDialog(false);
     setPendingShape(null);
-  }, [pendingShape, addAnnotation]);
+  }, [addAnnotation, labels, pendingShape, selectAnnotation, setActiveLabelId]);
 
   const handleLabelSkipped = useCallback(() => {
     if (!pendingShape) return;
 
     const { canvas, shape } = pendingShape;
     canvas.remove(shape);
+    if (shape.annotationId) {
+      shapeRegistryRef.current.delete(shape.annotationId);
+    }
     canvas.requestRenderAll();
 
     setShowLabelDialog(false);
@@ -169,6 +304,21 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     canvas.on('object:scaling', handleObjectModified);
     canvas.on('object:rotating', handleObjectModified);
 
+    const handleSelection = (e) => {
+      const target = e.selected && e.selected[0];
+      if (target && target.annotationId) {
+        selectAnnotation(target.annotationId);
+      }
+    };
+
+    const handleSelectionCleared = () => {
+      clearSelection();
+    };
+
+    canvas.on('selection:created', handleSelection);
+    canvas.on('selection:updated', handleSelection);
+    canvas.on('selection:cleared', handleSelectionCleared);
+
     // Use ResizeObserver to watch the parent container size changes
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -184,21 +334,27 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     // Observe the parent element
     resizeObserver.observe(parent);
 
+    const shapesRef = shapeRegistryRef.current;
+
     // Cleanup
     return () => {
       canvas.off('object:modified', handleObjectModified);
       canvas.off('object:moving', handleObjectModified);
       canvas.off('object:scaling', handleObjectModified);
       canvas.off('object:rotating', handleObjectModified);
+      canvas.off('selection:created', handleSelection);
+      canvas.off('selection:updated', handleSelection);
+      canvas.off('selection:cleared', handleSelectionCleared);
       resizeObserver.disconnect();
       canvas.dispose();
       fabricCanvasRef.current = null;
       if (typeof window !== 'undefined' && window.__fabricCanvas === canvas) {
         delete window.__fabricCanvas;
       }
+      shapesRef.clear();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [updateAnnotation]);
+  }, [clearSelection, selectAnnotation, updateAnnotation]);
 
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
@@ -209,6 +365,12 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     const handleMouseDown = (opt) => {
       const currentTool = activeToolRef.current;
       if (currentTool === 'select') {
+        const target = opt.target;
+        if (target && target.annotationId) {
+          selectAnnotation(target.annotationId);
+        } else {
+          clearSelection();
+        }
         return;
       }
 
@@ -219,78 +381,37 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
             removeAnnotation(target.annotationId);
           }
           canvas.remove(target);
+          if (target.annotationId) {
+            shapeRegistryRef.current.delete(target.annotationId);
+          }
           canvas.requestRenderAll();
         }
         return;
       }
 
+      if (currentTool !== 'rectangle') {
+        return;
+      }
+
       const pointer = canvas.getPointer(opt.e);
       isDrawingRef.current = true;
+      startPointRef.current = { x: pointer.x, y: pointer.y };
 
-      switch (currentTool) {
-        case 'rectangle': {
-          const rect = new Rect({
-            left: pointer.x,
-            top: pointer.y,
-            width: 0,
-            height: 0,
-            fill: 'rgba(59, 130, 246, 0.3)',
-            stroke: '#3B82F6',
-            strokeWidth: 2,
-            selectable: false,
-            evented: false,
-          });
-          canvas.add(rect);
-          drawingShapeRef.current = rect;
-          break;
-        }
-        case 'circle': {
-          const circle = new Circle({
-            left: pointer.x,
-            top: pointer.y,
-            radius: 0,
-            fill: 'rgba(16, 185, 129, 0.3)',
-            stroke: '#10B981',
-            strokeWidth: 2,
-            selectable: false,
-            evented: false,
-          });
-          canvas.add(circle);
-          drawingShapeRef.current = circle;
-          break;
-        }
-        case 'polygon': {
-          if (!drawingShapeRef.current) {
-            const polygon = new Polygon([pointer], {
-              fill: 'rgba(239, 68, 68, 0.3)',
-              stroke: '#EF4444',
-              strokeWidth: 2,
-              objectCaching: false,
-              selectable: false,
-              evented: false,
-            });
-            canvas.add(polygon);
-            drawingShapeRef.current = polygon;
-          } else {
-            const polygon = drawingShapeRef.current;
-            polygon.points.push(pointer);
-          }
-          break;
-        }
-        case 'line': {
-          const line = new Line([pointer.x, pointer.y, pointer.x, pointer.y], {
-            stroke: '#F59E0B',
-            strokeWidth: 2,
-            selectable: false,
-            evented: false,
-          });
-          canvas.add(line);
-          drawingShapeRef.current = line;
-          break;
-        }
-        default:
-          break;
-      }
+      const rect = new Rect({
+        left: pointer.x,
+        top: pointer.y,
+        width: 1,
+        height: 1,
+        fill: 'rgba(59, 130, 246, 0.16)',
+        stroke: '#3B82F6',
+        strokeWidth: 2,
+        selectable: false,
+        evented: false,
+        originX: 'left',
+        originY: 'top',
+      });
+      canvas.add(rect);
+      drawingShapeRef.current = rect;
     };
 
     const handleMouseMove = (opt) => {
@@ -298,49 +419,27 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         return;
       }
 
-      const currentTool = activeToolRef.current;
       const pointer = canvas.getPointer(opt.e);
       const shape = drawingShapeRef.current;
+      const origin = startPointRef.current;
+      const width = pointer.x - origin.x;
+      const height = pointer.y - origin.y;
+      const left = width >= 0 ? origin.x : origin.x + width;
+      const top = height >= 0 ? origin.y : origin.y + height;
+      const normalizedWidth = Math.abs(width);
+      const normalizedHeight = Math.abs(height);
 
-      switch (currentTool) {
-        case 'rectangle': {
-          const width = pointer.x - shape.left;
-          const height = pointer.y - shape.top;
-          shape.set({ width: Math.abs(width), height: Math.abs(height) });
-          if (width < 0) {
-            shape.set({ left: pointer.x });
-          }
-          if (height < 0) {
-            shape.set({ top: pointer.y });
-          }
-          shape.setCoords();
-          break;
-        }
-        case 'circle': {
-          const radius = Math.sqrt(
-            Math.pow(pointer.x - shape.left, 2) + Math.pow(pointer.y - shape.top, 2)
-          );
-          shape.set({ radius });
-          shape.setCoords();
-          break;
-        }
-        case 'polygon': {
-          const polygon = drawingShapeRef.current;
-          if (polygon) {
-            const points = polygon.points;
-            points[points.length - 1].x = pointer.x;
-            points[points.length - 1].y = pointer.y;
-            polygon.set({ points });
-          }
-          break;
-        }
-        case 'line': {
-          shape.set({ x2: pointer.x, y2: pointer.y });
-          break;
-        }
-        default:
-          break;
-      }
+      shape.set({
+        left,
+        top,
+        width: normalizedWidth || 1,
+        height: normalizedHeight || 1,
+        scaleX: 1,
+        scaleY: 1,
+        originX: 'left',
+        originY: 'top',
+      });
+      shape.setCoords();
 
       canvas.requestRenderAll();
     };
@@ -349,18 +448,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       const shape = drawingShapeRef.current;
       const currentTool = activeToolRef.current;
 
-      if (currentTool === 'polygon' && shape) {
-        return;
-      }
-
-      if (shape) {
-        switch (currentTool) {
-          case 'rectangle':
-            finalizeRectangle(canvas, shape);
-            break;
-          default:
-            break;
-        }
+      if (shape && currentTool === 'rectangle') {
+        finalizeRectangle(canvas, shape);
       }
 
       isDrawingRef.current = false;
@@ -368,15 +457,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     };
 
     const handleDoubleClick = () => {
-      const currentTool = activeToolRef.current;
-      if (currentTool === 'polygon' && drawingShapeRef.current) {
-        const polygon = drawingShapeRef.current;
-        polygon.points.pop();
-        polygon.set({ objectCaching: false });
-        canvas.requestRenderAll();
-        isDrawingRef.current = false;
-        drawingShapeRef.current = null;
-      }
+      isDrawingRef.current = false;
+      drawingShapeRef.current = null;
     };
 
     canvas.on('mouse:down', handleMouseDown);
@@ -390,7 +472,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       canvas.off('mouse:up', handleMouseUp);
       canvas.off('mouse:dblclick', handleDoubleClick);
     };
-  }, [addAnnotation, finalizeRectangle, removeAnnotation]);
+  }, [clearSelection, finalizeRectangle, removeAnnotation, selectAnnotation]);
 
   // Handle image loading separately
   useEffect(() => {
@@ -424,6 +506,88 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         console.error('Error details:', err.message, err.stack);
       });
   }, [imagePath]);
+
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) return;
+
+    const annotationIds = new Set(annotations.map((annotation) => annotation.id));
+
+    shapeRegistryRef.current.forEach((shape, id) => {
+      if (!annotationIds.has(id)) {
+        canvas.remove(shape);
+        shapeRegistryRef.current.delete(id);
+      }
+    });
+
+    annotations.forEach((annotation) => {
+      if (annotation.type !== 'rectangle') {
+        return;
+      }
+
+      if (!shapeRegistryRef.current.has(annotation.id)) {
+        const rect = new Rect({
+          left: annotation.coordinates.x,
+          top: annotation.coordinates.y,
+          width: annotation.coordinates.width,
+          height: annotation.coordinates.height,
+          fill: annotation.meta?.fill ?? 'rgba(59, 130, 246, 0.16)',
+          stroke: annotation.meta?.stroke ?? '#3B82F6',
+          strokeWidth: 2,
+          selectable: true,
+          evented: true,
+          originX: 'left',
+          originY: 'top',
+        });
+        rect.annotationId = annotation.id;
+        rect.setCoords();
+        canvas.add(rect);
+        shapeRegistryRef.current.set(annotation.id, rect);
+      }
+    });
+
+    canvas.requestRenderAll();
+  }, [annotations]);
+
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) return;
+
+    let activeShape = null;
+
+    annotations.forEach((annotation) => {
+      const shape = shapeRegistryRef.current.get(annotation.id);
+      if (!shape) {
+        return;
+      }
+
+      const label = labels.find((item) => item.id === annotation.labelId);
+      const baseColor = label?.color ?? '#3B82F6';
+      const isActive = annotation.id === activeAnnotationId;
+
+      shape.set({
+        stroke: baseColor,
+        strokeWidth: isActive ? 3 : 2,
+        fill: isActive ? hexToRgba(baseColor, 0.24) : hexToRgba(baseColor, 0.16),
+        opacity: 1,
+      });
+
+      if (isActive) {
+        activeShape = shape;
+      }
+    });
+
+    if (activeShape) {
+      canvas.setActiveObject(activeShape);
+      if (typeof canvas.bringToFront === 'function') {
+        canvas.bringToFront(activeShape);
+      }
+    } else {
+      canvas.discardActiveObject();
+    }
+
+    canvas.requestRenderAll();
+  }, [activeAnnotationId, annotations, labels]);
 
   // Update canvas selection mode when tool changes
   useEffect(() => {
