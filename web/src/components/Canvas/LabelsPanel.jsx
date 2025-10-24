@@ -38,18 +38,11 @@ const LabelsPanel = () => {
     <>
       <style>{`
         .labels-panel {
-          --panel-bg: #FFFFFF;
-          --panel-border: #E5E7EB;
-          --input-bg: #FFFFFF;
-          --input-border: #E5E7EB;
-          --button-bg: #F3F4F6;
-        }
-        .dark .labels-panel {
-          --panel-bg: #1F2937;
-          --panel-border: #374151;
-          --input-bg: #374151;
-          --input-border: #4B5563;
-          --button-bg: #374151;
+          --panel-bg: var(--semi-color-bg-1);
+          --panel-border: var(--semi-color-border);
+          --input-bg: var(--semi-color-bg-0);
+          --input-border: var(--semi-color-border);
+          --button-bg: var(--semi-color-fill-0);
         }
       `}</style>
       <div 
@@ -129,8 +122,8 @@ const LabelsPanel = () => {
               style={{
                 padding: '0.5rem 0.75rem',
                 borderRadius: '0.5rem',
-                background: '#3B82F6',
-                color: 'white',
+          background: 'var(--semi-color-primary)',
+          color: 'var(--semi-color-white)',
                 border: 'none',
                 cursor: 'pointer',
                 flex: 1
@@ -144,8 +137,8 @@ const LabelsPanel = () => {
               style={{
                 padding: '0.5rem 0.75rem',
                 borderRadius: '0.5rem',
-                background: '#D1D5DB',
-                border: 'none',
+              background: 'var(--semi-color-fill-1)',
+              border: 'none',
                 cursor: 'pointer',
                 flex: 1
               }}
@@ -204,7 +197,7 @@ const LabelsPanel = () => {
             </div>
             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400" style={{ gap: '0.5rem' }}>
               <Tag size={14} />
-              <span>{label.count} annotations</span>
+              <span>{t('annotation.labels.annotationCount', { count: label.count })}</span>
             </div>
           </div>
         ))}
@@ -219,7 +212,7 @@ const LabelsPanel = () => {
         }}
       >
         <h3 className="font-semibold" style={{ marginBottom: '0.5rem' }}>{t('annotation.labels.attributes')}</h3>
-        <p className="caption text-gray-500">Select a shape to edit attributes</p>
+        <p className="caption text-gray-500">{t('annotation.labels.selectShape')}</p>
       </div>
     </div>
     </>

@@ -1,4 +1,3 @@
-import { Tooltip } from '@douyinfe/semi-ui';
 import { Trash2, Crosshair, Ruler, Maximize2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAnnotations } from '@/contexts/AnnotationContext';
@@ -43,12 +42,9 @@ const AnnotationListPanel = () => {
     <>
       <style>{`
         .annotation-list-panel {
-          --panel-bg: #FFFFFF;
-          --panel-border: #E5E7EB;
-        }
-        .dark .annotation-list-panel {
-          --panel-bg: #1F2937;
-          --panel-border: #374151;
+          --panel-bg: var(--semi-color-bg-1);
+          --panel-border: var(--semi-color-border);
+          --panel-accent: var(--semi-color-primary);
         }
       `}</style>
       <div
@@ -58,7 +54,7 @@ const AnnotationListPanel = () => {
           borderLeft: '1px solid var(--panel-border)',
           padding: '1rem',
           borderRadius: '0.5rem',
-          boxShadow: '0 1px 2px 0 rgba(15, 23, 42, 0.05)',
+          boxShadow: 'var(--semi-shadow-elevated)',
         }}
       >
       <div className="flex flex-col gap-2" style={{ marginBottom: '1rem' }}>
@@ -76,7 +72,7 @@ const AnnotationListPanel = () => {
           borderRadius: '0.5rem',
           padding: '0.875rem',
           marginBottom: '1rem',
-          background: selectedAnnotation ? 'rgba(59, 130, 246, 0.06)' : 'var(--panel-bg)',
+          background: selectedAnnotation ? 'var(--semi-color-fill-1)' : 'var(--panel-bg)',
         }}
       >
         {selectedAnnotation ? (
@@ -88,7 +84,7 @@ const AnnotationListPanel = () => {
                     width: '0.875rem',
                     height: '0.875rem',
                     borderRadius: '9999px',
-                    backgroundColor: selectedLabel?.color ?? '#9CA3AF',
+                    backgroundColor: selectedLabel?.color ?? 'var(--semi-color-fill-2)',
                   }}
                 />
                 <span className="font-medium text-sm">
@@ -96,40 +92,38 @@ const AnnotationListPanel = () => {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Tooltip content={t('annotation.list.focus', 'Focus')} position="left">
-                  <button
-                    type="button"
-                    onClick={() => selectAnnotation(selectedAnnotation.id)}
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      color: '#2563EB',
-                      padding: '0.25rem',
-                      borderRadius: '0.375rem',
-                    }}
-                    aria-label={t('annotation.list.focus', 'Focus')}
-                  >
-                    <Crosshair size={16} />
-                  </button>
-                </Tooltip>
-                <Tooltip content={t('common.delete', 'Delete')} position="left">
-                  <button
-                    type="button"
-                    onClick={() => removeAnnotation(selectedAnnotation.id)}
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      color: '#DC2626',
-                      padding: '0.25rem',
-                      borderRadius: '0.375rem',
-                    }}
-                    aria-label={t('common.delete', 'Delete')}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </Tooltip>
+                <button
+                  type="button"
+                  onClick={() => selectAnnotation(selectedAnnotation.id)}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    color: 'var(--panel-accent)',
+                    padding: '0.25rem',
+                    borderRadius: '0.375rem',
+                  }}
+                  aria-label={t('annotation.list.focus', 'Focus')}
+                  title={t('annotation.list.focus', 'Focus')}
+                >
+                  <Crosshair size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeAnnotation(selectedAnnotation.id)}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    color: 'var(--semi-color-danger)',
+                    padding: '0.25rem',
+                    borderRadius: '0.375rem',
+                  }}
+                  aria-label={t('common.delete', 'Delete')}
+                  title={t('common.delete', 'Delete')}
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             </div>
 
@@ -194,13 +188,13 @@ const AnnotationListPanel = () => {
             <div
               key={annotation.id}
               className={`flex items-center justify-between gap-3 transition-all cursor-pointer ${
-                isActive ? 'ring-2 ring-blue-500' : ''
+                isActive ? 'ring-2 ring-[var(--panel-accent)]' : ''
               }`}
               style={{
                 padding: '0.75rem',
                 borderRadius: '0.5rem',
                 border: '1px solid var(--panel-border, #E5E7EB)',
-                backgroundColor: isActive ? 'rgba(59, 130, 246, 0.12)' : 'var(--panel-bg, #FFFFFF)',
+                backgroundColor: isActive ? 'var(--semi-color-fill-1)' : 'var(--panel-bg)',
               }}
               onClick={() => selectAnnotation(annotation.id)}
             >
@@ -211,7 +205,7 @@ const AnnotationListPanel = () => {
                       width: '0.75rem',
                       height: '0.75rem',
                       borderRadius: '9999px',
-                      backgroundColor: label?.color ?? '#9CA3AF',
+                      backgroundColor: label?.color ?? 'var(--semi-color-fill-2)',
                     }}
                   />
                   <span className="font-medium text-sm">
@@ -223,46 +217,44 @@ const AnnotationListPanel = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Tooltip content={t('annotation.list.focus', 'Focus')} position="left">
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      selectAnnotation(annotation.id);
-                    }}
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      color: '#2563EB',
-                      padding: '0.25rem',
-                      borderRadius: '0.375rem',
-                    }}
-                    aria-label={t('annotation.list.focus', 'Focus')}
-                  >
-                    <Crosshair size={16} />
-                  </button>
-                </Tooltip>
-                <Tooltip content={t('common.delete', 'Delete')} position="left">
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      removeAnnotation(annotation.id);
-                    }}
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      color: '#DC2626',
-                      padding: '0.25rem',
-                      borderRadius: '0.375rem',
-                    }}
-                    aria-label={t('common.delete', 'Delete')}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </Tooltip>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    selectAnnotation(annotation.id);
+                  }}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    color: 'var(--panel-accent)',
+                    padding: '0.25rem',
+                    borderRadius: '0.375rem',
+                  }}
+                  aria-label={t('annotation.list.focus', 'Focus')}
+                  title={t('annotation.list.focus', 'Focus')}
+                >
+                  <Crosshair size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    removeAnnotation(annotation.id);
+                  }}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    color: 'var(--semi-color-danger)',
+                    padding: '0.25rem',
+                    borderRadius: '0.375rem',
+                  }}
+                  aria-label={t('common.delete', 'Delete')}
+                  title={t('common.delete', 'Delete')}
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             </div>
           );

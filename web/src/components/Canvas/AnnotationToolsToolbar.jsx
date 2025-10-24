@@ -1,4 +1,4 @@
-import { Tooltip } from '@douyinfe/semi-ui';
+import { useMemo } from 'react';
 import { IconPlus, IconMinus, IconRefresh } from '@douyinfe/semi-icons';
 import {
   Square,
@@ -7,23 +7,46 @@ import {
   Redo,
   MousePointer
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZoomOut, onResetView }) => {
-  const drawingTools = [
-    { key: 'select', icon: MousePointer, label: 'Select (V)', aria: 'Select and move shapes' },
-    { key: 'rectangle', icon: Square, label: 'Rectangle (R)', aria: 'Draw rectangle' },
-    // Uncomment other tools as needed
-    // { key: 'polygon', icon: Square, label: 'Polygon (P)', aria: 'Draw polygon' },
-    // { key: 'circle', icon: Circle, label: 'Circle (C)', aria: 'Draw circle' },
-    // { key: 'line', icon: LineIcon, label: 'Line (L)', aria: 'Draw line' },
-    // { key: 'point', icon: PointIcon, label: 'Point (O)', aria: 'Add point' },
-  ];
+  const { t } = useTranslation();
 
-  const utilityTools = [
-    { key: 'eraser', icon: Eraser, label: 'Eraser (E)', aria: 'Erase shapes' },
-    { key: 'undo', icon: Undo, label: 'Undo (Z)', aria: 'Undo action' },
-    { key: 'redo', icon: Redo, label: 'Redo (Shift+Z)', aria: 'Redo action' },
-  ];
+  const drawingTools = useMemo(() => ([
+    {
+      key: 'select',
+      icon: MousePointer,
+      label: `${t('annotation.tools.select')} (V)`,
+      aria: t('annotation.tools.hints.select', 'Select and move shapes'),
+    },
+    {
+      key: 'rectangle',
+      icon: Square,
+      label: `${t('annotation.tools.rectangle')} (R)`,
+      aria: t('annotation.tools.hints.rectangle', 'Draw rectangle'),
+    },
+  ]), [t]);
+
+  const utilityTools = useMemo(() => ([
+    {
+      key: 'eraser',
+      icon: Eraser,
+      label: `${t('annotation.tools.eraser')} (E)`,
+      aria: t('annotation.tools.hints.eraser', 'Erase shapes'),
+    },
+    {
+      key: 'undo',
+      icon: Undo,
+      label: `${t('annotation.tools.undo')} (Z)`,
+      aria: t('annotation.tools.hints.undo', 'Undo action'),
+    },
+    {
+      key: 'redo',
+      icon: Redo,
+      label: `${t('annotation.tools.redo')} (Shift+Z)`,
+      aria: t('annotation.tools.hints.redo', 'Redo action'),
+    },
+  ]), [t]);
 
   const handleToolSelect = (key) => {
     if (onToolChange) {
@@ -35,26 +58,15 @@ const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZo
     <>
       <style>{`
         .annotation-toolbar {
-          --toolbar-bg: #F3F4F6;
-          --toolbar-border: #E5E7EB;
-          --toolbar-text: #374151;
-          --toolbar-text-light: #6B7280;
-          --toolbar-hover-bg: #EFF6FF;
-          --toolbar-hover-border: #BFDBFE;
-          --toolbar-active-ring: #3B82F6;
-          --toolbar-eraser-hover: #FEF2F2;
-          --toolbar-eraser-border: #FECACA;
-        }
-        .dark .annotation-toolbar {
-          --toolbar-bg: #1F2937;
-          --toolbar-border: #374151;
-          --toolbar-text: #D1D5DB;
-          --toolbar-text-light: #9CA3AF;
-          --toolbar-hover-bg: #1E3A8A;
-          --toolbar-hover-border: #3B82F6;
-          --toolbar-active-ring: #60A5FA;
-          --toolbar-eraser-hover: #7F1D1D;
-          --toolbar-eraser-border: #991B1B;
+          --toolbar-bg: var(--semi-color-bg-1);
+          --toolbar-border: var(--semi-color-border);
+          --toolbar-text: var(--semi-color-text-0);
+          --toolbar-text-light: var(--semi-color-text-2);
+          --toolbar-hover-bg: var(--semi-color-fill-0);
+          --toolbar-hover-border: var(--semi-color-border);
+          --toolbar-active-ring: var(--semi-color-primary);
+          --toolbar-eraser-hover: var(--semi-color-fill-2);
+          --toolbar-eraser-border: var(--semi-color-border);
         }
         .annotation-toolbar-btn {
           background: transparent;
@@ -82,6 +94,7 @@ const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZo
           background: var(--toolbar-hover-bg);
           border-color: var(--toolbar-active-ring);
           box-shadow: 0 0 0 2px var(--toolbar-active-ring);
+          color: var(--toolbar-active-ring);
         }
         .annotation-toolbar-btn.eraser:hover {
           background: var(--toolbar-eraser-hover);
@@ -120,20 +133,20 @@ const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZo
           boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
         }}
         role="toolbar"
-        aria-label="Annotation tools"
+        aria-label={t('annotation.tools.toolbarAria', 'Annotation tools')}
       >
         {/* Core Drawing Tools */}
         <div className="space-y-1">
           {drawingTools.map(({ key, icon: ToolIcon, label, aria }) => (
-            <Tooltip key={key} content={label} position="right">
-              <button
-                onClick={() => handleToolSelect(key)}
-                aria-label={aria}
-                className={`annotation-toolbar-btn ${activeTool === key ? 'active' : ''}`}
-              >
-                <ToolIcon className="annotation-toolbar-icon" />
-              </button>
-            </Tooltip>
+            <button
+              key={key}
+              onClick={() => handleToolSelect(key)}
+              aria-label={aria}
+              title={label}
+              className={`annotation-toolbar-btn ${activeTool === key ? 'active' : ''}`}
+            >
+              <ToolIcon className="annotation-toolbar-icon" />
+            </button>
           ))}
         </div>
 
@@ -146,46 +159,43 @@ const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZo
         {/* Utility Tools */}
         <div className="space-y-1 flex-1 flex flex-col justify-end">
           {utilityTools.map(({ key, icon: ToolIcon, label, aria }) => (
-            <Tooltip key={key} content={label} position="right">
-              <button
-                onClick={() => handleToolSelect(key)}
-                aria-label={aria}
-                className={`annotation-toolbar-btn ${key === 'eraser' ? 'eraser' : ''}`}
-              >
-                <ToolIcon className="annotation-toolbar-icon" />
-              </button>
-            </Tooltip>
+            <button
+              key={key}
+              onClick={() => handleToolSelect(key)}
+              aria-label={aria}
+              title={label}
+              className={`annotation-toolbar-btn ${key === 'eraser' ? 'eraser' : ''}`}
+            >
+              <ToolIcon className="annotation-toolbar-icon" />
+            </button>
           ))}
 
           {/* Zoom Controls (integrated at bottom, styled to match) */}
           <div className="space-y-1 mt-2">
-            <Tooltip content="Zoom In (+)" position="right">
-              <button
-                onClick={onZoomIn}
-                aria-label="Zoom In"
-                className="annotation-toolbar-btn zoom"
-              >
-                <IconPlus size={20} />
-              </button>
-            </Tooltip>
-            <Tooltip content="Zoom Out (-)" position="right">
-              <button
-                onClick={onZoomOut}
-                aria-label="Zoom Out"
-                className="annotation-toolbar-btn zoom"
-              >
-                <IconMinus size={20} />
-              </button>
-            </Tooltip>
-            <Tooltip content="Reset View (0)" position="right">
-              <button
-                onClick={onResetView}
-                aria-label="Reset View"
-                className="annotation-toolbar-btn zoom"
-              >
-                <IconRefresh size={20} />
-              </button>
-            </Tooltip>
+            <button
+              onClick={onZoomIn}
+              aria-label={t('annotation.canvas.zoomIn', 'Zoom In')}
+              title={`${t('annotation.canvas.zoomIn', 'Zoom In')} (+)`}
+              className="annotation-toolbar-btn zoom"
+            >
+              <IconPlus size={20} />
+            </button>
+            <button
+              onClick={onZoomOut}
+              aria-label={t('annotation.canvas.zoomOut', 'Zoom Out')}
+              title={`${t('annotation.canvas.zoomOut', 'Zoom Out')} (-)`}
+              className="annotation-toolbar-btn zoom"
+            >
+              <IconMinus size={20} />
+            </button>
+            <button
+              onClick={onResetView}
+              aria-label={t('annotation.canvas.reset', 'Reset View')}
+              title={`${t('annotation.canvas.resetViewTooltip', 'Reset View')} (0)`}
+              className="annotation-toolbar-btn zoom"
+            >
+              <IconRefresh size={20} />
+            </button>
             <div className="zoom-percentage">
               {zoom ? Math.round(zoom * 100) : 100}%
             </div>
