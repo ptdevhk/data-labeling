@@ -35,7 +35,8 @@
     "alwaysDark": "始终使用深色主题",
     "followSystem": "跟随系统主题设置",
     "skip": "跳过",
-    "assign": "分配标签"
+    "assign": "分配标签",
+    "active": "当前"
   },
   "nav": {
     "projects": "项目",
@@ -80,13 +81,46 @@
       "point": "点",
       "eraser": "橡皮擦",
       "undo": "撤销",
-      "redo": "重做"
+      "redo": "重做",
+      "toolbarAria": "标注工具",
+      "hints": {
+        "select": "选择并移动图形",
+        "rectangle": "绘制矩形",
+        "eraser": "擦除形状",
+        "undo": "撤销操作",
+        "redo": "重做操作"
+      }
     },
     "canvas": {
       "zoom": "缩放",
       "reset": "重置视图",
       "pan": "平移",
-      "fullscreen": "全屏"
+      "fullscreen": "全屏",
+      "zoomIn": "放大",
+      "zoomOut": "缩小",
+      "resetViewTooltip": "重置视图"
+    },
+    "page": {
+      "title": "标注 #{{id}}",
+      "imageSource": "图片来源：{{path}}"
+    },
+    "inspector": {
+      "title": "标注检查器",
+      "subtitle": {
+        "selected": "查看选中矩形的详细信息",
+        "empty": "选择一个矩形以查看其详情"
+      },
+      "emptyState": "绘制后，点击矩形或在下方列表中选择它以查看测量数据。",
+      "size": "尺寸",
+      "area": "面积",
+      "aspect": "纵横比",
+      "position": "位置"
+    },
+    "list": {
+      "title": "标注列表",
+      "total": "总数：{{count}}",
+      "empty": "在画布上绘制矩形以创建标注。",
+      "focus": "定位"
     },
     "labels": {
       "title": "标签",
@@ -98,7 +132,10 @@
       "assignLabel": "分配标签",
       "selectOrCreateLabel": "选择现有标签或创建新标签",
       "createNew": "创建新标签",
-      "labelName": "标签名称"
+      "labelName": "标签名称",
+      "unassigned": "未分配",
+      "annotationCount": "{{count}} 个标注",
+      "selectShape": "选择一个形状以编辑属性"
     }
   },
   "theme": {

@@ -5,12 +5,13 @@ import { useAnnotations } from '@/contexts/AnnotationContext';
 
 const LabelsPanel = () => {
   const { t } = useTranslation();
-  const { annotations } = useAnnotations();
-  const [labels, setLabels] = useState([
-    { id: 1, name: 'Defect1', color: '#3B82F6', count: 5 },
-    { id: 2, name: 'Defect2', color: '#10B981', count: 3 },
-    { id: 3, name: 'Defect3', color: '#EF4444', count: 2 },
-  ]);
+  const {
+    annotations,
+    labels,
+    addLabel,
+    activeLabelId,
+    setActiveLabelId,
+  } = useAnnotations();
 
   const totalAnnotations = annotations.length;
   const labelCounts = useMemo(() => {
@@ -26,13 +27,8 @@ const LabelsPanel = () => {
 
   const handleAddLabel = () => {
     if (newLabelName.trim()) {
-      const newLabel = {
-        id: labels.length + 1,
-        name: newLabelName,
-        color: newLabelColor,
-        count: 0,
-      };
-      setLabels([...labels, newLabel]);
+      const newLabel = addLabel({ name: newLabelName, color: newLabelColor });
+      setActiveLabelId(newLabel.id);
       setNewLabelName('');
       setShowAddLabel(false);
     }
@@ -42,18 +38,11 @@ const LabelsPanel = () => {
     <>
       <style>{`
         .labels-panel {
-          --panel-bg: #FFFFFF;
-          --panel-border: #E5E7EB;
-          --input-bg: #FFFFFF;
-          --input-border: #E5E7EB;
-          --button-bg: #F3F4F6;
-        }
-        .dark .labels-panel {
-          --panel-bg: #1F2937;
-          --panel-border: #374151;
-          --input-bg: #374151;
-          --input-border: #4B5563;
-          --button-bg: #374151;
+          --panel-bg: var(--semi-color-bg-1);
+          --panel-border: var(--semi-color-border);
+          --input-bg: var(--semi-color-bg-0);
+          --input-border: var(--semi-color-border);
+          --button-bg: var(--semi-color-fill-0);
         }
       `}</style>
       <div 
@@ -133,8 +122,8 @@ const LabelsPanel = () => {
               style={{
                 padding: '0.5rem 0.75rem',
                 borderRadius: '0.5rem',
-                background: '#3B82F6',
-                color: 'white',
+          background: 'var(--semi-color-primary)',
+          color: 'var(--semi-color-white)',
                 border: 'none',
                 cursor: 'pointer',
                 flex: 1
@@ -148,8 +137,8 @@ const LabelsPanel = () => {
               style={{
                 padding: '0.5rem 0.75rem',
                 borderRadius: '0.5rem',
-                background: '#D1D5DB',
-                border: 'none',
+              background: 'var(--semi-color-fill-1)',
+              border: 'none',
                 cursor: 'pointer',
                 flex: 1
               }}
@@ -175,10 +164,11 @@ const LabelsPanel = () => {
             style={{
               padding: '0.75rem',
               borderRadius: '0.5rem',
-              border: '2px solid transparent',
+              border: label.id === activeLabelId ? '2px solid #3B82F6' : '2px solid transparent',
               backgroundColor: `${label.color}20`,
               transition: 'border-color 0.15s ease'
             }}
+            onClick={() => setActiveLabelId(label.id)}
           >
             <div className="flex items-center" style={{ gap: '0.5rem', marginBottom: '0.5rem' }}>
               <div
@@ -190,10 +180,24 @@ const LabelsPanel = () => {
                 }}
               ></div>
               <span className="font-medium">{label.name}</span>
+              {label.id === activeLabelId && (
+                <span
+                  className="text-xs"
+                  style={{
+                    padding: '0.125rem 0.375rem',
+                    borderRadius: '0.375rem',
+                    backgroundColor: '#DBEAFE',
+                    color: '#1D4ED8',
+                    fontWeight: 500,
+                  }}
+                >
+                  {t('common.active', 'Active')}
+                </span>
+              )}
             </div>
             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400" style={{ gap: '0.5rem' }}>
               <Tag size={14} />
-              <span>{label.count} annotations</span>
+              <span>{t('annotation.labels.annotationCount', { count: label.count })}</span>
             </div>
           </div>
         ))}
@@ -208,7 +212,7 @@ const LabelsPanel = () => {
         }}
       >
         <h3 className="font-semibold" style={{ marginBottom: '0.5rem' }}>{t('annotation.labels.attributes')}</h3>
-        <p className="caption text-gray-500">Select a shape to edit attributes</p>
+        <p className="caption text-gray-500">{t('annotation.labels.selectShape')}</p>
       </div>
     </div>
     </>

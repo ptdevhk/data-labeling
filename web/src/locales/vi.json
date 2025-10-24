@@ -35,7 +35,8 @@
     "alwaysDark": "Luôn sử dụng giao diện tối",
     "followSystem": "Theo cài đặt hệ thống",
     "skip": "Bỏ qua",
-    "assign": "Gán nhãn"
+    "assign": "Gán nhãn",
+    "active": "Đang hoạt động"
   },
   "nav": {
     "projects": "Dự án",
@@ -80,13 +81,46 @@
       "point": "Điểm",
       "eraser": "Tẩy",
       "undo": "Hoàn tác",
-      "redo": "Làm lại"
+      "redo": "Làm lại",
+      "toolbarAria": "Công cụ chú thích",
+      "hints": {
+        "select": "Chọn và di chuyển hình",
+        "rectangle": "Vẽ hình chữ nhật",
+        "eraser": "Xóa hình",
+        "undo": "Hoàn tác thao tác",
+        "redo": "Làm lại thao tác"
+      }
     },
     "canvas": {
       "zoom": "Thu phóng",
       "reset": "Đặt lại",
       "pan": "Di chuyển",
-      "fullscreen": "Toàn màn hình"
+      "fullscreen": "Toàn màn hình",
+      "zoomIn": "Phóng to",
+      "zoomOut": "Thu nhỏ",
+      "resetViewTooltip": "Đặt lại góc nhìn"
+    },
+    "page": {
+      "title": "Chú thích #{{id}}",
+      "imageSource": "Nguồn ảnh: {{path}}"
+    },
+    "inspector": {
+      "title": "Trình kiểm tra chú thích",
+      "subtitle": {
+        "selected": "Chi tiết của hình chữ nhật đã chọn",
+        "empty": "Chọn một hình chữ nhật để xem chi tiết"
+      },
+      "emptyState": "Sau khi vẽ, bấm vào hình chữ nhật hoặc chọn trong danh sách bên dưới để xem số đo.",
+      "size": "Kích thước",
+      "area": "Diện tích",
+      "aspect": "Tỷ lệ",
+      "position": "Vị trí"
+    },
+    "list": {
+      "title": "Danh sách chú thích",
+      "total": "Tổng số: {{count}}",
+      "empty": "Vẽ hình chữ nhật trên canvas để tạo chú thích.",
+      "focus": "Định vị"
     },
     "labels": {
       "title": "Nhãn",
@@ -98,7 +132,10 @@
       "assignLabel": "Gán nhãn",
       "selectOrCreateLabel": "Chọn nhãn có sẵn hoặc tạo mới",
       "createNew": "Tạo mới",
-      "labelName": "Tên nhãn"
+      "labelName": "Tên nhãn",
+      "unassigned": "Chưa gán",
+      "annotationCount": "{{count}} chú thích",
+      "selectShape": "Chọn một hình để chỉnh sửa thuộc tính"
     }
   },
   "theme": {
