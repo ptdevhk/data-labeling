@@ -1,19 +1,9 @@
 name: Test Frontend
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - 'web/**'
-  #     - '.github/workflows/test-web.yml'
-
   pull_request:
     branches:
       - main
-    paths:
-      - 'web/**'
-      - '.github/workflows/test-web.yml'
 
   schedule:
     # Every sunday at 8:10 UTC
@@ -35,28 +25,47 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+      
+      # Check if frontend files changed
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'web/**'
+              - '.github/workflows/test-web.yml'
+      
+      # Skip if only backend changed
+      - name: Skip tests for backend-only changes
+        if: steps.filter.outputs.frontend != 'true'
+        run: echo "Only backend files changed, skipping frontend tests"
 
       - uses: actions/setup-node@v6
+        if: steps.filter.outputs.frontend == 'true'
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: Setup Bun
+        if: steps.filter.outputs.frontend == 'true'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Install Dependencies
+        if: steps.filter.outputs.frontend == 'true'
         working-directory: ./web
         run: |
           echo "Installing frontend dependencies..."
           bun install
 
       - name: Run Linter
+        if: steps.filter.outputs.frontend == 'true'
         run: |
           echo "Running frontend linter..."
           make lint-react
 
       - name: Build Frontend
+        if: steps.filter.outputs.frontend == 'true'
         working-directory: ./web
         run: |
           echo "Building frontend..."
