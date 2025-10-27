@@ -125,17 +125,28 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         },
       });
       rectShape.annotationId = annotation.id;
+
+      // Determine selectability based on current tool
+      const currentTool = activeToolRef.current;
+      const isSelectionTool = currentTool === 'select';
+      const shouldBeSelectable = isSelectionTool || currentTool === 'eraser';
+
       rectShape.set({
         name: annotation.id,
-        selectable: true,
-        evented: true,
-        hasControls: true,
-        hasBorders: true,
+        selectable: shouldBeSelectable,
+        evented: shouldBeSelectable,
+        hasControls: shouldBeSelectable,
+        hasBorders: shouldBeSelectable,
       });
       rectShape.setCoords();
       shapeRegistryRef.current.set(annotation.id, rectShape);
-      selectAnnotation(annotation.id);
-      canvas.setActiveObject(rectShape);
+
+      // Only select and activate if in select mode
+      if (isSelectionTool) {
+        selectAnnotation(annotation.id);
+        canvas.setActiveObject(rectShape);
+      }
+
       canvas.requestRenderAll();
       return;
     }
@@ -174,12 +185,18 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     });
 
     shape.annotationId = annotation.id;
+
+    // Determine selectability based on current tool
+    const currentTool = activeToolRef.current;
+    const isSelectionTool = currentTool === 'select';
+    const shouldBeSelectable = isSelectionTool || currentTool === 'eraser';
+
     shape.set({
       name: annotation.id,
-      selectable: true,
-      evented: true,
-      hasControls: true,
-      hasBorders: true,
+      selectable: shouldBeSelectable,
+      evented: shouldBeSelectable,
+      hasControls: shouldBeSelectable,
+      hasBorders: shouldBeSelectable,
       width: normalizedWidth,
       height: normalizedHeight,
       scaleX: 1,
@@ -190,8 +207,13 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     shape.setCoords();
     shapeRegistryRef.current.set(annotation.id, shape);
     setActiveLabelId(labelId);
-    selectAnnotation(annotation.id);
-    canvas.setActiveObject(shape);
+
+    // Only select and activate if in select mode
+    if (isSelectionTool) {
+      selectAnnotation(annotation.id);
+      canvas.setActiveObject(shape);
+    }
+
     canvas.requestRenderAll();
 
     setShowLabelDialog(false);
@@ -397,13 +419,17 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       isDrawingRef.current = true;
       startPointRef.current = { x: pointer.x, y: pointer.y };
 
+      // Get current label color or default to blue
+      const activeLabel = labels.find((label) => label.id === activeLabelId);
+      const strokeColor = activeLabel?.color ?? '#3B82F6';
+
       const rect = new Rect({
         left: pointer.x,
         top: pointer.y,
         width: 1,
         height: 1,
-        fill: 'rgba(59, 130, 246, 0.16)',
-        stroke: '#3B82F6',
+        fill: hexToRgba(strokeColor, 0.16),
+        stroke: strokeColor,
         strokeWidth: 2,
         selectable: false,
         evented: false,
@@ -472,7 +498,26 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       canvas.off('mouse:up', handleMouseUp);
       canvas.off('mouse:dblclick', handleDoubleClick);
     };
-  }, [clearSelection, finalizeRectangle, removeAnnotation, selectAnnotation]);
+  }, [activeLabelId, clearSelection, finalizeRectangle, labels, removeAnnotation, selectAnnotation]);
+
+  // Update drawing shape color when active label changes mid-draw
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) return;
+
+    // If currently drawing and label changes, update the drawing shape's color
+    if (isDrawingRef.current && drawingShapeRef.current) {
+      const activeLabel = labels.find((label) => label.id === activeLabelId);
+      const strokeColor = activeLabel?.color ?? '#3B82F6';
+
+      drawingShapeRef.current.set({
+        stroke: strokeColor,
+        fill: hexToRgba(strokeColor, 0.16),
+      });
+
+      canvas.requestRenderAll();
+    }
+  }, [activeLabelId, labels]);
 
   // Handle image loading separately
   useEffect(() => {
@@ -520,6 +565,10 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       }
     });
 
+    // Determine if objects should be selectable based on current tool
+    const isSelectionTool = activeTool === 'select';
+    const shouldBeSelectable = isSelectionTool || activeTool === 'eraser';
+
     annotations.forEach((annotation) => {
       if (annotation.type !== 'rectangle') {
         return;
@@ -534,8 +583,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
           fill: annotation.meta?.fill ?? 'rgba(59, 130, 246, 0.16)',
           stroke: annotation.meta?.stroke ?? '#3B82F6',
           strokeWidth: 2,
-          selectable: true,
-          evented: true,
+          selectable: shouldBeSelectable,
+          evented: shouldBeSelectable,
           originX: 'left',
           originY: 'top',
         });
@@ -547,7 +596,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     });
 
     canvas.requestRenderAll();
-  }, [annotations]);
+  }, [annotations, activeTool]);
 
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
@@ -596,6 +645,18 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       const isSelectionTool = activeTool === 'select';
       canvas.selection = isSelectionTool;
 
+      // Update all existing objects' selectability based on current tool
+      canvas.getObjects().forEach((obj) => {
+        if (obj.annotationId) {
+          // Objects should only be selectable in select or eraser mode
+          const shouldBeSelectable = isSelectionTool || activeTool === 'eraser';
+          obj.set({
+            selectable: shouldBeSelectable,
+            evented: shouldBeSelectable,
+          });
+        }
+      });
+
       if (isSelectionTool) {
         canvas.defaultCursor = 'default';
       } else if (activeTool === 'eraser') {
@@ -603,6 +664,13 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       } else {
         canvas.defaultCursor = 'crosshair';
       }
+
+      // Clear active object when switching away from select mode
+      if (!isSelectionTool) {
+        canvas.discardActiveObject();
+      }
+
+      canvas.requestRenderAll();
     }
   }, [activeTool]);
 
