@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { Button, Avatar } from '@douyinfe/semi-ui';
+import { Button, Avatar, Dropdown } from '@douyinfe/semi-ui';
 import {
   IconMoon,
   IconSun,
@@ -69,11 +68,6 @@ const Header = ({ onMobileMenuToggle }) => {
     },
   ];
 
-  const [openMenu, setOpenMenu] = useState(null);
-  const languageMenuRef = useRef(null);
-  const themeMenuRef = useRef(null);
-  const userMenuRef = useRef(null);
-
   const getCurrentThemeIcon = () => {
     if (resolvedTheme === 'dark') return <IconMoon size={18} />;
     if (resolvedTheme === 'light') return <IconSun size={18} />;
@@ -85,39 +79,6 @@ const Header = ({ onMobileMenuToggle }) => {
       setThemeMode(newTheme);
     }
   };
-
-  const toggleMenu = (menu) => {
-    setOpenMenu((current) => (current === menu ? null : menu));
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!openMenu) return;
-      const refsMap = {
-        language: languageMenuRef,
-        theme: themeMenuRef,
-        user: userMenuRef,
-      };
-      const activeRef = refsMap[openMenu];
-      if (activeRef?.current && !activeRef.current.contains(event.target)) {
-        setOpenMenu(null);
-      }
-    };
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setOpenMenu(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [openMenu]);
 
   return (
     <header className='text-semi-color-text-0 sticky top-0 z-50 transition-colors duration-300 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-lg'>
@@ -185,145 +146,111 @@ const Header = ({ onMobileMenuToggle }) => {
 
           <div className='flex items-center gap-2'>
             {/* Language Selector */}
-            <div className="relative" ref={languageMenuRef}>
+            <Dropdown
+              position="bottomRight"
+              render={
+                <Dropdown.Menu className='!bg-semi-color-bg-overlay !border-semi-color-border !shadow-lg !rounded-lg dark:!bg-gray-700 dark:!border-gray-600'>
+                  {languageOptions.map((option) => (
+                    <Dropdown.Item
+                      key={option.value}
+                      onClick={() => changeLanguage(option.value)}
+                      className={`!flex !items-center !gap-2 !px-3 !py-1.5 !text-sm !text-semi-color-text-0 dark:!text-gray-200 transition-colors ${
+                        i18n.language === option.value
+                          ? '!bg-semi-color-primary-light-default dark:!bg-blue-600 !font-semibold'
+                          : 'hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-600'
+                      }`}
+                    >
+                      <span>{option.label}</span>
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              }
+            >
               <Button
                 icon={<IconLanguage size={18} />}
                 theme="borderless"
                 type="tertiary"
                 className='!p-1.5 !text-current focus:!bg-semi-color-fill-1 dark:focus:!bg-gray-700 !rounded-full !bg-semi-color-fill-0 dark:!bg-semi-color-fill-1 hover:!bg-semi-color-fill-1 dark:hover:!bg-semi-color-fill-2 transition-colors'
                 aria-label={t('common.changeLanguage')}
-                aria-expanded={openMenu === 'language'}
-                aria-haspopup="menu"
-                onClick={() => toggleMenu('language')}
               />
-              {openMenu === 'language' && (
-                <div
-                  role="menu"
-                  className="absolute right-0 mt-2 w-44 rounded-lg border border-[var(--semi-color-border)] bg-[var(--semi-color-bg-overlay)] shadow-lg dark:bg-gray-700 dark:border-gray-600"
-                >
-                  {languageOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => {
-                        changeLanguage(option.value);
-                        setOpenMenu(null);
-                      }}
-                      className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm transition-colors ${
-                        i18n.language === option.value
-                          ? 'bg-[var(--semi-color-primary-light-default)] dark:bg-blue-600 font-semibold text-[var(--semi-color-text-0)] dark:text-gray-200'
-                          : 'text-[var(--semi-color-text-0)] dark:text-gray-200 hover:bg-[var(--semi-color-fill-1)] dark:hover:bg-gray-600'
-                      }`}
-                      role="menuitem"
-                    >
-                      <span>{option.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            </Dropdown>
 
             {/* Theme Toggle */}
-            <div className="relative" ref={themeMenuRef}>
+            <Dropdown
+              position="bottomRight"
+              render={
+                <Dropdown.Menu className='!bg-semi-color-bg-overlay !border-semi-color-border !shadow-lg !rounded-lg dark:!bg-gray-700 dark:!border-gray-600'>
+                  {themeOptions.map((option) => (
+                    <Dropdown.Item
+                      key={option.key}
+                      onClick={() => handleThemeModeChange(option.key)}
+                      className={`!flex !items-start !gap-3 !px-3 !py-1.5 !text-sm transition-colors ${
+                        theme === option.key
+                          ? '!bg-semi-color-primary-light-default dark:!bg-blue-600 !font-semibold !text-semi-color-text-0 dark:!text-gray-200'
+                          : '!text-semi-color-text-0 dark:!text-gray-200 hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-600'
+                      }`}
+                    >
+                      <span className="mt-0.5">{option.icon}</span>
+                      <span className="flex flex-col text-left">
+                        <span className='text-sm'>{option.label}</span>
+                        <span className='text-xs text-semi-color-text-2 dark:text-gray-400'>
+                          {option.description}
+                        </span>
+                      </span>
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              }
+            >
               <Button
                 icon={getCurrentThemeIcon()}
                 theme="borderless"
                 type="tertiary"
                 className='!p-1.5 !text-current focus:!bg-semi-color-fill-1 dark:focus:!bg-gray-700 !rounded-full !bg-semi-color-fill-0 dark:!bg-semi-color-fill-1 hover:!bg-semi-color-fill-1 dark:hover:!bg-semi-color-fill-2 transition-colors'
                 aria-label={t('common.toggleTheme')}
-                aria-expanded={openMenu === 'theme'}
-                aria-haspopup="menu"
-                onClick={() => toggleMenu('theme')}
               />
-              {openMenu === 'theme' && (
-                <div
-                  role="menu"
-                  className="absolute right-0 mt-2 w-56 rounded-lg border border-[var(--semi-color-border)] bg-[var(--semi-color-bg-overlay)] shadow-lg dark:bg-gray-700 dark:border-gray-600"
-                >
-                  {themeOptions.map((option) => (
-                    <button
-                      key={option.key}
-                      type="button"
-                      onClick={() => {
-                        handleThemeModeChange(option.key);
-                        setOpenMenu(null);
-                      }}
-                      className={`flex w-full items-start gap-3 px-3 py-1.5 transition-colors ${
-                        theme === option.key
-                          ? 'bg-[var(--semi-color-primary-light-default)] dark:bg-blue-600 font-semibold text-[var(--semi-color-text-0)] dark:text-gray-200'
-                          : 'text-[var(--semi-color-text-0)] dark:text-gray-200 hover:bg-[var(--semi-color-fill-1)] dark:hover:bg-gray-600'
-                      }`}
-                      role="menuitem"
-                    >
-                      <span className="mt-0.5">{option.icon}</span>
-                      <span className="flex flex-col text-left">
-                        <span className='text-sm'>{option.label}</span>
-                        <span className='text-xs text-[var(--semi-color-text-2)] dark:text-gray-400'>
-                          {option.description}
-                        </span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            </Dropdown>
 
             {/* User Dropdown */}
-            <div className="relative" ref={userMenuRef}>
+            <Dropdown
+              position="bottomRight"
+              render={
+                <Dropdown.Menu className='!bg-semi-color-bg-overlay !border-semi-color-border !shadow-lg !rounded-lg dark:!bg-gray-700 dark:!border-gray-600'>
+                  <Dropdown.Item
+                    onClick={() => { window.location.href = '/console/settings'; }}
+                    className='!px-3 !py-1.5 !text-sm !text-semi-color-text-0 hover:!bg-semi-color-fill-1 dark:!text-gray-200 dark:hover:!bg-blue-500 dark:hover:!text-white transition-colors'
+                  >
+                    {t('common.profile')}
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    onClick={() => { window.location.href = '/console/settings'; }}
+                    className='!px-3 !py-1.5 !text-sm !text-semi-color-text-0 hover:!bg-semi-color-fill-1 dark:!text-gray-200 dark:hover:!bg-blue-500 dark:hover:!text-white transition-colors'
+                  >
+                    {t('common.settings')}
+                  </Dropdown.Item>
+                  <Dropdown.Divider className='!my-1 !bg-semi-color-border dark:!bg-gray-600' />
+                  <Dropdown.Item
+                    onClick={() => {
+                      localStorage.clear();
+                      window.location.href = '/';
+                    }}
+                    className='!px-3 !py-1.5 !text-sm !text-semi-color-text-0 hover:!bg-semi-color-fill-1 dark:!text-gray-200 dark:hover:!bg-red-500 dark:hover:!text-white transition-colors'
+                  >
+                    {t('common.logout')}
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              }
+            >
               <Button
                 theme='borderless'
                 type='tertiary'
                 className='flex items-center gap-1.5 !p-1 !rounded-full hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-700 !bg-semi-color-fill-0 dark:!bg-semi-color-fill-1 dark:hover:!bg-semi-color-fill-2 transition-colors'
-                aria-haspopup="menu"
-                aria-expanded={openMenu === 'user'}
-                onClick={() => toggleMenu('user')}
               >
                 <Avatar color="blue" size="extra-small">
                   U
                 </Avatar>
               </Button>
-              {openMenu === 'user' && (
-                <div
-                  role="menu"
-                  className="absolute right-0 mt-2 w-48 rounded-lg border border-[var(--semi-color-border)] bg-[var(--semi-color-bg-overlay)] shadow-lg dark:bg-gray-700 dark:border-gray-600"
-                >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      window.location.href = '/console/settings';
-                      setOpenMenu(null);
-                    }}
-                    className='w-full px-3 py-1.5 text-left text-sm text-[var(--semi-color-text-0)] hover:bg-[var(--semi-color-fill-1)] dark:text-gray-200 dark:hover:bg-blue-500 dark:hover:text-white transition-colors'
-                    role="menuitem"
-                  >
-                    {t('common.profile')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      window.location.href = '/console/settings';
-                      setOpenMenu(null);
-                    }}
-                    className='w-full px-3 py-1.5 text-left text-sm text-[var(--semi-color-text-0)] hover:bg-[var(--semi-color-fill-1)] dark:text-gray-200 dark:hover:bg-blue-500 dark:hover:text-white transition-colors'
-                    role="menuitem"
-                  >
-                    {t('common.settings')}
-                  </button>
-                  <div className='my-1 h-px bg-[var(--semi-color-border)] dark:bg-gray-600' />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      localStorage.clear();
-                      window.location.href = '/';
-                    }}
-                    className='w-full px-3 py-1.5 text-left text-sm text-[var(--semi-color-text-0)] hover:bg-[var(--semi-color-fill-1)] dark:text-gray-200 dark:hover:bg-red-500 dark:hover:text-white transition-colors'
-                    role="menuitem"
-                  >
-                    {t('common.logout')}
-                  </button>
-                </div>
-              )}
-            </div>
+            </Dropdown>
           </div>
         </div>
       </div>
