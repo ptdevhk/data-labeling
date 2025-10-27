@@ -70,8 +70,8 @@ const Annotation = () => {
 
   return (
     <AnnotationProvider>
-      <div className="h-full flex flex-col" style={{ minWidth: '1024px', backgroundColor: 'var(--semi-color-bg-0)' }}>
-        <div className="flex flex-1" style={{ padding: '1.5rem', backgroundColor: 'var(--semi-color-bg-0)' }}>
+      <div className="flex flex-col h-full" style={{ minWidth: '1024px', backgroundColor: 'var(--semi-color-bg-0)', overflow: 'hidden' }}>
+        <div className="flex flex-1" style={{ padding: '1.5rem', backgroundColor: 'var(--semi-color-bg-0)', minHeight: 0 }}>
           <div
             className="flex-1 flex overflow-hidden"
             style={{
@@ -80,6 +80,7 @@ const Annotation = () => {
               backgroundColor: 'var(--semi-color-bg-1)',
               boxShadow: 'var(--semi-shadow-elevated)',
               flexDirection: 'column',
+              minHeight: 0,
             }}
           >
             <header
@@ -128,12 +129,12 @@ const Annotation = () => {
               </div>
             </header>
 
-            <div className="flex-1 flex overflow-hidden">
-              <aside style={{ width: '260px', minWidth: '240px', borderRight: '1px solid var(--semi-color-border)' }}>
+            <div className="flex-1 flex overflow-hidden" style={{ minHeight: 0 }}>
+              <aside style={{ width: '260px', minWidth: '240px', height: '100%', borderRight: '1px solid var(--semi-color-border)', overflow: 'hidden' }}>
                 <LabelsPanel />
               </aside>
 
-              <div className="flex-1 flex overflow-hidden" style={{ padding: '1rem', gap: '1rem' }}>
+              <div className="flex-1 flex overflow-hidden" style={{ padding: '1rem', gap: '1rem', minHeight: 0 }}>
                 <div style={{ width: '72px', flexShrink: 0 }}>
                   <AnnotationToolsToolbar
                     activeTool={activeTool}
@@ -151,6 +152,7 @@ const Annotation = () => {
                     borderRadius: '0.75rem',
                     border: '1px solid var(--semi-color-border)',
                     backgroundColor: 'var(--semi-color-bg-0)',
+                    minHeight: 0,
                   }}
                 >
                   <AnnotationCanvas
@@ -161,7 +163,7 @@ const Annotation = () => {
                     imagePath={imagePath}
                   />
                 </div>
-                <aside style={{ width: '300px', minWidth: '280px', borderLeft: '1px solid var(--semi-color-border)' }}>
+                <aside style={{ width: '300px', minWidth: '280px', height: '100%', borderLeft: '1px solid var(--semi-color-border)', overflow: 'hidden' }}>
                   <AnnotationListPanel />
                 </aside>
               </div>

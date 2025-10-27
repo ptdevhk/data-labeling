@@ -101,7 +101,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       const strokeColor = activeLabel?.color ?? '#3B82F6';
       rectShape.set({
         stroke: strokeColor,
-        fill: hexToRgba(strokeColor, 0.16),
+        fill: 'transparent', // No fill by default
         width: normalizedWidth,
         height: normalizedHeight,
         scaleX: 1,
@@ -166,7 +166,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
 
     shape.set({
       stroke: strokeColor,
-      fill: hexToRgba(strokeColor, 0.16),
+      fill: 'transparent', // No fill by default
     });
 
     const annotation = addAnnotation({
@@ -378,6 +378,45 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clearSelection, selectAnnotation, updateAnnotation]);
 
+  // Handle mouse hover events for fill on hover in select mode
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) return undefined;
+
+    const handleMouseOver = (e) => {
+      const target = e.target;
+      if (target && target.annotationId && activeTool === 'select') {
+        const annotation = annotations.find((a) => a.id === target.annotationId);
+        if (annotation) {
+          const label = labels.find((item) => item.id === annotation.labelId);
+          const baseColor = label?.color ?? '#3B82F6';
+          target.set({ fill: hexToRgba(baseColor, 0.16) });
+          canvas.requestRenderAll();
+        }
+      }
+    };
+
+    const handleMouseOut = (e) => {
+      const target = e.target;
+      if (target && target.annotationId) {
+        // Don't remove fill if this is the active annotation
+        const isActive = target.annotationId === activeAnnotationId;
+        if (!isActive) {
+          target.set({ fill: 'transparent' });
+          canvas.requestRenderAll();
+        }
+      }
+    };
+
+    canvas.on('mouse:over', handleMouseOver);
+    canvas.on('mouse:out', handleMouseOut);
+
+    return () => {
+      canvas.off('mouse:over', handleMouseOver);
+      canvas.off('mouse:out', handleMouseOut);
+    };
+  }, [activeTool, activeAnnotationId, annotations, labels]);
+
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) {
@@ -542,8 +581,10 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         canvas.backgroundImage = img;
         backgroundImageRef.current = img;
 
-        // Initial sizing
-        resizeBackgroundImage(canvas);
+        // Initial sizing - use requestAnimationFrame to ensure layout is stable
+        requestAnimationFrame(() => {
+          resizeBackgroundImage(canvas);
+        });
       })
       .catch((err) => {
         console.error('Error loading image:', err);
@@ -580,7 +621,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
           top: annotation.coordinates.y,
           width: annotation.coordinates.width,
           height: annotation.coordinates.height,
-          fill: annotation.meta?.fill ?? 'rgba(59, 130, 246, 0.16)',
+          fill: 'transparent', // No fill by default
           stroke: annotation.meta?.stroke ?? '#3B82F6',
           strokeWidth: 2,
           selectable: shouldBeSelectable,
@@ -617,7 +658,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       shape.set({
         stroke: baseColor,
         strokeWidth: isActive ? 3 : 2,
-        fill: isActive ? hexToRgba(baseColor, 0.24) : hexToRgba(baseColor, 0.16),
+        fill: isActive ? hexToRgba(baseColor, 0.24) : 'transparent', // Fill only when active
         opacity: 1,
       });
 

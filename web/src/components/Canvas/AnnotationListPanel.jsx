@@ -55,6 +55,7 @@ const AnnotationListPanel = () => {
           padding: '1rem',
           borderRadius: '0.5rem',
           boxShadow: 'var(--semi-shadow-elevated)',
+          overflow: 'hidden'
         }}
       >
       <div className="flex flex-col gap-2" style={{ marginBottom: '1rem' }}>
@@ -167,7 +168,7 @@ const AnnotationListPanel = () => {
         </span>
       </div>
 
-      <div className="flex flex-col gap-2 overflow-auto" style={{ flex: 1 }}>
+      <div className="flex flex-col gap-2 overflow-y-auto" style={{ flex: 1, minHeight: 0 }}>
         {annotations.length === 0 && (
           <div
             className="text-sm text-gray-500"

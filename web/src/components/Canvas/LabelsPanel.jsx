@@ -52,7 +52,8 @@ const LabelsPanel = () => {
           background: 'var(--panel-bg)',
           borderLeft: '1px solid var(--panel-border)',
           borderRadius: '0.5rem',
-          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+          overflow: 'hidden'
         }}
       >
       <div className="flex items-center justify-between" style={{ marginBottom: '1rem' }}>
@@ -156,7 +157,7 @@ const LabelsPanel = () => {
         </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <div className="flex-1 overflow-y-auto" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minHeight: 0 }}>
         {labelCounts.map((label) => (
           <div
             key={label.id}
