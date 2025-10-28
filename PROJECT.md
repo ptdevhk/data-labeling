@@ -218,6 +218,22 @@ Focus on a functional MVP: Standalone React SPA supporting manual labeling with 
   - Move and edit the selected polygons: Highlight active polygon with semi-transparent fill, allow dragging the entire shape, and expose vertex handles for precise adjustments and arrow-key nudges.
   - Eraser/Undo/Redo: Visual undo stack preview; max 50 actions.
   - **Zoom follows window width**: Automatic canvas scaling that dynamically adjusts the zoom level to fit the image width to the viewport width. When enabled, the canvas automatically recalculates the scale factor on window resize events by dividing the container width by the image width (`scale = containerWidth / imageWidth`). The zoom mode toggles between `FIT_WINDOW` (fit entire image), `FIT_WIDTH` (fit width only), and `MANUAL_ZOOM` (user-controlled). The `resizeEvent` handler triggers `adjustScale()` to recompute and apply the new zoom percentage, persisting the current mode per file. This behavior mimics AnyLabeling's `set_fit_width()` and `scale_fit_width()` methods, providing seamless responsiveness without manual zoom adjustments.
+  - **Canvas Scrolling** (✅ Implemented - 2025-10-28): Dynamic canvas resizing enables proper scrolling when zoomed images exceed viewport dimensions. The implementation ensures the canvas element itself grows/shrinks based on zoom level, rather than relying solely on Fabric.js viewport transforms:
+    - **Dynamic Canvas Dimensions**: Canvas element size (`<canvas width/height>`) automatically adjusts when zoom changes. For example, at 100% zoom on a 1635×1280px image, canvas becomes 1635×1280px; at 200% zoom, it expands to 3270×2560px, triggering native browser scrollbars.
+    - **Container Hierarchy**: Canvas wrapper uses `display: inline-block` with `minWidth/minHeight: 100%` to expand with canvas content while remaining centered. Parent container has `overflow: auto` to enable scrolling when canvas exceeds viewport.
+    - **Zoom Integration**: Three zoom functions dynamically resize canvas:
+      - `setZoom(level)`: Calculates new dimensions as `Math.round(imageWidth × level)` and applies via `canvas.setDimensions()`, then updates Fabric zoom with `canvas.setZoom(level)`.
+      - `resetToCenter()`: Resets canvas to image natural size (100% zoom) with `canvas.setDimensions({ width: img.width, height: img.height })`.
+      - `adjustScale()` (for FIT_WIDTH): Computes scale as `containerWidth / imageWidth`, resizes canvas accordingly, and updates zoom level.
+    - **FIT_WIDTH Toggle Fix**: Implements retry mechanism using `requestAnimationFrame` to handle timing issues when `backgroundImageRef` becomes temporarily unavailable after mode transitions. Retries up to 10 times until refs are ready.
+    - **Container Reference Correction**: Uses `scrollContainer = parent.parentElement` instead of immediate parent (inline-block wrapper) to get actual viewport width for accurate FIT_WIDTH calculations.
+    - **Technical Details**:
+      - Canvas wrapper: `<div style="display: inline-block; minWidth: 100%; minHeight: 100%">`
+      - Scrollable container: `<div style="overflow: auto; flex: 1">`
+      - Pan functionality works via select tool when canvas exceeds viewport
+      - Annotations persist correctly during all zoom/scroll operations
+      - ResizeObserver triggers FIT_WIDTH recalculation on window resize
+    - **User Experience**: Users can zoom in to 200-300% for precise annotation, scroll freely using scrollbars or trackpad gestures, and toggle FIT_WIDTH mode seamlessly. The canvas behaves like a native scrollable document, providing intuitive navigation without custom pan controls.
 - **Labels**: Dynamic class dropdown; per-shape attributes (e.g., confidence slider 0-100%); multi-select for batch labeling.
 - **LLM Placeholder**: Grayed-out "Assist" button linking to future sidebar chat.
 
