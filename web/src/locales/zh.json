@@ -98,7 +98,9 @@
       "fullscreen": "全屏",
       "zoomIn": "放大",
       "zoomOut": "缩小",
-      "resetViewTooltip": "重置视图"
+      "resetViewTooltip": "重置视图",
+      "fitWidth": "适应宽度",
+      "fitWidthTooltip": "切换缩放跟随窗口宽度"
     },
     "page": {
       "title": "标注 #{{id}}",

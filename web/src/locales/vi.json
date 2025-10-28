@@ -98,7 +98,9 @@
       "fullscreen": "Toàn màn hình",
       "zoomIn": "Phóng to",
       "zoomOut": "Thu nhỏ",
-      "resetViewTooltip": "Đặt lại góc nhìn"
+      "resetViewTooltip": "Đặt lại góc nhìn",
+      "fitWidth": "Vừa chiều rộng",
+      "fitWidthTooltip": "Bật/tắt thu phóng theo chiều rộng cửa sổ"
     },
     "page": {
       "title": "Chú thích #{{id}}",

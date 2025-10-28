@@ -98,7 +98,9 @@
       "fullscreen": "Fullscreen",
       "zoomIn": "Zoom In",
       "zoomOut": "Zoom Out",
-      "resetViewTooltip": "Reset View"
+      "resetViewTooltip": "Reset View",
+      "fitWidth": "Fit Width",
+      "fitWidthTooltip": "Toggle zoom follows window width"
     },
     "page": {
       "title": "Annotation #{{id}}",

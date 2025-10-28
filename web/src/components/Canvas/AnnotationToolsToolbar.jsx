@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Tooltip } from '@douyinfe/semi-ui';
 import { IconPlus, IconMinus, IconRefresh } from '@douyinfe/semi-icons';
 import {
   Square,
@@ -139,15 +140,15 @@ const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, zoomMode, onZo
         {/* Core Drawing Tools */}
         <div className="space-y-1">
           {drawingTools.map(({ key, icon: ToolIcon, label, aria }) => (
-            <button
-              key={key}
-              onClick={() => handleToolSelect(key)}
-              aria-label={aria}
-              title={label}
-              className={`annotation-toolbar-btn ${activeTool === key ? 'active' : ''}`}
-            >
-              <ToolIcon className="annotation-toolbar-icon" />
-            </button>
+            <Tooltip key={key} content={label} position="right">
+              <button
+                onClick={() => handleToolSelect(key)}
+                aria-label={aria}
+                className={`annotation-toolbar-btn ${activeTool === key ? 'active' : ''}`}
+              >
+                <ToolIcon className="annotation-toolbar-icon" />
+              </button>
+            </Tooltip>
           ))}
         </div>
 
@@ -160,51 +161,55 @@ const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, zoomMode, onZo
         {/* Utility Tools */}
         <div className="space-y-1 flex-1 flex flex-col justify-end">
           {utilityTools.map(({ key, icon: ToolIcon, label, aria }) => (
-            <button
-              key={key}
-              onClick={() => handleToolSelect(key)}
-              aria-label={aria}
-              title={label}
-              className={`annotation-toolbar-btn ${key === 'eraser' ? 'eraser' : ''}`}
-            >
-              <ToolIcon className="annotation-toolbar-icon" />
-            </button>
+            <Tooltip key={key} content={label} position="right">
+              <button
+                onClick={() => handleToolSelect(key)}
+                aria-label={aria}
+                className={`annotation-toolbar-btn ${key === 'eraser' ? 'eraser' : ''}`}
+              >
+                <ToolIcon className="annotation-toolbar-icon" />
+              </button>
+            </Tooltip>
           ))}
 
           {/* Zoom Controls (integrated at bottom, styled to match) */}
           <div className="space-y-1 mt-2">
-            <button
-              onClick={onToggleFitWidth}
-              aria-label={t('annotation.canvas.fitWidth', 'Fit Width')}
-              title={t('annotation.canvas.fitWidthTooltip', 'Toggle zoom follows window width')}
-              className={`annotation-toolbar-btn zoom ${zoomMode === 'FIT_WIDTH' ? 'active' : ''}`}
-            >
-              <Maximize2 size={20} />
-            </button>
-            <button
-              onClick={onZoomIn}
-              aria-label={t('annotation.canvas.zoomIn', 'Zoom In')}
-              title={`${t('annotation.canvas.zoomIn', 'Zoom In')} (+)`}
-              className="annotation-toolbar-btn zoom"
-            >
-              <IconPlus size={20} />
-            </button>
-            <button
-              onClick={onZoomOut}
-              aria-label={t('annotation.canvas.zoomOut', 'Zoom Out')}
-              title={`${t('annotation.canvas.zoomOut', 'Zoom Out')} (-)`}
-              className="annotation-toolbar-btn zoom"
-            >
-              <IconMinus size={20} />
-            </button>
-            <button
-              onClick={onResetView}
-              aria-label={t('annotation.canvas.reset', 'Reset View')}
-              title={`${t('annotation.canvas.resetViewTooltip', 'Reset View')} (0)`}
-              className="annotation-toolbar-btn zoom"
-            >
-              <IconRefresh size={20} />
-            </button>
+            <Tooltip content={t('annotation.canvas.fitWidthTooltip', 'Toggle zoom follows window width')} position="right">
+              <button
+                onClick={onToggleFitWidth}
+                aria-label={t('annotation.canvas.fitWidth', 'Fit Width')}
+                className={`annotation-toolbar-btn zoom ${zoomMode === 'FIT_WIDTH' ? 'active' : ''}`}
+              >
+                <Maximize2 size={20} />
+              </button>
+            </Tooltip>
+            <Tooltip content={`${t('annotation.canvas.zoomIn', 'Zoom In')} (+)`} position="right">
+              <button
+                onClick={onZoomIn}
+                aria-label={t('annotation.canvas.zoomIn', 'Zoom In')}
+                className="annotation-toolbar-btn zoom"
+              >
+                <IconPlus size={20} />
+              </button>
+            </Tooltip>
+            <Tooltip content={`${t('annotation.canvas.zoomOut', 'Zoom Out')} (-)`} position="right">
+              <button
+                onClick={onZoomOut}
+                aria-label={t('annotation.canvas.zoomOut', 'Zoom Out')}
+                className="annotation-toolbar-btn zoom"
+              >
+                <IconMinus size={20} />
+              </button>
+            </Tooltip>
+            <Tooltip content={`${t('annotation.canvas.resetViewTooltip', 'Reset View')} (0)`} position="right">
+              <button
+                onClick={onResetView}
+                aria-label={t('annotation.canvas.reset', 'Reset View')}
+                className="annotation-toolbar-btn zoom"
+              >
+                <IconRefresh size={20} />
+              </button>
+            </Tooltip>
             <div className="zoom-percentage">
               {zoom ? Math.round(zoom * 100) : 100}%
             </div>

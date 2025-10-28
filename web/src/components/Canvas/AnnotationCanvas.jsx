@@ -726,7 +726,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         console.error('Image path:', imagePath);
         console.error('Error details:', err.message, err.stack);
       });
-  }, [imagePath, zoomMode]);
+  }, [imagePath, zoomMode, parentCanvasRef]);
 
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
@@ -831,6 +831,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
           obj.set({
             selectable: shouldBeSelectable,
             evented: shouldBeSelectable,
+            hasControls: shouldBeSelectable,
+            hasBorders: shouldBeSelectable,
           });
         }
       });
