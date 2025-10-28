@@ -314,8 +314,6 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
   const centerBackgroundImage = (canvas) => {
     if (backgroundImageRef.current && canvas) {
       const img = backgroundImageRef.current;
-      const imgWidth = img.width;
-      const imgHeight = img.height;
 
       // Always keep image at 1:1 scale
       // Position at origin (0, 0) so canvas zoom handles the display
