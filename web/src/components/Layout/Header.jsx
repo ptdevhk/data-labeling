@@ -42,9 +42,9 @@ const Header = ({ onMobileMenuToggle }) => {
   };
 
   const languageOptions = [
+    { value: 'zh', label: '中文' },
     { value: 'en', label: 'English' },
     { value: 'vi', label: 'Tiếng Việt' },
-    { value: 'zh', label: '中文' },
   ];
 
   const themeOptions = [
