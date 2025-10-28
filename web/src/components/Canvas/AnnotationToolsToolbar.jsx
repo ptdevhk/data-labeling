@@ -5,11 +5,12 @@ import {
   Eraser,
   Undo,
   Redo,
-  MousePointer
+  MousePointer,
+  Maximize2
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZoomOut, onResetView }) => {
+const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, zoomMode, onZoomIn, onZoomOut, onResetView, onToggleFitWidth }) => {
   const { t } = useTranslation();
 
   const drawingTools = useMemo(() => ([
@@ -172,6 +173,14 @@ const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZo
 
           {/* Zoom Controls (integrated at bottom, styled to match) */}
           <div className="space-y-1 mt-2">
+            <button
+              onClick={onToggleFitWidth}
+              aria-label={t('annotation.canvas.fitWidth', 'Fit Width')}
+              title={t('annotation.canvas.fitWidthTooltip', 'Toggle zoom follows window width')}
+              className={`annotation-toolbar-btn zoom ${zoomMode === 'FIT_WIDTH' ? 'active' : ''}`}
+            >
+              <Maximize2 size={20} />
+            </button>
             <button
               onClick={onZoomIn}
               aria-label={t('annotation.canvas.zoomIn', 'Zoom In')}

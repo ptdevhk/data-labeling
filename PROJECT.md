@@ -217,6 +217,7 @@ Focus on a functional MVP: Standalone React SPA supporting manual labeling with 
   - Rectangle/Polygon/Circle/Line/Point: Intuitive drawing modes with snap-to-grid option.
   - Move and edit the selected polygons: Highlight active polygon with semi-transparent fill, allow dragging the entire shape, and expose vertex handles for precise adjustments and arrow-key nudges.
   - Eraser/Undo/Redo: Visual undo stack preview; max 50 actions.
+  - **Zoom follows window width**: Automatic canvas scaling that dynamically adjusts the zoom level to fit the image width to the viewport width. When enabled, the canvas automatically recalculates the scale factor on window resize events by dividing the container width by the image width (`scale = containerWidth / imageWidth`). The zoom mode toggles between `FIT_WINDOW` (fit entire image), `FIT_WIDTH` (fit width only), and `MANUAL_ZOOM` (user-controlled). The `resizeEvent` handler triggers `adjustScale()` to recompute and apply the new zoom percentage, persisting the current mode per file. This behavior mimics AnyLabeling's `set_fit_width()` and `scale_fit_width()` methods, providing seamless responsiveness without manual zoom adjustments.
 - **Labels**: Dynamic class dropdown; per-shape attributes (e.g., confidence slider 0-100%); multi-select for batch labeling.
 - **LLM Placeholder**: Grayed-out "Assist" button linking to future sidebar chat.
 

@@ -12,12 +12,14 @@ const Annotation = () => {
   const { t } = useTranslation();
   const [activeTool, setActiveTool] = useState('select');
   const [zoom, setZoom] = useState(1);
+  const [zoomMode, setZoomMode] = useState('FIT_WIDTH'); // FIT_WINDOW, FIT_WIDTH, MANUAL_ZOOM
   const canvasRef = useRef(null);
 
   // Map project ID to sample images
   const imagePath = `/samples/image_${String(id).padStart(3, '0')}.jpg`;
 
   const handleZoomIn = () => {
+    setZoomMode('MANUAL_ZOOM'); // Switch to manual mode when user zooms
     const newZoom = Math.min(zoom + 0.1, 3);
     setZoom(newZoom);
     if (canvasRef.current) {
@@ -26,6 +28,7 @@ const Annotation = () => {
   };
 
   const handleZoomOut = () => {
+    setZoomMode('MANUAL_ZOOM'); // Switch to manual mode when user zooms
     const newZoom = Math.max(zoom - 0.1, 0.5);
     setZoom(newZoom);
     if (canvasRef.current) {
@@ -34,9 +37,27 @@ const Annotation = () => {
   };
 
   const handleResetView = () => {
+    setZoomMode('MANUAL_ZOOM');
     setZoom(1);
     if (canvasRef.current) {
       canvasRef.current.resetView();
+    }
+  };
+
+  const handleToggleFitWidth = () => {
+    if (zoomMode === 'FIT_WIDTH') {
+      // Switch to MANUAL mode with 100% zoom and centered image
+      setZoomMode('MANUAL_ZOOM');
+      setZoom(1);
+      if (canvasRef.current) {
+        canvasRef.current.resetToCenter();
+      }
+    } else {
+      // Switch to FIT_WIDTH mode
+      setZoomMode('FIT_WIDTH');
+      if (canvasRef.current) {
+        canvasRef.current.adjustScale();
+      }
     }
   };
 
@@ -140,9 +161,11 @@ const Annotation = () => {
                     activeTool={activeTool}
                     onToolChange={handleToolChange}
                     zoom={zoom}
+                    zoomMode={zoomMode}
                     onZoomIn={handleZoomIn}
                     onZoomOut={handleZoomOut}
                     onResetView={handleResetView}
+                    onToggleFitWidth={handleToggleFitWidth}
                   />
                 </div>
                 <div
@@ -160,6 +183,7 @@ const Annotation = () => {
                     canvasRef={canvasRef}
                     zoom={zoom}
                     setZoom={setZoom}
+                    zoomMode={zoomMode}
                     imagePath={imagePath}
                   />
                 </div>

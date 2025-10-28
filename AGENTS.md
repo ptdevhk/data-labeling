@@ -182,6 +182,46 @@ cd web && bun add <pkg>           # Add frontend dep
 - **Tailwind CSS 3.4.18** (integrated with Semi Design via CSS layers)
 - i18next + react-i18next (i18n)
 
+**Annotation Canvas Zoom Architecture** (Updated 2025-10-28):
+
+The annotation page implements a dual-zoom system inspired by AnyLabeling:
+
+**Two Zoom Modes:**
+1. **FIT_WIDTH** (Default ON):
+   - Image scales to fit container width automatically
+   - Auto-adjusts on window resize via ResizeObserver
+   - Formula: `canvasZoom = (containerWidth - 2) / imageWidth`
+   - Background image: Always at 1:1 scale (scaleX: 1, scaleY: 1)
+   - Zoom handled by: Fabric canvas zoom property
+   - Toggle button: Active/highlighted state
+
+2. **MANUAL_ZOOM** (Toggle OFF):
+   - Image displays at actual pixel size (e.g., 1635×1280px)
+   - Background image: At 1:1 scale (scaleX: 1, scaleY: 1)
+   - Canvas zoom: 1.0 (100%)
+   - Image position: Centered `(canvasWidth - imgWidth) / 2`
+   - Window resize: Does NOT change zoom/scale
+   - Toggle button: Inactive/normal state
+
+**Key Implementation Details:**
+- **Background image scale**: Always 1.0 in BOTH modes (never scaled)
+- **Zoom control**: Fabric canvas zoom property only
+- **Positioning**: Origin (0, 0) for FIT_WIDTH, centered for MANUAL
+- **State tracking**: `zoomModeRef` to handle ResizeObserver timing
+- **Image loading**: `imageLoadedRef` flag prevents premature centering
+- **No double-scaling**: Old `resizeBackgroundImage()` removed, replaced with `centerBackgroundImage()`
+
+**Files:**
+- `web/src/pages/Annotation.jsx` - Zoom mode state, toggle handlers
+- `web/src/components/Canvas/AnnotationToolsToolbar.jsx` - Fit Width button (Maximize2 icon)
+- `web/src/components/Canvas/AnnotationCanvas.jsx` - Canvas zoom, image positioning, ResizeObserver
+
+**Troubleshooting:**
+- If image shrinks on refresh: Check background image scale is 1.0, not fitted
+- If only corner visible: Check image position is (0, 0) for FIT_WIDTH mode
+- If toggle doesn't change size: Check `resetToCenter()` is called and `zoomModeRef` is updated
+- If inconsistent on load: Check `imageLoadedRef` flag and ResizeObserver coordination
+
 **Theme handling:**
 - `ThemeContext` persists `light` / `dark` / `auto` and toggles `<html>` classes
 - Applies `body` `theme-mode="dark"` for Semi Design compatibility
@@ -367,7 +407,7 @@ data-labeling/
 └── CLAUDE.local.md       # Agent instructions (this file)
 ```
 
-## Implementation Status (as of 2025-10-20)
+## Implementation Status (as of 2025-10-28)
 
 ### ✅ Completed
 **Frontend:**
@@ -377,7 +417,12 @@ data-labeling/
 - Theme switching (light/dark)
 - i18n framework (EN/VI/ZH)
 - Background image loading (`/samples/image_{ID}.jpg`)
-- Zoom controls (50%-300%)
+- **Zoom controls with FIT_WIDTH mode** (default ON, auto-adjusts to window width)
+  - Fit Width toggle button (Maximize2 icon)
+  - MANUAL mode: Displays actual image size (e.g., 1635×1280px at 100%)
+  - FIT_WIDTH mode: Scales to fit container width (e.g., 47% zoom)
+  - Consistent behavior on refresh (no image shrinking)
+  - Proper image positioning (visible, not just corner)
 - 3-panel annotation layout (64px toolbar + flex canvas + 250px labels panel)
 - **Tailwind CSS v3 + Semi Design integration** (CSS layers, Vite plugin, token mapping)
 

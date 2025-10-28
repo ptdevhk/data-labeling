@@ -23,7 +23,7 @@ const hexToRgba = (hex, alpha = 1) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, imagePath }) => {
+const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, imagePath, zoomMode = 'FIT_WIDTH', setZoom }) => {
   const canvasRef = useRef(null);
   const fabricCanvasRef = useRef(null);
   const drawingShapeRef = useRef(null);
@@ -31,6 +31,9 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
   const backgroundImageRef = useRef(null);
   const isDrawingRef = useRef(false);
   const activeToolRef = useRef(activeTool);
+  const zoomModeRef = useRef(zoomMode);
+  const containerRef = useRef(null);
+  const imageLoadedRef = useRef(false);
   const {
     annotations,
     addAnnotation,
@@ -52,6 +55,10 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
   useEffect(() => {
     activeToolRef.current = activeTool;
   }, [activeTool]);
+
+  useEffect(() => {
+    zoomModeRef.current = zoomMode;
+  }, [zoomMode]);
 
   const computeDimension = (shape, axis) => {
     const dimension = shape[axis] ?? 0;
@@ -248,44 +255,124 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         fabricCanvasRef.current.viewportTransform = [1, 0, 0, 1, 0, 0];
         fabricCanvasRef.current.renderAll();
       }
+    },
+    resetToCenter: () => {
+      if (fabricCanvasRef.current && backgroundImageRef.current) {
+        const canvas = fabricCanvasRef.current;
+        const img = backgroundImageRef.current;
+        
+        // Reset zoom to 100%
+        canvas.setZoom(1);
+        canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
+        
+        // Show image at actual 1:1 scale (no fitting, actual pixel size)
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const imgWidth = img.width;
+        const imgHeight = img.height;
+        
+        // Set image to 1:1 scale (100% actual size)
+        img.set({
+          scaleX: 1,
+          scaleY: 1,
+          left: (canvasWidth - imgWidth) / 2,
+          top: (canvasHeight - imgHeight) / 2,
+        });
+        
+        canvas.renderAll();
+        
+        // Update parent zoom state
+        if (setZoom) {
+          setZoom(1);
+        }
+      }
+    },
+    adjustScale: () => {
+      if (fabricCanvasRef.current && backgroundImageRef.current) {
+        const canvas = fabricCanvasRef.current;
+        const img = backgroundImageRef.current;
+        const containerWidth = containerRef.current?.clientWidth || canvas.width;
+        const imageWidth = img.width || 1;
+        
+        // Calculate scale to fit width
+        const scale = containerWidth / imageWidth;
+        
+        // Apply zoom via Fabric's setZoom
+        canvas.setZoom(scale);
+        
+        // Update parent zoom state
+        if (setZoom) {
+          setZoom(scale);
+        }
+        
+        canvas.renderAll();
+      }
     }
   }));
 
-  // Function to resize and reposition background image
-  const resizeBackgroundImage = (canvas) => {
+  // Function to center background image at 1:1 scale (no fitting)
+  const centerBackgroundImage = (canvas) => {
     if (backgroundImageRef.current && canvas) {
       const img = backgroundImageRef.current;
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
       const imgWidth = img.width;
       const imgHeight = img.height;
 
-      // Calculate scale to fit the image to the canvas
-      const scale = Math.min(
-        canvasWidth / imgWidth,
-        canvasHeight / imgHeight
-      );
-
+      // Always keep image at 1:1 scale
+      // Position at origin (0, 0) so canvas zoom handles the display
+      // Canvas zoom will make the entire image visible when in FIT_WIDTH mode
       img.set({
-        scaleX: scale,
-        scaleY: scale,
-      });
-
-      // Center the image
-      img.set({
-        left: (canvasWidth - imgWidth * scale) / 2,
-        top: (canvasHeight - imgHeight * scale) / 2,
+        scaleX: 1,
+        scaleY: 1,
+        left: 0,
+        top: 0,
       });
 
       canvas.renderAll();
     }
   };
 
+  // Calculate scale for FIT_WIDTH mode
+  const calculateFitWidthScale = useCallback(() => {
+    if (!fabricCanvasRef.current || !backgroundImageRef.current || !containerRef.current) {
+      return 1;
+    }
+    
+    const canvas = fabricCanvasRef.current;
+    const img = backgroundImageRef.current;
+    const containerWidth = containerRef.current.clientWidth || canvas.width;
+    const imageWidth = img.width || 1;
+    
+    // Calculate scale to fit width (with small epsilon to avoid scrollbars)
+    return (containerWidth - 2) / imageWidth;
+  }, []);
+
+  // Adjust scale based on zoom mode
+  const adjustScale = useCallback(() => {
+    if (!fabricCanvasRef.current || !backgroundImageRef.current) {
+      return;
+    }
+
+    const canvas = fabricCanvasRef.current;
+    
+    if (zoomMode === 'FIT_WIDTH') {
+      const scale = calculateFitWidthScale();
+      canvas.setZoom(scale);
+      
+      // Update parent zoom state
+      if (setZoom) {
+        setZoom(scale);
+      }
+      
+      canvas.renderAll();
+    }
+  }, [zoomMode, calculateFitWidthScale, setZoom]);
+
   // Use useLayoutEffect for initial setup to ensure DOM is ready
   useLayoutEffect(() => {
     if (!canvasRef.current || fabricCanvasRef.current) return;
 
     const parent = canvasRef.current.parentElement;
+    containerRef.current = parent;
     const initialWidth = parent.clientWidth || 800;
     const initialHeight = parent.clientHeight || 600;
 
@@ -348,7 +435,16 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         if (width > 0 && height > 0) {
           canvas.setWidth(width);
           canvas.setHeight(height);
-          resizeBackgroundImage(canvas);
+          
+          // Always center the background image at 1:1 scale if image is loaded
+          if (imageLoadedRef.current) {
+            centerBackgroundImage(canvas);
+          }
+          
+          // Only adjust zoom if in FIT_WIDTH mode
+          if (zoomModeRef.current === 'FIT_WIDTH') {
+            adjustScale();
+          }
         }
       }
     });
@@ -376,7 +472,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       shapesRef.clear();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clearSelection, selectAnnotation, updateAnnotation]);
+  }, [clearSelection, selectAnnotation, updateAnnotation, zoomMode, adjustScale]);
 
   // Handle mouse hover events for fill on hover in select mode
   useEffect(() => {
@@ -567,6 +663,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     if (backgroundImageRef.current) {
       canvas.backgroundImage = null;
       backgroundImageRef.current = null;
+      imageLoadedRef.current = false;
     }
 
     // Load background image
@@ -580,18 +677,23 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         // In Fabric.js v6, assign backgroundImage directly instead of using setBackgroundImage
         canvas.backgroundImage = img;
         backgroundImageRef.current = img;
+        imageLoadedRef.current = true;
 
-        // Initial sizing - use requestAnimationFrame to ensure layout is stable
-        requestAnimationFrame(() => {
-          resizeBackgroundImage(canvas);
-        });
+        // Initial sizing - center and apply zoom immediately
+        // The ResizeObserver will also trigger if canvas size changes
+        centerBackgroundImage(canvas);
+        
+        // Apply FIT_WIDTH zoom if that's the initial mode
+        if (zoomModeRef.current === 'FIT_WIDTH') {
+          adjustScale();
+        }
       })
       .catch((err) => {
         console.error('Error loading image:', err);
         console.error('Image path:', imagePath);
         console.error('Error details:', err.message, err.stack);
       });
-  }, [imagePath]);
+  }, [imagePath, zoomMode, adjustScale]);
 
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
@@ -714,6 +816,13 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       canvas.requestRenderAll();
     }
   }, [activeTool]);
+
+  // Handle zoom mode changes
+  useEffect(() => {
+    if (zoomMode === 'FIT_WIDTH') {
+      adjustScale();
+    }
+  }, [zoomMode, adjustScale]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', flex: 1 }}>
