@@ -34,6 +34,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
   const zoomModeRef = useRef(zoomMode);
   const containerRef = useRef(null);
   const imageLoadedRef = useRef(false);
+  const isPanningRef = useRef(false);
+  const lastPosRef = useRef({ x: 0, y: 0 });
   const {
     annotations,
     addAnnotation,
@@ -46,6 +48,10 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     selectAnnotation,
     clearSelection,
   } = useAnnotations();
+  const selectAnnotationRef = useRef(selectAnnotation);
+  const clearSelectionRef = useRef(clearSelection);
+  const removeAnnotationRef = useRef(removeAnnotation);
+  const updateAnnotationRef = useRef(updateAnnotation);
   const shapeRegistryRef = useRef(new Map());
   const [showLabelDialog, setShowLabelDialog] = useState(false);
   const [pendingShape, setPendingShape] = useState(null);
@@ -59,6 +65,14 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
   useEffect(() => {
     zoomModeRef.current = zoomMode;
   }, [zoomMode]);
+  
+  // Keep refs updated
+  useEffect(() => {
+    selectAnnotationRef.current = selectAnnotation;
+    clearSelectionRef.current = clearSelection;
+    removeAnnotationRef.current = removeAnnotation;
+    updateAnnotationRef.current = updateAnnotation;
+  }, [selectAnnotation, clearSelection, removeAnnotation, updateAnnotation]);
 
   const computeDimension = (shape, axis) => {
     const dimension = shape[axis] ?? 0;
@@ -93,6 +107,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     return 0;
   };
 
+  const finalizeRectangleRef = useRef(null);
+  
   const finalizeRectangle = useCallback((canvas, rectShape) => {
     const normalizedWidth = computeDimension(rectShape, 'width');
     const normalizedHeight = computeDimension(rectShape, 'height');
@@ -161,6 +177,9 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     setPendingShape({ canvas, shape: rectShape, type: 'rectangle' });
     setShowLabelDialog(true);
   }, [activeLabelId, addAnnotation, labels, selectAnnotation]);
+  
+  // Keep ref updated
+  finalizeRectangleRef.current = finalizeRectangle;
 
   const handleLabelAssigned = useCallback((labelId) => {
     if (!pendingShape) return;
@@ -244,9 +263,20 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
   // Expose methods to parent
   useImperativeHandle(parentCanvasRef, () => ({
     setZoom: (newZoom) => {
-      if (fabricCanvasRef.current) {
-        fabricCanvasRef.current.setZoom(newZoom);
-        fabricCanvasRef.current.renderAll();
+      if (fabricCanvasRef.current && backgroundImageRef.current) {
+        const canvas = fabricCanvasRef.current;
+        const img = backgroundImageRef.current;
+        
+        // Calculate new canvas dimensions based on image size and zoom
+        const newWidth = Math.round(img.width * img.scaleX * newZoom);
+        const newHeight = Math.round(img.height * img.scaleY * newZoom);
+        
+        // Resize canvas
+        canvas.setDimensions({ width: newWidth, height: newHeight });
+        
+        // Apply zoom
+        canvas.setZoom(newZoom);
+        canvas.renderAll();
       }
     },
     resetView: () => {
@@ -261,22 +291,21 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         const canvas = fabricCanvasRef.current;
         const img = backgroundImageRef.current;
         
+        // Resize canvas to image's natural size (100% zoom)
+        const naturalWidth = img.width;
+        const naturalHeight = img.height;
+        canvas.setDimensions({ width: naturalWidth, height: naturalHeight });
+        
         // Reset zoom to 100%
         canvas.setZoom(1);
         canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
         
-        // Show image at actual 1:1 scale (no fitting, actual pixel size)
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const imgWidth = img.width;
-        const imgHeight = img.height;
-        
-        // Set image to 1:1 scale (100% actual size)
+        // Center image at 1:1 scale
         img.set({
           scaleX: 1,
           scaleY: 1,
-          left: (canvasWidth - imgWidth) / 2,
-          top: (canvasHeight - imgHeight) / 2,
+          left: 0,
+          top: 0,
         });
         
         canvas.renderAll();
@@ -293,9 +322,17 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         const img = backgroundImageRef.current;
         const containerWidth = containerRef.current?.clientWidth || canvas.width;
         const imageWidth = img.width || 1;
+        const imageHeight = img.height || 1;
         
         // Calculate scale to fit width
         const scale = containerWidth / imageWidth;
+        
+        // Calculate new canvas dimensions
+        const newWidth = Math.round(imageWidth * scale);
+        const newHeight = Math.round(imageHeight * scale);
+        
+        // Resize canvas to fit
+        canvas.setDimensions({ width: newWidth, height: newHeight });
         
         // Apply zoom via Fabric's setZoom
         canvas.setZoom(scale);
@@ -329,50 +366,16 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     }
   };
 
-  // Calculate scale for FIT_WIDTH mode
-  const calculateFitWidthScale = useCallback(() => {
-    if (!fabricCanvasRef.current || !backgroundImageRef.current || !containerRef.current) {
-      return 1;
-    }
-    
-    const canvas = fabricCanvasRef.current;
-    const img = backgroundImageRef.current;
-    const containerWidth = containerRef.current.clientWidth || canvas.width;
-    const imageWidth = img.width || 1;
-    
-    // Calculate scale to fit width (with small epsilon to avoid scrollbars)
-    return (containerWidth - 2) / imageWidth;
-  }, []);
-
-  // Adjust scale based on zoom mode
-  const adjustScale = useCallback(() => {
-    if (!fabricCanvasRef.current || !backgroundImageRef.current) {
-      return;
-    }
-
-    const canvas = fabricCanvasRef.current;
-    
-    if (zoomMode === 'FIT_WIDTH') {
-      const scale = calculateFitWidthScale();
-      canvas.setZoom(scale);
-      
-      // Update parent zoom state
-      if (setZoom) {
-        setZoom(scale);
-      }
-      
-      canvas.renderAll();
-    }
-  }, [zoomMode, calculateFitWidthScale, setZoom]);
-
   // Use useLayoutEffect for initial setup to ensure DOM is ready
   useLayoutEffect(() => {
     if (!canvasRef.current || fabricCanvasRef.current) return;
 
     const parent = canvasRef.current.parentElement;
-    containerRef.current = parent;
-    const initialWidth = parent.clientWidth || 800;
-    const initialHeight = parent.clientHeight || 600;
+    // Get the actual scrollable container (parent of the inline-block wrapper)
+    const scrollContainer = parent.parentElement;
+    containerRef.current = scrollContainer;
+    const initialWidth = scrollContainer.clientWidth || 800;
+    const initialHeight = scrollContainer.clientHeight || 600;
 
     // Initialize Fabric.js canvas
     const canvas = new Canvas(canvasRef.current, {
@@ -383,6 +386,16 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     });
 
     fabricCanvasRef.current = canvas;
+    
+    // Set initial cursor based on active tool
+    if (activeTool === 'select') {
+      canvas.defaultCursor = 'grab';
+      canvas.hoverCursor = 'pointer';
+    } else if (activeTool === 'eraser') {
+      canvas.defaultCursor = 'not-allowed';
+    } else {
+      canvas.defaultCursor = 'crosshair';
+    }
 
     if (typeof window !== 'undefined') {
       window.__fabricCanvas = canvas;
@@ -395,7 +408,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         const normalizedWidth = (target.width || 0) * (target.scaleX || 1);
         const normalizedHeight = (target.height || 0) * (target.scaleY || 1);
 
-        updateAnnotation(target.annotationId, {
+        updateAnnotationRef.current(target.annotationId, {
           coordinates: {
             x: target.left,
             y: target.top,
@@ -414,12 +427,12 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     const handleSelection = (e) => {
       const target = e.selected && e.selected[0];
       if (target && target.annotationId) {
-        selectAnnotation(target.annotationId);
+        selectAnnotationRef.current(target.annotationId);
       }
     };
 
     const handleSelectionCleared = () => {
-      clearSelection();
+      clearSelectionRef.current();
     };
 
     canvas.on('selection:created', handleSelection);
@@ -440,8 +453,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
           }
           
           // Only adjust zoom if in FIT_WIDTH mode
-          if (zoomModeRef.current === 'FIT_WIDTH') {
-            adjustScale();
+          if (zoomModeRef.current === 'FIT_WIDTH' && parentCanvasRef?.current) {
+            parentCanvasRef.current.adjustScale();
           }
         }
       }
@@ -449,82 +462,22 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
 
     // Observe the parent element
     resizeObserver.observe(parent);
-
-    const shapesRef = shapeRegistryRef.current;
-
-    // Cleanup
-    return () => {
-      canvas.off('object:modified', handleObjectModified);
-      canvas.off('object:moving', handleObjectModified);
-      canvas.off('object:scaling', handleObjectModified);
-      canvas.off('object:rotating', handleObjectModified);
-      canvas.off('selection:created', handleSelection);
-      canvas.off('selection:updated', handleSelection);
-      canvas.off('selection:cleared', handleSelectionCleared);
-      resizeObserver.disconnect();
-      canvas.dispose();
-      fabricCanvasRef.current = null;
-      if (typeof window !== 'undefined' && window.__fabricCanvas === canvas) {
-        delete window.__fabricCanvas;
-      }
-      shapesRef.clear();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clearSelection, selectAnnotation, updateAnnotation, zoomMode, adjustScale]);
-
-  // Handle mouse hover events for fill on hover in select mode
-  useEffect(() => {
-    const canvas = fabricCanvasRef.current;
-    if (!canvas) return undefined;
-
-    const handleMouseOver = (e) => {
-      const target = e.target;
-      if (target && target.annotationId && activeTool === 'select') {
-        const annotation = annotations.find((a) => a.id === target.annotationId);
-        if (annotation) {
-          const label = labels.find((item) => item.id === annotation.labelId);
-          const baseColor = label?.color ?? '#3B82F6';
-          target.set({ fill: hexToRgba(baseColor, 0.16) });
-          canvas.requestRenderAll();
-        }
-      }
-    };
-
-    const handleMouseOut = (e) => {
-      const target = e.target;
-      if (target && target.annotationId) {
-        // Don't remove fill if this is the active annotation
-        const isActive = target.annotationId === activeAnnotationId;
-        if (!isActive) {
-          target.set({ fill: 'transparent' });
-          canvas.requestRenderAll();
-        }
-      }
-    };
-
-    canvas.on('mouse:over', handleMouseOver);
-    canvas.on('mouse:out', handleMouseOut);
-
-    return () => {
-      canvas.off('mouse:over', handleMouseOver);
-      canvas.off('mouse:out', handleMouseOut);
-    };
-  }, [activeTool, activeAnnotationId, annotations, labels]);
-
-  useEffect(() => {
-    const canvas = fabricCanvasRef.current;
-    if (!canvas) {
-      return undefined;
-    }
-
+    
+    // Mouse event handlers for drawing and panning
     const handleMouseDown = (opt) => {
       const currentTool = activeToolRef.current;
       if (currentTool === 'select') {
         const target = opt.target;
         if (target && target.annotationId) {
-          selectAnnotation(target.annotationId);
+          selectAnnotationRef.current(target.annotationId);
         } else {
-          clearSelection();
+          // No target - start panning
+          const evt = opt.e;
+          isPanningRef.current = true;
+          lastPosRef.current = { x: evt.clientX, y: evt.clientY };
+          canvas.selection = false;
+          canvas.defaultCursor = 'grabbing';
+          clearSelectionRef.current();
         }
         return;
       }
@@ -533,7 +486,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         const target = opt.target;
         if (target) {
           if (target.annotationId) {
-            removeAnnotation(target.annotationId);
+            removeAnnotationRef.current(target.annotationId);
           }
           canvas.remove(target);
           if (target.annotationId) {
@@ -574,6 +527,22 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     };
 
     const handleMouseMove = (opt) => {
+      const evt = opt.e;
+      
+      // Handle panning in select mode
+      if (isPanningRef.current) {
+        const vpt = canvas.viewportTransform;
+        const deltaX = evt.clientX - lastPosRef.current.x;
+        const deltaY = evt.clientY - lastPosRef.current.y;
+        
+        vpt[4] += deltaX;
+        vpt[5] += deltaY;
+        
+        lastPosRef.current = { x: evt.clientX, y: evt.clientY };
+        canvas.requestRenderAll();
+        return;
+      }
+      
       if (!isDrawingRef.current || !drawingShapeRef.current) {
         return;
       }
@@ -607,8 +576,17 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       const shape = drawingShapeRef.current;
       const currentTool = activeToolRef.current;
 
-      if (shape && currentTool === 'rectangle') {
-        finalizeRectangle(canvas, shape);
+      if (shape && currentTool === 'rectangle' && finalizeRectangleRef.current) {
+        finalizeRectangleRef.current(canvas, shape);
+      }
+
+      // Reset panning state
+      if (isPanningRef.current) {
+        isPanningRef.current = false;
+        if (currentTool === 'select') {
+          canvas.selection = true;
+          canvas.defaultCursor = 'grab';
+        }
       }
 
       isDrawingRef.current = false;
@@ -625,13 +603,70 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     canvas.on('mouse:up', handleMouseUp);
     canvas.on('mouse:dblclick', handleDoubleClick);
 
+    const shapesRef = shapeRegistryRef.current;
+
+    // Cleanup
     return () => {
       canvas.off('mouse:down', handleMouseDown);
       canvas.off('mouse:move', handleMouseMove);
       canvas.off('mouse:up', handleMouseUp);
       canvas.off('mouse:dblclick', handleDoubleClick);
+      canvas.off('object:modified', handleObjectModified);
+      canvas.off('object:moving', handleObjectModified);
+      canvas.off('object:scaling', handleObjectModified);
+      canvas.off('object:rotating', handleObjectModified);
+      canvas.off('selection:created', handleSelection);
+      canvas.off('selection:updated', handleSelection);
+      canvas.off('selection:cleared', handleSelectionCleared);
+      resizeObserver.disconnect();
+      canvas.dispose();
+      fabricCanvasRef.current = null;
+      if (typeof window !== 'undefined' && window.__fabricCanvas === canvas) {
+        delete window.__fabricCanvas;
+      }
+      shapesRef.clear();
     };
-  }, [activeLabelId, clearSelection, finalizeRectangle, labels, removeAnnotation, selectAnnotation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Canvas should only be created once on mount
+
+  // Handle mouse hover events for fill on hover in select mode
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) return undefined;
+
+    const handleMouseOver = (e) => {
+      const target = e.target;
+      if (target && target.annotationId && activeTool === 'select') {
+        const annotation = annotations.find((a) => a.id === target.annotationId);
+        if (annotation) {
+          const label = labels.find((item) => item.id === annotation.labelId);
+          const baseColor = label?.color ?? '#3B82F6';
+          target.set({ fill: hexToRgba(baseColor, 0.16) });
+          canvas.requestRenderAll();
+        }
+      }
+    };
+
+    const handleMouseOut = (e) => {
+      const target = e.target;
+      if (target && target.annotationId) {
+        // Don't remove fill if this is the active annotation
+        const isActive = target.annotationId === activeAnnotationId;
+        if (!isActive) {
+          target.set({ fill: 'transparent' });
+          canvas.requestRenderAll();
+        }
+      }
+    };
+
+    canvas.on('mouse:over', handleMouseOver);
+    canvas.on('mouse:out', handleMouseOut);
+
+    return () => {
+      canvas.off('mouse:over', handleMouseOver);
+      canvas.off('mouse:out', handleMouseOut);
+    };
+  }, [activeTool, activeAnnotationId, annotations, labels]);
 
   // Update drawing shape color when active label changes mid-draw
   useEffect(() => {
@@ -682,8 +717,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         centerBackgroundImage(canvas);
         
         // Apply FIT_WIDTH zoom if that's the initial mode
-        if (zoomModeRef.current === 'FIT_WIDTH') {
-          adjustScale();
+        if (zoomModeRef.current === 'FIT_WIDTH' && parentCanvasRef?.current) {
+          parentCanvasRef.current.adjustScale();
         }
       })
       .catch((err) => {
@@ -691,7 +726,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         console.error('Image path:', imagePath);
         console.error('Error details:', err.message, err.stack);
       });
-  }, [imagePath, zoomMode, adjustScale]);
+  }, [imagePath, zoomMode]);
 
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
@@ -784,7 +819,9 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     if (fabricCanvasRef.current) {
       const canvas = fabricCanvasRef.current;
       const isSelectionTool = activeTool === 'select';
-      canvas.selection = isSelectionTool;
+      
+      // Only enable selection if not panning
+      canvas.selection = isSelectionTool && !isPanningRef.current;
 
       // Update all existing objects' selectability based on current tool
       canvas.getObjects().forEach((obj) => {
@@ -799,7 +836,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       });
 
       if (isSelectionTool) {
-        canvas.defaultCursor = 'default';
+        canvas.defaultCursor = 'grab';
+        canvas.hoverCursor = 'pointer';
       } else if (activeTool === 'eraser') {
         canvas.defaultCursor = 'not-allowed';
       } else {
@@ -817,13 +855,61 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
 
   // Handle zoom mode changes
   useEffect(() => {
+    const applyFitWidth = () => {
+      if (fabricCanvasRef.current && backgroundImageRef.current && containerRef.current) {
+        const canvas = fabricCanvasRef.current;
+        const img = backgroundImageRef.current;
+        const containerWidth = containerRef.current.clientWidth;
+        const imageWidth = img.width || 1;
+        const imageHeight = img.height || 1;
+        
+        // Calculate scale to fit width
+        const scale = containerWidth / imageWidth;
+        
+        // Calculate new canvas dimensions
+        const newWidth = Math.round(imageWidth * scale);
+        const newHeight = Math.round(imageHeight * scale);
+        
+        // Resize canvas to fit
+        canvas.setDimensions({ width: newWidth, height: newHeight });
+        
+        // Apply zoom
+        canvas.setZoom(scale);
+        
+        // Update parent zoom state
+        if (setZoom) {
+          setZoom(scale);
+        }
+        
+        canvas.renderAll();
+        
+        return true;
+      }
+      
+      return false;
+    };
+    
     if (zoomMode === 'FIT_WIDTH') {
-      adjustScale();
+      // Try immediately first
+      const success = applyFitWidth();
+      
+      // If refs not ready, retry with requestAnimationFrame (up to 10 times)
+      if (!success) {
+        let retries = 10;
+        const retry = () => {
+          const success = applyFitWidth();
+          if (!success && retries > 0) {
+            retries--;
+            requestAnimationFrame(retry);
+          }
+        };
+        requestAnimationFrame(retry);
+      }
     }
-  }, [zoomMode, adjustScale]);
+  }, [zoomMode, setZoom]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', flex: 1 }}>
+    <div style={{ position: 'relative', display: 'inline-block', minWidth: '100%', minHeight: '100%' }}>
       {/* Canvas */}
       <canvas ref={canvasRef} />
       

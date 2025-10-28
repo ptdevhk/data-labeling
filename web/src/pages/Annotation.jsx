@@ -53,11 +53,8 @@ const Annotation = () => {
         canvasRef.current.resetToCenter();
       }
     } else {
-      // Switch to FIT_WIDTH mode
+      // Switch to FIT_WIDTH mode - let useEffect in AnnotationCanvas handle the adjust
       setZoomMode('FIT_WIDTH');
-      if (canvasRef.current) {
-        canvasRef.current.adjustScale();
-      }
     }
   };
 
@@ -171,7 +168,7 @@ const Annotation = () => {
                 <div
                   className="flex-1"
                   style={{
-                    overflow: 'hidden',
+                    overflow: 'auto',
                     borderRadius: '0.75rem',
                     border: '1px solid var(--semi-color-border)',
                     backgroundColor: 'var(--semi-color-bg-0)',
