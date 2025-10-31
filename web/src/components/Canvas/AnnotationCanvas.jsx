@@ -281,35 +281,57 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     },
     resetView: () => {
       if (fabricCanvasRef.current) {
-        fabricCanvasRef.current.setZoom(1);
-        fabricCanvasRef.current.viewportTransform = [1, 0, 0, 1, 0, 0];
-        fabricCanvasRef.current.renderAll();
+        const canvas = fabricCanvasRef.current;
+        const img = backgroundImageRef.current;
+
+        if (img) {
+          canvas.setDimensions({ width: img.width, height: img.height });
+          img.set({
+            scaleX: 1,
+            scaleY: 1,
+            left: 0,
+            top: 0,
+          });
+        }
+
+        canvas.setZoom(1);
+        canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+
+        if (setZoom) {
+          setZoom(1);
+        }
+
+        canvas.requestRenderAll();
       }
     },
     resetToCenter: () => {
       if (fabricCanvasRef.current && backgroundImageRef.current) {
         const canvas = fabricCanvasRef.current;
         const img = backgroundImageRef.current;
-        
-        // Resize canvas to image's natural size (100% zoom)
+
+        // Get image's natural dimensions
         const naturalWidth = img.width;
         const naturalHeight = img.height;
+
+        // At 100% zoom, canvas should be exactly the image's natural size
+        // The container's overflow:auto will handle scrollbars if needed
         canvas.setDimensions({ width: naturalWidth, height: naturalHeight });
-        
-        // Reset zoom to 100%
-        canvas.setZoom(1);
-        canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
-        
-        // Center image at 1:1 scale
+
+        // Reset viewport transform to identity matrix (100% zoom, no pan)
+        // This properly resets both zoom AND pan, unlike setZoom() which only resets zoom
+        // setViewportTransform automatically calls calcViewportBoundaries() and requestRenderAll()
+        canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+
+        // Position image at origin with 1:1 scale
         img.set({
           scaleX: 1,
           scaleY: 1,
           left: 0,
           top: 0,
         });
-        
-        canvas.renderAll();
-        
+
+        canvas.requestRenderAll();
+
         // Update parent zoom state
         if (setZoom) {
           setZoom(1);
@@ -321,18 +343,15 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         const canvas = fabricCanvasRef.current;
         const img = backgroundImageRef.current;
         const containerWidth = containerRef.current?.clientWidth || canvas.width;
+        const containerHeight = containerRef.current?.clientHeight || canvas.height;
         const imageWidth = img.width || 1;
-        const imageHeight = img.height || 1;
-        
+
         // Calculate scale to fit width
         const scale = containerWidth / imageWidth;
         
-        // Calculate new canvas dimensions
-        const newWidth = Math.round(imageWidth * scale);
-        const newHeight = Math.round(imageHeight * scale);
-        
-        // Resize canvas to fit
-        canvas.setDimensions({ width: newWidth, height: newHeight });
+        // In FIT_WIDTH mode, canvas should match viewport size
+        // The scaled image will be larger, but panning handles navigation
+        canvas.setDimensions({ width: containerWidth, height: containerHeight });
         
         // Apply zoom via Fabric's setZoom
         canvas.setZoom(scale);
@@ -371,8 +390,17 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     if (!canvasRef.current || fabricCanvasRef.current) return;
 
     const parent = canvasRef.current.parentElement;
-    // Get the actual scrollable container (parent of the inline-block wrapper)
-    const scrollContainer = parent.parentElement;
+    // Get the actual scrollable container with overflow:auto
+    // Walk up the DOM tree to find it
+    let scrollContainer = parent;
+    while (scrollContainer && window.getComputedStyle(scrollContainer).overflow !== 'auto') {
+      scrollContainer = scrollContainer.parentElement;
+      if (!scrollContainer || scrollContainer === document.body) {
+        // Fallback if we can't find it
+        scrollContainer = parent.parentElement.parentElement;
+        break;
+      }
+    }
     containerRef.current = scrollContainer;
     const initialWidth = scrollContainer.clientWidth || 800;
     const initialHeight = scrollContainer.clientHeight || 600;
@@ -382,7 +410,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       width: initialWidth,
       height: initialHeight,
       backgroundColor: '#f5f5f5',
-      selection: activeTool === 'select',
+      selection: false, // Disable default selection box for better pan control
     });
 
     fabricCanvasRef.current = canvas;
@@ -439,46 +467,51 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
     canvas.on('selection:updated', handleSelection);
     canvas.on('selection:cleared', handleSelectionCleared);
 
-    // Use ResizeObserver to watch the parent container size changes
+    // Add viewport constraint after any transform change
+    canvas.on('after:render', () => {
+      if (backgroundImageRef.current) {
+        constrainPan(canvas.viewportTransform, canvas, backgroundImageRef.current);
+      }
+    });
+
+    // Use ResizeObserver to watch the scrollable container size changes
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
         if (width > 0 && height > 0) {
-          canvas.setWidth(width);
-          canvas.setHeight(height);
-          
-          // Always center the background image at 1:1 scale if image is loaded
-          if (imageLoadedRef.current) {
-            centerBackgroundImage(canvas);
-          }
-          
           // Only adjust zoom if in FIT_WIDTH mode
-          if (zoomModeRef.current === 'FIT_WIDTH' && parentCanvasRef?.current) {
+          if (zoomModeRef.current === 'FIT_WIDTH' && parentCanvasRef?.current && imageLoadedRef.current) {
             parentCanvasRef.current.adjustScale();
           }
         }
       }
     });
 
-    // Observe the parent element
-    resizeObserver.observe(parent);
+    // Observe the scrollable container (not the inline-block parent)
+    resizeObserver.observe(scrollContainer);
     
     // Mouse event handlers for drawing and panning
     const handleMouseDown = (opt) => {
       const currentTool = activeToolRef.current;
+      
       if (currentTool === 'select') {
         const target = opt.target;
+        // Check if clicking on an annotation object (not background image)
         if (target && target.annotationId) {
           selectAnnotationRef.current(target.annotationId);
-        } else {
-          // No target - start panning
-          const evt = opt.e;
-          isPanningRef.current = true;
-          lastPosRef.current = { x: evt.clientX, y: evt.clientY };
-          canvas.selection = false;
-          canvas.defaultCursor = 'grabbing';
-          clearSelectionRef.current();
+          return; // Let Fabric handle object selection/dragging
         }
+        
+        // Clicking on empty canvas or background - start panning
+        // (target might be null or the background image)
+        const evt = opt.e;
+        isPanningRef.current = true;
+        lastPosRef.current = { x: evt.clientX, y: evt.clientY };
+        canvas.defaultCursor = 'grabbing';
+        clearSelectionRef.current();
+        
+        // Prevent any default Fabric.js behavior for panning
+        opt.e.preventDefault?.();
         return;
       }
 
@@ -526,6 +559,52 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       drawingShapeRef.current = rect;
     };
 
+    const constrainPan = (vpt, canvasObj, bgImage) => {
+      if (!bgImage) return;
+
+      const zoom = canvasObj.getZoom();
+
+      // Use viewport dimensions (scroll container), not canvas dimensions
+      const viewportWidth = containerRef.current?.clientWidth || canvasObj.width;
+      const viewportHeight = containerRef.current?.clientHeight || canvasObj.height;
+
+      // Calculate scaled image dimensions
+      const imageWidth = bgImage.width * bgImage.scaleX * zoom;
+      const imageHeight = bgImage.height * bgImage.scaleY * zoom;
+
+      // Constrain horizontal pan
+      if (imageWidth > viewportWidth) {
+        // When image is larger than viewport, constrain panning so image edges
+        // cannot go beyond viewport edges (no gray areas visible)
+        // vpt[4] is the x-offset: positive = image moves right, negative = moves left
+
+        // Right limit: When panning right, left edge of image must stay at left edge of viewport
+        // Image left edge at viewport left: vpt[4] = 0
+        const limitRight = 0;
+
+        // Left limit: When panning left, right edge of image must stay at right edge of viewport
+        // Image right edge at viewport right: vpt[4] + imageWidth = viewportWidth
+        // So: vpt[4] = viewportWidth - imageWidth (this is NEGATIVE since imageWidth > viewportWidth)
+        const limitLeft = viewportWidth - imageWidth;
+
+        // Apply constraints: vpt[4] must be between limitLeft (min) and limitRight (max)
+        vpt[4] = Math.max(limitLeft, Math.min(limitRight, vpt[4]));
+      } else {
+        vpt[4] = 0; // Center horizontally if image fits
+      }
+
+      // Constrain vertical pan
+      if (imageHeight > viewportHeight) {
+        // Same logic for vertical
+        const limitBottom = 0;  // Top edge at top of viewport
+        const limitTop = viewportHeight - imageHeight;  // Bottom edge at bottom of viewport (negative)
+
+        vpt[5] = Math.max(limitTop, Math.min(limitBottom, vpt[5]));
+      } else {
+        vpt[5] = 0; // Center vertically if image fits
+      }
+    };
+
     const handleMouseMove = (opt) => {
       const evt = opt.e;
       
@@ -537,6 +616,9 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         
         vpt[4] += deltaX;
         vpt[5] += deltaY;
+        
+        // Apply pan constraints to keep image visible
+        constrainPan(vpt, canvas, backgroundImageRef.current);
         
         lastPosRef.current = { x: evt.clientX, y: evt.clientY };
         canvas.requestRenderAll();
@@ -584,7 +666,6 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       if (isPanningRef.current) {
         isPanningRef.current = false;
         if (currentTool === 'select') {
-          canvas.selection = true;
           canvas.defaultCursor = 'grab';
         }
       }
@@ -820,8 +901,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       const canvas = fabricCanvasRef.current;
       const isSelectionTool = activeTool === 'select';
       
-      // Only enable selection if not panning
-      canvas.selection = isSelectionTool && !isPanningRef.current;
+      // Disable default selection box to allow custom panning behavior
+      canvas.selection = false;
 
       // Update all existing objects' selectability based on current tool
       canvas.getObjects().forEach((obj) => {
