@@ -80,13 +80,14 @@ The UI/UX design establishes a professional, accessible foundation optimized for
     - **User Avatar Dropdown**: Circular avatar (initials or image) with chevron; menu (Semi Design DropdownMenu) includes profile, settings, logout; shows user role (e.g., "Admin") and version info.
     - **Dark/Light Mode Toggle**: Switch icon (Lucide Moon/Sun) at far right; persists via localStorage; animates smoothly with 300ms transition.
     - **Hamburger Menu (Mobile Only)**: Three-line icon to toggle sidebar drawer; positioned after logo.
+    - **Auto-Save Indicator**: Small status icon (e.g., Lucide Save with green check) next to notifications bell; shows "Saving..." spinner during saves, timestamp on success (e.g., "Saved 2m ago"); clickable to force manual save.
   - **Sidebar Menu**: Vertical navigation (Semi Design Nav) in a collapsible aside (250px expanded, 64px collapsed on desktop); full drawer overlay on mobile (slide-in from left with backdrop). Items structured hierarchically with icons and labels (hidden in collapsed state):
     - **Console**: Home icon; overview page with project cards and stats.
     - **Projects**: Folder icon; list view with create/new button; sub-items: "My Projects", "Shared Projects".
     - **Datasets**: Image icon; upload/browse interface; sub-items: "All Datasets", "Pending Review".
     - **Annotations**: Edit icon; active labeling workspace; sub-items: "In Progress", "Completed".
     - **Exports**: Download icon; format selection and history; sub-items: "Recent Exports", "Templates".
-    - **Settings**: Gear icon; user preferences; sub-items: "Account", "Themes", "Shortcuts", "Help & Feedback".
+    - **Settings**: Gear icon; user preferences; sub-items: "Account", "Themes", "Shortcuts", "Help & Feedback", "Auto-Save (Toggle)".
     - **Footer (Expanded Only)**: Version number (e.g., "v1.0.0") and logout button at bottom.
     - **Collapse sidebar(left,right arrow)**
     - **Behavior**: Auto-highlight active route via `selectedKeys`; chevron toggle for collapse/expand; state synced with localStorage; auto-collapse on annotation page to maximize canvas space.
@@ -99,11 +100,11 @@ The UI/UX design establishes a professional, accessible foundation optimized for
   - **Icons**: Lucide React library; 24px default, stroke-width 2px; tool-specific (e.g., square icon for rectangle); tooltips on hover/focus.
 - **Interactions and Feedback**:
   - **Animations**: Micro-interactions (e.g., 150-300ms cubic-bezier transitions for hovers, modals); disable during canvas focus to prevent interference.
-  - **Feedback Mechanisms**: Inline validation (e.g., red outlines for invalid shapes); toasts for async ops (position: bottom-right, duration: 4s); progress indicators for uploads/exports.
+  - **Feedback Mechanisms**: Inline validation (e.g., red outlines for invalid shapes); toasts for async ops (position: bottom-right, duration: 4s); progress indicators for uploads/exports. For auto-save, display subtle toast notifications (e.g., "Draft saved automatically") on successful saves, with error toasts for failures (e.g., "Save failed—check connection"); include a recovery prompt modal on app reload if unsaved changes are detected in drafts.
   - **Onboarding Flow**: Interactive tour (e.g., Joyride library) with 4-6 steps, highlighting key UI; skippable, one-time via localStorage.
 - **Canvas-Specific Elements**:
   - **Viewer**: Full-bleed canvas with optional faint grid (toggle via icon); floating toolbar for zoom/reset; drag-to-pan with cursor hints.
-  - **Tools Palette**: Vertical list with preview thumbnails; selected tool glows (#3B82F6 border); right-click context menu for shape options. Implement as a Semi Design `ButtonGroup` for cohesive clustering: Use `theme="borderless"` for minimalism, `type="tertiary"` for neutral states, and `theme="solid"`/`type="primary"` for active selection. Icons from Lucide React (e.g., `IconSquare` for rectangle); tooltips via Semi `Tooltip` for shortcuts (e.g., "Rectangle (R)"). Group into drawing tools (polygon, rectangle, circle, line, point) and utilities (eraser, undo, redo) with a divider. Responsive: Vertical on desktop (`flexDirection: 'column'`), horizontal stack on mobile via media queries. Integrate with Fabric.js via `onClick` handlers to set drawing modes (e.g., `canvas.isDrawingMode`). **Note**: For implementation patterns, agents should reference MCP tools (context7, deepwiki) for Semi Design, Lucide React, and Fabric.js best practices.
+  - **Tools Palette**: Vertical list with preview thumbnails; selected tool glows (#3B82F6 border); right-click context menu for shape options. Implement as a Semi Design `ButtonGroup` for cohesive clustering: Use `theme="borderless"` for minimalism, `type="tertiary"` for neutral states, and `theme="solid"`/`type="primary"` for active selection. Icons from Lucide React (e.g., `IconSquare` for rectangle); tooltips via Semi `Tooltip` for shortcuts (e.g., "Rectangle (R)"). Group into drawing tools (polygon, rectangle, circle, line, point) and utilities (eraser, undo, redo) with a divider. Responsive: Vertical on desktop (`flexDirection: 'column'`), horizontal stack on mobile via media queries. Integrate with Fabric.js via `onClick` handlers to set drawing modes (e.g., `canvas.isDrawingMode`). Trigger auto-save events on tool actions like shape completion or undo/redo to capture state changes promptly. **Note**: For implementation patterns, agents should reference MCP tools (context7, deepwiki) for Semi Design, Lucide React, and Fabric.js best practices.
   - **Labels Panel**: Collapsible accordion for classes/attributes; drag-to-reorder classes; color picker for shape fills.
 - **Localization and Inclusivity**:
   - Support RTL layouts; initial languages: English (default), Vietnamese, Chinese (via i18next JSON files).
@@ -149,31 +150,37 @@ Focus on a functional MVP: Standalone React SPA supporting manual labeling with 
 - **LLM Placeholder**: Grayed-out "Assist" button linking to future sidebar chat.
 
 #### 3. Export and Review
-- **Persistence/Export**: Auto-save drafts; formats: COCO JSON, YOLO TXT, CSV; zip download with metadata.
+- **Auto-Save** (Inspired by AnyLabeling): Implement an optional auto-save mode to automatically persist annotation drafts, reducing data loss during long sessions or crashes. Key features:
+  - **Trigger Events**: Saves occur every 30 seconds (configurable in settings: 10s–5min intervals) or immediately on shape completion, label changes, undo/redo, or image switches. Debounce rapid changes (e.g., vertex drags) to avoid excessive writes.
+  - **What is Saved**: Current canvas state (shapes, labels, attributes via Fabric.js serialization), project metadata, and per-image progress. For frontend MVP, store in IndexedDB (keyed by project ID + image hash); sync to backend API (`/api/annotate/draft`) in Phase 2 for multi-device recovery.
+  - **User Controls**: Toggle via Settings > Auto-Save (default: enabled); manual save button in header/canvas toolbar. Version drafts with timestamps and change counts to handle concurrent edits (e.g., merge on load).
+  - **Notifications and Recovery**: Subtle UI indicator (e.g., "Last saved: 1m ago" in header) with green check on success; toast on save ("Draft auto-saved") or error ("Save failed—manual save recommended"). On app reload or image load, check for unsaved drafts and prompt modal: "Recover unsaved changes from [timestamp]?" with diff preview if possible. Mimics AnyLabeling's rendering-aware saves to ensure completeness without slowing UI (e.g., queue saves async, skip if no changes).
+  - **Performance Considerations**: Batch saves for multiple images; limit draft history to last 5 versions per project; clear on explicit export/save-as-final.
+- **Export**: Formats: COCO JSON, YOLO TXT, CSV; zip download with metadata.
 - **Review**: Paginated table view (filter/sort by class/image); inline edits; bulk actions (approve/reject).
 - **Tracking**: Per-project progress bars; export logs with timestamps.
 
 #### 4. UI/UX Flows
-- **Onboarding**: Stepper modal guiding setup (project → upload → first annotation).
-- **Shortcuts**: Customizable (e.g., 'B' for brush/eraser); display cheat sheet in help modal.
-- **Errors/Notifications**: Contextual toasts (e.g., "Shape too small" with resize prompt).
+- **Onboarding**: Stepper modal guiding setup (project → upload → first annotation), including demo of auto-save toggle and indicator.
+- **Shortcuts**: Customizable (e.g., 'B' for brush/eraser, 'S' for manual save); display cheat sheet in help modal.
+- **Errors/Notifications**: Contextual toasts (e.g., "Shape too small" with resize prompt); auto-save errors escalate to persistent banner if repeated.
 - **i18n**: Dynamic language switcher; auto-detect browser locale.
 
 ### Non-Functional Requirements
 
 #### Performance
-- Initial load <3s (code-split routes); lazy-load images/annotations.
+- Initial load <3s (code-split routes); lazy-load images/annotations. Auto-save operations <100ms latency, non-blocking via Web Workers if needed.
 - Canvas rendering ≥60 FPS; test on i5/8GB RAM.
 - Bundle <4MB gzipped (Vite optimization).
 
 #### Accessibility and Usability
-- WCAG 2.1 AA: Screen reader support (ARIA for shapes); focus indicators.
-- Offline: Service Worker for caching; IndexedDB sync on reconnect.
+- WCAG 2.1 AA: Screen reader support (ARIA for shapes); focus indicators. Announce auto-save status via ARIA live regions (e.g., "Draft saved").
+- Offline: Service Worker for caching; IndexedDB sync on reconnect, with auto-save queuing for offline tolerance.
 - Cross-browser: Chrome/Edge/Firefox/Safari (latest two versions).
 
 #### Security and Maintainability
-- Sanitize all inputs (DOMPurify for labels); CSP headers in production.
-- Dependency audits quarterly; 80% test coverage.
+- Sanitize all inputs (DOMPurify for labels); CSP headers in production. Encrypt IndexedDB drafts if sensitive data present.
+- Dependency audits quarterly; 80% test coverage, including auto-save edge cases (e.g., offline save, conflict resolution).
 
 ### Technology Stack
 
@@ -196,6 +203,7 @@ Focus on a functional MVP: Standalone React SPA supporting manual labeling with 
 | **Testing**           | Vitest + React Testing Library     | Fast, React-idiomatic tests. |
 | **Linting**           | ESLint + Prettier                  | Enforces code quality. |
 | **Package Manager**   | Bun                                | Speedy installs for CI/dev. |
+| **Local Storage**     | Dexie.js (IndexedDB wrapper)       | Efficient, queryable persistence for auto-save drafts. |
 
 #### Semi Design Best Practices
 Based on official Semi Design documentation:
@@ -229,14 +237,14 @@ Based on official Semi Design documentation:
 
 #### Frontend Bootstrapping
 1. `npm create vite@latest -- --template react` (JS template).
-2. `bun add` core deps (Semi UI, Axios, etc.); `bun add -D` dev deps.
+2. `bun add` core deps (Semi UI, Axios, Dexie.js, etc.); `bun add -D` dev deps.
 3. Configure `vite.config.js` (Semi plugin, aliases); `tailwind.config.js`.
 4. Import Semi Design CSS: Add `import '@douyinfe/semi-ui/dist/css/semi.css';` to `main.jsx`.
 5. `bun run dev` (localhost:5173); `bun run build` for `/dist`.
 
 ### Backend Integration
 - **Framework**: FastAPI 0.100+ (Python 3.13).
-- **Key Features**: JWT auth, file uploads (via FastAPI's UploadFile), SQLite/Postgres for annotations.
+- **Key Features**: JWT auth, file uploads (via FastAPI's UploadFile), SQLite/Postgres for annotations. Add endpoint `/api/annotate/draft` for async draft syncing (POST with JSON payload, versioning via ETag).
 - **Endpoints**: `/api/projects`, `/api/annotate/{id}`, `/health`.
 - **Local Dev**: `make all` serves frontend from backend (port 5002).
 - **Production**: Gunicorn workers (env-var tunable).
@@ -267,7 +275,7 @@ make docker-up        # Auto-builds frontend, spins up services
 - **Routing Errors**: Verify Caddyfile handles (API first).
 
 ### Future Roadmap
-- **Phase 2**: LLM endpoints (`/llm/suggest` via OpenAI/Hugging Face).
+- **Phase 2**: LLM endpoints (`/llm/suggest` via OpenAI/Hugging Face); enhance auto-save with real-time backend syncing via WebSockets.
 - **Enhancements**: Collaboration (WebSockets), advanced exports (VOC/Pascal).
 - **Scaling**: Horizontal backend pods; CDN for assets.
 
@@ -298,8 +306,8 @@ data-labeling/
 
 ### Deliverables
 - **Repo Setup**: README with diagrams (e.g., Mermaid for architecture); Makefile with `make help`.
-- **Design Assets**: Figma file (wireframes, style guide).
-- **MVP Proof**: Loom video demoing end-to-end flow.
+- **Design Assets**: Figma file (wireframes, style guide), including auto-save flow prototypes.
+- **MVP Proof**: Loom video demoing end-to-end flow, highlighting auto-save in action.
 - **Quality Gates**: Test reports (>80% coverage); lint passes.
 
-For commands, run `make help`. Refer to GEMINI.md for Docker deep-dive. This spec serves as the living blueprint—update via PRs as the project evolves.
+For commands, run `make help`. Refer to AGENTS.md for Docker deep-dive. This spec serves as the living blueprint—update via PRs as the project evolves.
