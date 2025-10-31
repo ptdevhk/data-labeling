@@ -138,6 +138,16 @@
       "unassigned": "Unassigned",
       "annotationCount": "{{count}} annotations",
       "selectShape": "Select a shape to edit attributes"
+    },
+    "save": {
+      "button": "Save",
+      "success": "Annotations saved successfully",
+      "autoSave": "Auto-save",
+      "lastSaved": "Last saved: {{time}}"
+    },
+    "export": {
+      "button": "Export",
+      "waitForImage": "Please wait for image to load"
     }
   },
   "theme": {
@@ -157,7 +167,15 @@
     "name": "Export Name",
     "format": "Format",
     "status": "Status",
-    "createdAt": "Created At"
+    "createdAt": "Created At",
+    "dialog": {
+      "title": "Export Annotations",
+      "export": "Export",
+      "format": "Export Format",
+      "stats": "Total Annotations: {{count}}",
+      "labels": "Total Labels: {{count}}",
+      "noAnnotations": "No annotations to export"
+    }
   },
   "settings": {
     "general": "General",

@@ -1,22 +1,48 @@
 import { useCallback, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Toast } from '@douyinfe/semi-ui';
 import AnnotationCanvas from '@/components/Canvas/AnnotationCanvas';
 import AnnotationToolsToolbar from '@/components/Canvas/AnnotationToolsToolbar';
 import LabelsPanel from '@/components/Canvas/LabelsPanel';
 import AnnotationListPanel from '@/components/Canvas/AnnotationListPanel';
-import { AnnotationProvider } from '@/contexts/AnnotationContext';
+import ExportDialog from '@/components/Canvas/ExportDialog';
+import { AnnotationProvider, useAnnotations } from '@/contexts/AnnotationContext';
 import { useTranslation } from 'react-i18next';
 
-const Annotation = () => {
+const AnnotationContent = ({ onImageLoad: onImageLoadProp }) => {
   const { id } = useParams();
   const { t } = useTranslation();
   const [activeTool, setActiveTool] = useState('select');
   const [zoom, setZoom] = useState(1);
-  const [zoomMode, setZoomMode] = useState('FIT_WIDTH'); // FIT_WINDOW, FIT_WIDTH, MANUAL_ZOOM
+  const [zoomMode, setZoomMode] = useState('FIT_WIDTH');
+  const [exportDialogVisible, setExportDialogVisible] = useState(false);
+  const [imageMetadata, setImageMetadata] = useState(null);
   const canvasRef = useRef(null);
+  
+  const { annotations, labels, saveToLocalStorage, isDirty } = useAnnotations();
 
   // Map project ID to sample images
   const imagePath = `/samples/image_${String(id).padStart(3, '0')}.jpg`;
+
+  const handleImageLoad = useCallback((metadata) => {
+    setImageMetadata(metadata);
+    if (onImageLoadProp) {
+      onImageLoadProp(metadata);
+    }
+  }, [onImageLoadProp]);
+
+  const handleSaveClick = useCallback(() => {
+    saveToLocalStorage();
+    Toast.success(t('annotation.save.success', 'Annotations saved successfully'));
+  }, [saveToLocalStorage, t]);
+
+  const handleExportClick = useCallback(() => {
+    if (!imageMetadata) {
+      Toast.warning(t('annotation.export.waitForImage', 'Please wait for image to load'));
+      return;
+    }
+    setExportDialogVisible(true);
+  }, [imageMetadata, t]);
 
   const handleZoomIn = () => {
     setZoomMode('MANUAL_ZOOM'); // Switch to manual mode when user zooms
@@ -87,8 +113,7 @@ const Annotation = () => {
   }, [setActiveTool]);
 
   return (
-    <AnnotationProvider>
-      <div className="flex flex-col h-full" style={{ minWidth: '1024px', backgroundColor: 'var(--semi-color-bg-0)', overflow: 'hidden' }}>
+    <div className="flex flex-col h-full" style={{ minWidth: '1024px', backgroundColor: 'var(--semi-color-bg-0)', overflow: 'hidden' }}>
         <div className="flex flex-1" style={{ padding: '1.5rem', backgroundColor: 'var(--semi-color-bg-0)', minHeight: 0 }}>
           <div
             className="flex-1 flex overflow-hidden"
@@ -110,12 +135,44 @@ const Annotation = () => {
               }}
             >
               <div>
-                <h1 className="text-xl font-semibold" style={{ margin: 0 }}>{t('annotation.page.title', { id })}</h1>
+                <h1 className="text-xl font-semibold" style={{ margin: 0 }}>
+                  {t('annotation.page.title', { id })}
+                  {isDirty && <span style={{ marginLeft: '8px', color: 'var(--semi-color-warning)' }}>●</span>}
+                </h1>
                 <p className="text-sm" style={{ margin: 0, color: 'var(--semi-color-text-2)' }}>
                   {t('annotation.page.imageSource', { path: imagePath })}
                 </p>
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSaveClick}
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '0.5rem',
+                    border: '1px solid var(--semi-color-border)',
+                    backgroundColor: isDirty ? 'var(--semi-color-primary)' : 'var(--semi-color-fill-0)',
+                    color: isDirty ? 'white' : 'var(--semi-color-text-0)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {t('annotation.save.button', 'Save')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportClick}
+                  disabled={annotations.length === 0}
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '0.5rem',
+                    border: '1px solid var(--semi-color-border)',
+                    backgroundColor: annotations.length > 0 ? 'var(--semi-color-success)' : 'var(--semi-color-fill-0)',
+                    color: annotations.length > 0 ? 'white' : 'var(--semi-color-text-3)',
+                    cursor: annotations.length > 0 ? 'pointer' : 'not-allowed',
+                  }}
+                >
+                  {t('annotation.export.button', 'Export')}
+                </button>
                 <button
                   type="button"
                   disabled
@@ -182,6 +239,7 @@ const Annotation = () => {
                     setZoom={setZoom}
                     zoomMode={zoomMode}
                     imagePath={imagePath}
+                    onImageLoad={handleImageLoad}
                   />
                 </div>
                 <aside style={{ width: '300px', minWidth: '280px', height: '100%', borderLeft: '1px solid var(--semi-color-border)', overflow: 'hidden' }}>
@@ -191,7 +249,33 @@ const Annotation = () => {
             </div>
           </div>
         </div>
+
+        <ExportDialog
+          visible={exportDialogVisible}
+          onCancel={() => setExportDialogVisible(false)}
+          annotations={annotations}
+          labels={labels}
+          imageMetadata={imageMetadata}
+        />
       </div>
+  );
+};
+
+const Annotation = () => {
+  const { id } = useParams();
+  const [imageMetadata, setImageMetadata] = useState(null);
+  
+  // Map project ID to sample images
+  const imagePath = `/samples/image_${String(id).padStart(3, '0')}.jpg`;
+  
+  return (
+    <AnnotationProvider 
+      imageId={id} 
+      imagePath={imagePath}
+      imageWidth={imageMetadata?.width}
+      imageHeight={imageMetadata?.height}
+    >
+      <AnnotationContent onImageLoad={setImageMetadata} />
     </AnnotationProvider>
   );
 };

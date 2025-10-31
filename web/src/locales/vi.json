@@ -138,6 +138,16 @@
       "unassigned": "Chưa gán",
       "annotationCount": "{{count}} chú thích",
       "selectShape": "Chọn một hình để chỉnh sửa thuộc tính"
+    },
+    "save": {
+      "button": "Lưu",
+      "success": "Đã lưu chú thích thành công",
+      "autoSave": "Tự động lưu",
+      "lastSaved": "Lưu lần cuối: {{time}}"
+    },
+    "export": {
+      "button": "Xuất",
+      "waitForImage": "Vui lòng đợi hình ảnh tải xong"
     }
   },
   "theme": {
@@ -157,7 +167,15 @@
     "name": "Tên xuất dữ liệu",
     "format": "Định dạng",
     "status": "Trạng thái",
-    "createdAt": "Ngày tạo"
+    "createdAt": "Ngày tạo",
+    "dialog": {
+      "title": "Xuất Chú Thích",
+      "export": "Xuất",
+      "format": "Định Dạng Xuất",
+      "stats": "Tổng Chú Thích: {{count}}",
+      "labels": "Tổng Nhãn: {{count}}",
+      "noAnnotations": "Không có chú thích để xuất"
+    }
   },
   "settings": {
     "general": "Chung",

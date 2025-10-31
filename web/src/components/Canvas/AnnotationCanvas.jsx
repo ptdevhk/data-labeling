@@ -23,7 +23,7 @@ const hexToRgba = (hex, alpha = 1) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, imagePath, zoomMode = 'FIT_WIDTH', setZoom }) => {
+const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, imagePath, zoomMode = 'FIT_WIDTH', setZoom, onImageLoad }) => {
   const canvasRef = useRef(null);
   const fabricCanvasRef = useRef(null);
   const drawingShapeRef = useRef(null);
@@ -137,8 +137,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         type: 'rectangle',
         labelId: activeLabelId,
         coordinates: {
-          x: rectShape.left,
-          y: rectShape.top,
+          left: rectShape.left,
+          top: rectShape.top,
           width: normalizedWidth,
           height: normalizedHeight,
         },
@@ -199,8 +199,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
       type,
       labelId,
       coordinates: {
-        x: shape.left,
-        y: shape.top,
+        left: shape.left,
+        top: shape.top,
         width: normalizedWidth,
         height: normalizedHeight,
       },
@@ -438,8 +438,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
 
         updateAnnotationRef.current(target.annotationId, {
           coordinates: {
-            x: target.left,
-            y: target.top,
+            left: target.left,
+            top: target.top,
             width: normalizedWidth,
             height: normalizedHeight,
           },
@@ -793,6 +793,18 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         backgroundImageRef.current = img;
         imageLoadedRef.current = true;
 
+        // Notify parent with image metadata
+        if (onImageLoad) {
+          const imageId = imagePath.match(/image_(\d+)/)?.[1] || '001';
+          const imageName = imagePath.split('/').pop();
+          onImageLoad({
+            id: imageId,
+            name: imageName,
+            width: img.width,
+            height: img.height,
+          });
+        }
+
         // Initial sizing - center and apply zoom immediately
         // The ResizeObserver will also trigger if canvas size changes
         centerBackgroundImage(canvas);
@@ -807,7 +819,7 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
         console.error('Image path:', imagePath);
         console.error('Error details:', err.message, err.stack);
       });
-  }, [imagePath, zoomMode, parentCanvasRef]);
+  }, [imagePath, zoomMode, parentCanvasRef, onImageLoad]);
 
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
@@ -833,8 +845,8 @@ const AnnotationCanvas = ({ activeTool = 'select', canvasRef: parentCanvasRef, i
 
       if (!shapeRegistryRef.current.has(annotation.id)) {
         const rect = new Rect({
-          left: annotation.coordinates.x,
-          top: annotation.coordinates.y,
+          left: annotation.coordinates.left,
+          top: annotation.coordinates.top,
           width: annotation.coordinates.width,
           height: annotation.coordinates.height,
           fill: 'transparent', // No fill by default

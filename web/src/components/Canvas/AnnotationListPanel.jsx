@@ -34,7 +34,7 @@ const AnnotationListPanel = () => {
                 2,
               )
             : '—',
-        position: `${formatCoordinate(selectedAnnotation.coordinates.x)}, ${formatCoordinate(selectedAnnotation.coordinates.y)}`,
+        position: `${formatCoordinate(selectedAnnotation.coordinates.left)}, ${formatCoordinate(selectedAnnotation.coordinates.top)}`,
       }
     : null;
 
@@ -214,7 +214,7 @@ const AnnotationListPanel = () => {
                   </span>
                 </div>
                 <div className="text-xs text-gray-500">
-                  {`x:${formatCoordinate(annotation.coordinates.x)} y:${formatCoordinate(annotation.coordinates.y)} · w:${formatCoordinate(annotation.coordinates.width)} · h:${formatCoordinate(annotation.coordinates.height)}`}
+                  {`x:${formatCoordinate(annotation.coordinates.left)} y:${formatCoordinate(annotation.coordinates.top)} · w:${formatCoordinate(annotation.coordinates.width)} · h:${formatCoordinate(annotation.coordinates.height)}`}
                 </div>
               </div>
               <div className="flex items-center gap-2">

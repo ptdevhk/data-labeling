@@ -138,6 +138,16 @@
       "unassigned": "未分配",
       "annotationCount": "{{count}} 个标注",
       "selectShape": "选择一个形状以编辑属性"
+    },
+    "save": {
+      "button": "保存",
+      "success": "注释保存成功",
+      "autoSave": "自动保存",
+      "lastSaved": "最后保存: {{time}}"
+    },
+    "export": {
+      "button": "导出",
+      "waitForImage": "请等待图像加载"
     }
   },
   "theme": {
@@ -157,7 +167,15 @@
     "name": "导出名称",
     "format": "格式",
     "status": "状态",
-    "createdAt": "创建时间"
+    "createdAt": "创建时间",
+    "dialog": {
+      "title": "导出注释",
+      "export": "导出",
+      "format": "导出格式",
+      "stats": "总注释数: {{count}}",
+      "labels": "总标签数: {{count}}",
+      "noAnnotations": "没有注释可导出"
+    }
   },
   "settings": {
     "general": "通用",
