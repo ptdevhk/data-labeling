@@ -35,7 +35,8 @@
     "alwaysDark": "Always use dark theme",
     "followSystem": "Follow system theme",
     "skip": "Skip",
-    "assign": "Assign"
+    "assign": "Assign",
+    "active": "Active"
   },
   "nav": {
     "projects": "Projects",
@@ -80,13 +81,48 @@
       "point": "Point",
       "eraser": "Eraser",
       "undo": "Undo",
-      "redo": "Redo"
+      "redo": "Redo",
+      "toolbarAria": "Annotation tools",
+      "hints": {
+        "select": "Select and move shapes",
+        "rectangle": "Draw rectangle",
+        "eraser": "Erase shapes",
+        "undo": "Undo action",
+        "redo": "Redo action"
+      }
     },
     "canvas": {
       "zoom": "Zoom",
       "reset": "Reset View",
       "pan": "Pan",
-      "fullscreen": "Fullscreen"
+      "fullscreen": "Fullscreen",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "resetViewTooltip": "Reset View",
+      "fitWidth": "Fit Width",
+      "fitWidthTooltip": "Toggle zoom follows window width"
+    },
+    "page": {
+      "title": "Annotation #{{id}}",
+      "imageSource": "Image source: {{path}}"
+    },
+    "inspector": {
+      "title": "Annotation Inspector",
+      "subtitle": {
+        "selected": "Details for the selected rectangle",
+        "empty": "Select a rectangle to inspect its details."
+      },
+      "emptyState": "After drawing, click a rectangle or choose it in the list below to review its measurements.",
+      "size": "Size",
+      "area": "Area",
+      "aspect": "Aspect",
+      "position": "Position"
+    },
+    "list": {
+      "title": "Annotations",
+      "total": "Total: {{count}}",
+      "empty": "Draw rectangles on the canvas to create annotations.",
+      "focus": "Focus"
     },
     "labels": {
       "title": "Labels",
@@ -98,7 +134,20 @@
       "assignLabel": "Assign Label",
       "selectOrCreateLabel": "Select an existing label or create a new one",
       "createNew": "Create New",
-      "labelName": "Label Name"
+      "labelName": "Label Name",
+      "unassigned": "Unassigned",
+      "annotationCount": "{{count}} annotations",
+      "selectShape": "Select a shape to edit attributes"
+    },
+    "save": {
+      "button": "Save",
+      "success": "Annotations saved successfully",
+      "autoSave": "Auto-save",
+      "lastSaved": "Last saved: {{time}}"
+    },
+    "export": {
+      "button": "Export",
+      "waitForImage": "Please wait for image to load"
     }
   },
   "theme": {
@@ -118,7 +167,15 @@
     "name": "Export Name",
     "format": "Format",
     "status": "Status",
-    "createdAt": "Created At"
+    "createdAt": "Created At",
+    "dialog": {
+      "title": "Export Annotations",
+      "export": "Export",
+      "format": "Export Format",
+      "stats": "Total Annotations: {{count}}",
+      "labels": "Total Labels: {{count}}",
+      "noAnnotations": "No annotations to export"
+    }
   },
   "settings": {
     "general": "General",

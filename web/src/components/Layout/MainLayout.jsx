@@ -94,8 +94,9 @@ const MainLayout = () => {
         >
           <Content
             style={{
-              flex: '1 0 auto',
-              overflowY: isMobile ? 'visible' : 'auto',
+              flex: '1 1 0',
+              minHeight: 0,
+              overflowY: isAnnotationPage ? 'hidden' : (isMobile ? 'visible' : 'auto'),
               WebkitOverflowScrolling: 'touch',
               padding: shouldInnerPadding ? (isMobile ? '5px' : '24px') : '0',
               position: 'relative',

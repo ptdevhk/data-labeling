@@ -42,9 +42,9 @@ const Header = ({ onMobileMenuToggle }) => {
   };
 
   const languageOptions = [
+    { value: 'zh', label: '中文' },
     { value: 'en', label: 'English' },
     { value: 'vi', label: 'Tiếng Việt' },
-    { value: 'zh', label: '中文' },
   ];
 
   const themeOptions = [
@@ -183,20 +183,20 @@ const Header = ({ onMobileMenuToggle }) => {
                   {themeOptions.map((option) => (
                     <Dropdown.Item
                       key={option.key}
-                      icon={option.icon}
                       onClick={() => handleThemeModeChange(option.key)}
-                      className={`!px-3 !py-1.5 transition-colors ${
+                      className={`!flex !items-start !gap-3 !px-3 !py-1.5 !text-sm transition-colors ${
                         theme === option.key
-                          ? '!bg-semi-color-primary-light-default dark:!bg-blue-600 !font-semibold'
-                          : 'hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-600'
+                          ? '!bg-semi-color-primary-light-default dark:!bg-blue-600 !font-semibold !text-semi-color-text-0 dark:!text-gray-200'
+                          : '!text-semi-color-text-0 dark:!text-gray-200 hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-600'
                       }`}
                     >
-                      <div className='flex flex-col'>
-                        <span className='!text-sm !text-semi-color-text-0 dark:!text-gray-200'>{option.label}</span>
+                      <span className="mt-0.5">{option.icon}</span>
+                      <span className="flex flex-col text-left">
+                        <span className='text-sm'>{option.label}</span>
                         <span className='text-xs text-semi-color-text-2 dark:text-gray-400'>
                           {option.description}
                         </span>
-                      </div>
+                      </span>
                     </Dropdown.Item>
                   ))}
                 </Dropdown.Menu>
@@ -217,18 +217,18 @@ const Header = ({ onMobileMenuToggle }) => {
               render={
                 <Dropdown.Menu className='!bg-semi-color-bg-overlay !border-semi-color-border !shadow-lg !rounded-lg dark:!bg-gray-700 dark:!border-gray-600'>
                   <Dropdown.Item
-                    onClick={() => window.location.href = '/console/settings'}
+                    onClick={() => { window.location.href = '/console/settings'; }}
                     className='!px-3 !py-1.5 !text-sm !text-semi-color-text-0 hover:!bg-semi-color-fill-1 dark:!text-gray-200 dark:hover:!bg-blue-500 dark:hover:!text-white transition-colors'
                   >
                     {t('common.profile')}
                   </Dropdown.Item>
                   <Dropdown.Item
-                    onClick={() => window.location.href = '/console/settings'}
+                    onClick={() => { window.location.href = '/console/settings'; }}
                     className='!px-3 !py-1.5 !text-sm !text-semi-color-text-0 hover:!bg-semi-color-fill-1 dark:!text-gray-200 dark:hover:!bg-blue-500 dark:hover:!text-white transition-colors'
                   >
                     {t('common.settings')}
                   </Dropdown.Item>
-                  <Dropdown.Divider />
+                  <Dropdown.Divider className='!my-1 !bg-semi-color-border dark:!bg-gray-600' />
                   <Dropdown.Item
                     onClick={() => {
                       localStorage.clear();

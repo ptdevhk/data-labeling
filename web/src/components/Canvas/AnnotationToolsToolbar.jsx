@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Tooltip } from '@douyinfe/semi-ui';
 import { IconPlus, IconMinus, IconRefresh } from '@douyinfe/semi-icons';
 import {
@@ -5,25 +6,49 @@ import {
   Eraser,
   Undo,
   Redo,
-  MousePointer
+  MousePointer,
+  Maximize2
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZoomOut, onResetView }) => {
-  const drawingTools = [
-    { key: 'select', icon: MousePointer, label: 'Select (V)', aria: 'Select and move shapes' },
-    { key: 'rectangle', icon: Square, label: 'Rectangle (R)', aria: 'Draw rectangle' },
-    // Uncomment other tools as needed
-    // { key: 'polygon', icon: Square, label: 'Polygon (P)', aria: 'Draw polygon' },
-    // { key: 'circle', icon: Circle, label: 'Circle (C)', aria: 'Draw circle' },
-    // { key: 'line', icon: LineIcon, label: 'Line (L)', aria: 'Draw line' },
-    // { key: 'point', icon: PointIcon, label: 'Point (O)', aria: 'Add point' },
-  ];
+const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, zoomMode, onZoomIn, onZoomOut, onResetView, onToggleFitWidth }) => {
+  const { t } = useTranslation();
 
-  const utilityTools = [
-    { key: 'eraser', icon: Eraser, label: 'Eraser (E)', aria: 'Erase shapes' },
-    { key: 'undo', icon: Undo, label: 'Undo (Z)', aria: 'Undo action' },
-    { key: 'redo', icon: Redo, label: 'Redo (Shift+Z)', aria: 'Redo action' },
-  ];
+  const drawingTools = useMemo(() => ([
+    {
+      key: 'select',
+      icon: MousePointer,
+      label: `${t('annotation.tools.select')} (V)`,
+      aria: t('annotation.tools.hints.select', 'Select and move shapes'),
+    },
+    {
+      key: 'rectangle',
+      icon: Square,
+      label: `${t('annotation.tools.rectangle')} (R)`,
+      aria: t('annotation.tools.hints.rectangle', 'Draw rectangle'),
+    },
+  ]), [t]);
+
+  const utilityTools = useMemo(() => ([
+    {
+      key: 'eraser',
+      icon: Eraser,
+      label: `${t('annotation.tools.eraser')} (E)`,
+      aria: t('annotation.tools.hints.eraser', 'Erase shapes'),
+    },
+    {
+      key: 'undo',
+      icon: Undo,
+      label: `${t('annotation.tools.undo')} (Z)`,
+      aria: t('annotation.tools.hints.undo', 'Undo action'),
+    },
+    {
+      key: 'redo',
+      icon: Redo,
+      label: `${t('annotation.tools.redo')} (Shift+Z)`,
+      aria: t('annotation.tools.hints.redo', 'Redo action'),
+    },
+  ]), [t]);
 
   const handleToolSelect = (key) => {
     if (onToolChange) {
@@ -35,26 +60,15 @@ const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZo
     <>
       <style>{`
         .annotation-toolbar {
-          --toolbar-bg: #F3F4F6;
-          --toolbar-border: #E5E7EB;
-          --toolbar-text: #374151;
-          --toolbar-text-light: #6B7280;
-          --toolbar-hover-bg: #EFF6FF;
-          --toolbar-hover-border: #BFDBFE;
-          --toolbar-active-ring: #3B82F6;
-          --toolbar-eraser-hover: #FEF2F2;
-          --toolbar-eraser-border: #FECACA;
-        }
-        .dark .annotation-toolbar {
-          --toolbar-bg: #1F2937;
-          --toolbar-border: #374151;
-          --toolbar-text: #D1D5DB;
-          --toolbar-text-light: #9CA3AF;
-          --toolbar-hover-bg: #1E3A8A;
-          --toolbar-hover-border: #3B82F6;
-          --toolbar-active-ring: #60A5FA;
-          --toolbar-eraser-hover: #7F1D1D;
-          --toolbar-eraser-border: #991B1B;
+          --toolbar-bg: var(--semi-color-bg-1);
+          --toolbar-border: var(--semi-color-border);
+          --toolbar-text: var(--semi-color-text-0);
+          --toolbar-text-light: var(--semi-color-text-2);
+          --toolbar-hover-bg: var(--semi-color-fill-0);
+          --toolbar-hover-border: var(--semi-color-border);
+          --toolbar-active-ring: var(--semi-color-primary);
+          --toolbar-eraser-hover: var(--semi-color-fill-2);
+          --toolbar-eraser-border: var(--semi-color-border);
         }
         .annotation-toolbar-btn {
           background: transparent;
@@ -82,6 +96,7 @@ const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZo
           background: var(--toolbar-hover-bg);
           border-color: var(--toolbar-active-ring);
           box-shadow: 0 0 0 2px var(--toolbar-active-ring);
+          color: var(--toolbar-active-ring);
         }
         .annotation-toolbar-btn.eraser:hover {
           background: var(--toolbar-eraser-hover);
@@ -111,16 +126,16 @@ const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZo
         style={{
           background: 'var(--toolbar-bg)',
           border: '1px solid var(--toolbar-border)',
-          width: '4rem',
-          height: '400px',
-          minWidth: '4rem',
-          padding: '0.5rem',
+          width: '4.5rem',
+          height: '100%',
+          minWidth: '4.5rem',
+          padding: '0.75rem 0.5rem',
           alignItems: 'center',
           borderRadius: '0.5rem',
           boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
         }}
         role="toolbar"
-        aria-label="Annotation tools"
+        aria-label={t('annotation.tools.toolbarAria', 'Annotation tools')}
       >
         {/* Core Drawing Tools */}
         <div className="space-y-1">
@@ -159,28 +174,37 @@ const AnnotationToolsToolbar = ({ activeTool, onToolChange, zoom, onZoomIn, onZo
 
           {/* Zoom Controls (integrated at bottom, styled to match) */}
           <div className="space-y-1 mt-2">
-            <Tooltip content="Zoom In (+)" position="right">
+            <Tooltip content={t('annotation.canvas.fitWidthTooltip', 'Toggle zoom follows window width')} position="right">
+              <button
+                onClick={onToggleFitWidth}
+                aria-label={t('annotation.canvas.fitWidth', 'Fit Width')}
+                className={`annotation-toolbar-btn zoom ${zoomMode === 'FIT_WIDTH' ? 'active' : ''}`}
+              >
+                <Maximize2 size={20} />
+              </button>
+            </Tooltip>
+            <Tooltip content={`${t('annotation.canvas.zoomIn', 'Zoom In')} (+)`} position="right">
               <button
                 onClick={onZoomIn}
-                aria-label="Zoom In"
+                aria-label={t('annotation.canvas.zoomIn', 'Zoom In')}
                 className="annotation-toolbar-btn zoom"
               >
                 <IconPlus size={20} />
               </button>
             </Tooltip>
-            <Tooltip content="Zoom Out (-)" position="right">
+            <Tooltip content={`${t('annotation.canvas.zoomOut', 'Zoom Out')} (-)`} position="right">
               <button
                 onClick={onZoomOut}
-                aria-label="Zoom Out"
+                aria-label={t('annotation.canvas.zoomOut', 'Zoom Out')}
                 className="annotation-toolbar-btn zoom"
               >
                 <IconMinus size={20} />
               </button>
             </Tooltip>
-            <Tooltip content="Reset View (0)" position="right">
+            <Tooltip content={`${t('annotation.canvas.resetViewTooltip', 'Reset View')} (0)`} position="right">
               <button
                 onClick={onResetView}
-                aria-label="Reset View"
+                aria-label={t('annotation.canvas.reset', 'Reset View')}
                 className="annotation-toolbar-btn zoom"
               >
                 <IconRefresh size={20} />
