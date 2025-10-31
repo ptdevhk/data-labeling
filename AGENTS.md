@@ -100,6 +100,82 @@ make generate-client
 
 Web-based image annotation tool with React SPA frontend + FastAPI backend. Browser-only, manual labeling (no auto-segmentation/SAM). Monorepo structure: `./web` (React+Vite) and `./svc` (FastAPI+Python).
 
+**Latest Updates (feat/clone branch - 2025-10-31):**
+
+This branch implements a comprehensive annotation system with advanced canvas interactions, multi-select capabilities, and improved UI/UX patterns. Key changes:
+
+**Annotation System Enhancements:**
+- **Dual Zoom Modes**: FIT_WIDTH (default, auto-scales to container) and MANUAL_ZOOM (1:1 pixel size)
+- **Canvas Pan Constraints**: Limits panning to image boundaries with proper edge detection
+- **Selection Handling**: Multi-select with Shift+click, single select, click-to-deselect on canvas
+- **Annotation List Panel**: New dedicated panel showing all annotations with visibility/lock/delete controls
+- **Label Assignment**: Modal dialog for assigning labels to shapes with color picker
+- **Hover Interactions**: Visual feedback on hover (dashed stroke, handles visible)
+- **Drag & Drop**: Move annotations with proper boundary constraints
+
+**Component Updates:**
+- `AnnotationCanvas.jsx`: Complete rewrite with ~955 lines of new canvas logic
+  - Shape creation: rectangle, circle, polygon, line tools
+  - Selection modes: single, multi-select, click-to-clear
+  - Pan constraints: keeps image visible, prevents over-panning
+  - Zoom integration: syncs with parent zoom controls
+  - Annotation synchronization: two-way sync between Fabric shapes and context state
+- `AnnotationListPanel.jsx`: New 269-line component for annotation management
+  - Tree view of all annotations
+  - Visibility toggle (eye icon)
+  - Lock/unlock editing (lock icon)
+  - Delete annotation (trash icon)
+  - Select annotation by clicking list item
+- `AnnotationToolsToolbar.jsx`: Enhanced with tooltips, fit width button
+- `LabelsPanel.jsx`: Refactored for better label management
+- `LabelAssignmentDialog.jsx`: Modal for post-creation label assignment
+
+**Context & State:**
+- `AnnotationContext.jsx`: New state management for:
+  - `annotations`: Array of all annotations with id, type, coordinates, label, color
+  - `activeAnnotationId`: Currently selected annotation
+  - `selectAnnotation(id)`: Select single annotation
+  - `toggleAnnotationSelection(id)`: Multi-select with Shift
+  - `clearSelection()`: Deselect all
+  - CRUD operations: add, update, remove, clear all
+
+**UI/UX Improvements:**
+- Header menus refactored to use Semi UI Dropdown (replacing custom implementations)
+- Annotation page layout: 3-panel design (toolbar 64px + canvas flex + list panel 250px)
+- Dark mode support with proper stroke colors (light mode: #3b82f6, dark: #60a5fa)
+- Responsive hover states with visual feedback
+- Tooltips on all toolbar buttons (keyboard shortcuts shown)
+
+**Internationalization:**
+- New i18n keys in en/vi/zh locales:
+  - `annotation.toolbar.*`: Tool names and shortcuts
+  - `annotation.listPanel.*`: List panel UI strings
+  - `annotation.labelDialog.*`: Label assignment dialog
+  - `annotation.actions.*`: Action buttons (show/hide, lock/unlock, delete)
+
+**Technical Patterns:**
+- Refs for stable callbacks: Prevents re-render loops in canvas event handlers
+- Shape registry: Maps Fabric.js objects to annotation IDs for two-way sync
+- Color utilities: `hexToRgba()` for alpha channel support
+- Dimension computation: Handles scaled shapes with fallback logic
+- Boundary detection: Accurate edge checking for pan constraints
+
+**Files Changed (14 files, +1537 -366 lines):**
+- Major: AnnotationCanvas.jsx, AnnotationListPanel.jsx (new), AnnotationContext.jsx
+- Moderate: Annotation.jsx, AnnotationToolsToolbar.jsx, LabelsPanel.jsx
+- Minor: Header.jsx, MainLayout.jsx, LabelAssignmentDialog.jsx
+- Docs: PROJECT.md (design updates), AGENTS.md (this update)
+- i18n: en.json, vi.json, zh.json (47 new keys each)
+
+**Key Implementation Notes for Agents:**
+- When adding new canvas features, use `fabricCanvasRef.current` to access Fabric.js canvas
+- Shape selection should update both `shapeRegistryRef` and `AnnotationContext` state
+- Color values: Use `hexToRgba(color, alpha)` for consistent RGBA formatting
+- Pan boundaries: Check `backgroundImageRef.current` dimensions before panning
+- Multi-select: Use `annotations.filter(a => a.selected)` to get selected annotations
+- Delete operations: Must call both `canvas.remove(shape)` and `removeAnnotation(id)`
+- **Always reference MCP tools for implementation patterns**: Use `context7` for Fabric.js/Semi Design docs, `deepwiki` for React/fabric.js repo best practices
+
 **Layout Architecture** (Updated 2025-10-20):
 - Follows **new-api** design pattern (`QuantumNous/new-api`)
 - **Routes**: `/` redirects to `/console`, main pages: `/console`, `/console/projects`, `/console/datasets`, `/console/exports`, `/console/settings`
@@ -407,24 +483,27 @@ data-labeling/
 └── CLAUDE.local.md       # Agent instructions (this file)
 ```
 
-## Implementation Status (as of 2025-10-28)
+## Implementation Status (as of 2025-10-31)
 
 ### ✅ Completed
 **Frontend:**
 - React 18 + Vite SPA with 7 routed pages
-- Annotation canvas with 5 working tools (rectangle, circle, polygon, line, select)
+- **Annotation canvas with 5 working tools** (rectangle, circle, polygon, line, select)
+- **Advanced selection system**: Single select, multi-select with Shift+click, click-to-deselect
+- **Annotation List Panel**: Dedicated panel with visibility/lock/delete controls (NEW in feat/clone)
+- **Label Assignment Dialog**: Post-creation label assignment with color picker (NEW in feat/clone)
+- **Canvas Pan Constraints**: Prevents over-panning beyond image boundaries (NEW in feat/clone)
+- **Hover Interactions**: Visual feedback on annotation hover (dashed stroke, handles) (NEW in feat/clone)
+- **Dual Zoom Modes**: FIT_WIDTH (auto-scale) and MANUAL_ZOOM (1:1 pixels) (NEW in feat/clone)
 - Responsive sidebar (auto-collapses on annotation page)
-- Theme switching (light/dark)
-- i18n framework (EN/VI/ZH)
+- Theme switching (light/dark) with proper annotation colors
+- i18n framework (EN/VI/ZH) with 47+ new annotation-related keys
 - Background image loading (`/samples/image_{ID}.jpg`)
-- **Zoom controls with FIT_WIDTH mode** (default ON, auto-adjusts to window width)
-  - Fit Width toggle button (Maximize2 icon)
-  - MANUAL mode: Displays actual image size (e.g., 1635×1280px at 100%)
-  - FIT_WIDTH mode: Scales to fit container width (e.g., 47% zoom)
-  - Consistent behavior on refresh (no image shrinking)
-  - Proper image positioning (visible, not just corner)
-- 3-panel annotation layout (64px toolbar + flex canvas + 250px labels panel)
+- Zoom controls (50%-300%)
+- 3-panel annotation layout (64px toolbar + flex canvas + 250px list panel)
 - **Tailwind CSS v3 + Semi Design integration** (CSS layers, Vite plugin, token mapping)
+- **Semi UI Dropdown menus** in header (language, theme, user)
+- **Tooltips on toolbar buttons** with keyboard shortcuts
 
 **Backend:**
 - FastAPI with JWT auth (`/token` endpoint)
@@ -440,33 +519,31 @@ data-labeling/
 - Testing (pytest with coverage)
 
 ### 🚧 Partially Implemented
-- Labels panel (UI only, no functionality)
-- Properties panel (placeholder)
-- Project/Dataset management (pages only, no CRUD)
+- Labels panel (UI + basic CRUD, needs advanced features)
+- Properties panel (placeholder, needs full implementation)
+- Project/Dataset management (pages only, no backend CRUD)
 - Export page (scaffold only)
+- **Annotation state persistence** (in-memory only, no backend save/load yet)
 
 ### ❌ Not Yet Implemented (MVP Requirements)
 **High Priority:**
-- Annotation persistence (save/load to backend API)
-- Backend annotation CRUD APIs
-- Undo/Redo functionality
-- Keyboard shortcuts for tools
-- Point tool implementation
-- Shape editing/deletion UI
-- Label assignment to shapes
-- Properties panel functionality
-- Annotation list/tree view
+- **Annotation persistence to backend** (save/load annotations via API)
+- Backend annotation CRUD APIs (POST/GET/PUT/DELETE endpoints)
+- Undo/Redo functionality (history stack)
+- **Keyboard shortcuts for tools** (R, C, P, L, S keys)
+- Shape editing UI improvements (vertex manipulation for polygons)
+- Advanced label features (nested categories, attributes)
+- Annotation validation (min size, max count)
 - Project image listing API
 - Export formats (COCO JSON, YOLO TXT, CSV)
 
 **Medium Priority:**
 - Loading states for images
 - Error boundaries for canvas
-- Tooltips on toolbar buttons
-- Canvas pan/drag
-- Annotation validation
-- Multi-select for bulk operations
-- Annotation statistics
+- Canvas drag-to-pan (currently select tool only)
+- Multi-select bulk operations (batch delete, batch label)
+- Annotation statistics (count by label, coverage %)
+- Search/filter annotations in list panel
 
 ## Development Conventions
 
