@@ -139,6 +139,11 @@
       "annotationCount": "{{count}} annotations",
       "selectShape": "Select a shape to edit attributes"
     },
+    "class": {
+      "defect1": "Defect1",
+      "defect2": "Defect2",
+      "defect3": "Defect3"
+    },
     "save": {
       "button": "Save",
       "success": "Annotations saved successfully",

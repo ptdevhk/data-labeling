@@ -139,6 +139,11 @@
       "annotationCount": "{{count}} chú thích",
       "selectShape": "Chọn một hình để chỉnh sửa thuộc tính"
     },
+    "class": {
+      "defect1": "Khuyết tật 1",
+      "defect2": "Khuyết tật 2",
+      "defect3": "Khuyết tật 3"
+    },
     "save": {
       "button": "Lưu",
       "success": "Đã lưu chú thích thành công",

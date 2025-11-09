@@ -139,6 +139,11 @@
       "annotationCount": "{{count}} 个标注",
       "selectShape": "选择一个形状以编辑属性"
     },
+    "class": {
+      "defect1": "缺陷1",
+      "defect2": "缺陷2",
+      "defect3": "缺陷3"
+    },
     "save": {
       "button": "保存",
       "success": "注释保存成功",

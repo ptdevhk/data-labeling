@@ -9,7 +9,7 @@ all: build-frontend start-backend
 
 clean-frontend-cache: ## Clear frontend cache and dependencies (fixes Vite hangs)
 	@echo "🧹 Clearing frontend cache and dependencies..."
-	@cd $(FRONTEND_DIR) && rm -rf node_modules bun.lockb .vite
+	@cd $(FRONTEND_DIR) && rm -rf node_modules bun.lock .vite
 	@echo "✅ Frontend cache cleared. Run 'cd web && bun install' to reinstall."
 
 build-frontend:
