@@ -20,7 +20,7 @@
     "@douyinfe/semi-ui": "^2.86.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@karlorz/react-image-annotate": "^4.0.3",
+    "@karlorz/react-image-annotate": "^4.0.4",
     "@mui/material": "^6.5.0",
     "@visactor/react-vchart": "^2.0.5",
     "axios": "^1.12.2",
