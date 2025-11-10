@@ -10,7 +10,7 @@
 1. **context7** - For library documentation and code examples:
    - First call `mcp__context7__resolve-library-id` to get the library ID
    - Then call `mcp__context7__get-library-docs` with the library ID
-   - Use for: React, FastAPI, Fabric.js, Semi Design, i18next, Tailwind CSS, etc.
+   - Use for: React, FastAPI, Semi Design, i18next, Tailwind CSS, @karlorz/react-image-annotate, etc.
    - Example: Get React Router DOM 7 docs before refactoring routes
 
 2. **deepwiki** - For GitHub repository deep knowledge:
@@ -38,7 +38,7 @@ When refactoring JavaScript/TypeScript code:
    - Follow React 18 patterns (no deprecated APIs like findDOMNode)
    - Use React Router DOM 7 nested routes syntax
    - Maintain Semi Design 2.86 compatibility
-   - Keep Fabric.js 6 canvas patterns
+   - Use `@karlorz/react-image-annotate` for annotation features
    - Preserve i18n structure with react-i18next
 
 3. **Testing approach**:
@@ -60,12 +60,13 @@ When working on this project, frequently query these repositories:
 **Frontend Libraries:**
 - `facebook/react` - React core, hooks, performance optimization
 - `remix-run/react-router` - React Router DOM 7 routing patterns
-- `fabricjs/fabric.js` - Canvas manipulation, object handling, events
+- `karlorz/react-image-annotate` - **Primary annotation library**, tools, keyboard shortcuts
 - `DouyinFE/semi-design` - Semi Design components, theming, customization
 - `i18next/react-i18next` - Internationalization patterns, language switching
 - `vitejs/vite` - Build configuration, plugins, optimization
 - `TanStack/query` - Server state management, caching, mutations
 - `tailwindlabs/tailwindcss` - Tailwind CSS v3 patterns, CSS layers, integration
+- `fabricjs/fabric.js` - (Legacy) Canvas manipulation for custom implementation reference
 
 **Backend Libraries:**
 - `fastapi/fastapi` - API design, dependency injection, async patterns
@@ -82,6 +83,8 @@ When working on this project, frequently query these repositories:
 - "What are performance optimization techniques for [library name]?"
 - "How to properly integrate [library A] with [library B]?"
 - "What are common pitfalls when using [library name] with React 18?"
+- "How to customize @karlorz/react-image-annotate tools and UI?"
+- "What are best practices for annotation data structure and persistence?"
 
 ## TypeScript & OpenAPI Client
 
@@ -100,81 +103,45 @@ make generate-client
 
 Web-based image annotation tool with React SPA frontend + FastAPI backend. Browser-only, manual labeling (no auto-segmentation/SAM). Monorepo structure: `./web` (React+Vite) and `./svc` (FastAPI+Python).
 
-**Latest Updates (feat/clone branch - 2025-10-31):**
+**Latest Updates (2025-11-10):**
 
-This branch implements a comprehensive annotation system with advanced canvas interactions, multi-select capabilities, and improved UI/UX patterns. Key changes:
+**Current Annotation Implementation: @karlorz/react-image-annotate**
 
-**Annotation System Enhancements:**
-- **Dual Zoom Modes**: FIT_WIDTH (default, auto-scales to container) and MANUAL_ZOOM (1:1 pixel size)
-- **Canvas Pan Constraints**: Limits panning to image boundaries with proper edge detection
-- **Selection Handling**: Multi-select with Shift+click, single select, click-to-deselect on canvas
-- **Annotation List Panel**: New dedicated panel showing all annotations with visibility/lock/delete controls
-- **Label Assignment**: Modal dialog for assigning labels to shapes with color picker
-- **Hover Interactions**: Visual feedback on hover (dashed stroke, handles visible)
-- **Drag & Drop**: Move annotations with proper boundary constraints
+The project now uses `@karlorz/react-image-annotate` (v4.0.3) as the primary annotation library. This is a mature, feature-complete image annotation component for React.
 
-**Component Updates:**
-- `AnnotationCanvas.jsx`: Complete rewrite with ~955 lines of new canvas logic
-  - Shape creation: rectangle, circle, polygon, line tools
-  - Selection modes: single, multi-select, click-to-clear
-  - Pan constraints: keeps image visible, prevents over-panning
-  - Zoom integration: syncs with parent zoom controls
-  - Annotation synchronization: two-way sync between Fabric shapes and context state
-- `AnnotationListPanel.jsx`: New 269-line component for annotation management
-  - Tree view of all annotations
-  - Visibility toggle (eye icon)
-  - Lock/unlock editing (lock icon)
-  - Delete annotation (trash icon)
-  - Select annotation by clicking list item
-- `AnnotationToolsToolbar.jsx`: Enhanced with tooltips, fit width button
-- `LabelsPanel.jsx`: Refactored for better label management
-- `LabelAssignmentDialog.jsx`: Modal for post-creation label assignment
+**Active Implementation:**
+- **File**: `web/src/pages/Annotation.jsx` (active route: `/console/annotation/:id`)
+- **Library**: `@karlorz/react-image-annotate` v4.0.3
+- **Features**:
+  - Built-in annotation tools: select, box, polygon, point, line, expanding-line
+  - Keyboard shortcuts: S (select), B (box), P (polygon), O (point)
+  - Multi-language support via `I18nProvider` (en, zh, vi)
+  - Theme integration (light/dark mode support)
+  - Task descriptions with Markdown support
+  - Region class labels with `regionClsList` prop
+  - Image navigation (next/previous with callbacks)
+  - Clone/settings/fullscreen controls
+  - Auto-saves annotations on exit
 
-**Context & State:**
-- `AnnotationContext.jsx`: New state management for:
-  - `annotations`: Array of all annotations with id, type, coordinates, label, color
-  - `activeAnnotationId`: Currently selected annotation
-  - `selectAnnotation(id)`: Select single annotation
-  - `toggleAnnotationSelection(id)`: Multi-select with Shift
-  - `clearSelection()`: Deselect all
-  - CRUD operations: add, update, remove, clear all
+**Implementation Details:**
+- **Language mapping**: Maps i18next language codes to react-image-annotate (en/zh/vi)
+- **Theme sync**: Passes `resolvedTheme` from `ThemeContext` to maintain consistency
+- **Image structure**: Single image with `src`, `name`, `regions`, `pixelSize` properties
+- **Callbacks**:
+  - `onExit(output)`: Saves annotations and navigates to projects
+  - `onNextImage(output)`: Navigates to next image in dataset (TODO)
+  - `onPrevImage(output)`: Navigates to previous image in dataset (TODO)
+- **Enabled tools**: select, create-box, create-polygon, create-point, create-line, create-expanding-line
+- **Region classes**: Defect1, Defect2, Defect3 (configurable via i18n)
 
-**UI/UX Improvements:**
-- Header menus refactored to use Semi UI Dropdown (replacing custom implementations)
-- Annotation page layout: 3-panel design (toolbar 64px + canvas flex + list panel 250px)
-- Dark mode support with proper stroke colors (light mode: #3b82f6, dark: #60a5fa)
-- Responsive hover states with visual feedback
-- Tooltips on all toolbar buttons (keyboard shortcuts shown)
+**Vite Configuration:**
+- Added to `optimizeDeps.include` in `vite.config.ts` (line 38)
+- Ensures proper bundling and dev server compatibility
 
-**Internationalization:**
-- New i18n keys in en/vi/zh locales:
-  - `annotation.toolbar.*`: Tool names and shortcuts
-  - `annotation.listPanel.*`: List panel UI strings
-  - `annotation.labelDialog.*`: Label assignment dialog
-  - `annotation.actions.*`: Action buttons (show/hide, lock/unlock, delete)
-
-**Technical Patterns:**
-- Refs for stable callbacks: Prevents re-render loops in canvas event handlers
-- Shape registry: Maps Fabric.js objects to annotation IDs for two-way sync
-- Color utilities: `hexToRgba()` for alpha channel support
-- Dimension computation: Handles scaled shapes with fallback logic
-- Boundary detection: Accurate edge checking for pan constraints
-
-**Files Changed (14 files, +1537 -366 lines):**
-- Major: AnnotationCanvas.jsx, AnnotationListPanel.jsx (new), AnnotationContext.jsx
-- Moderate: Annotation.jsx, AnnotationToolsToolbar.jsx, LabelsPanel.jsx
-- Minor: Header.jsx, MainLayout.jsx, LabelAssignmentDialog.jsx
-- Docs: PROJECT.md (design updates), AGENTS.md (this update)
-- i18n: en.json, vi.json, zh.json (47 new keys each)
-
-**Key Implementation Notes for Agents:**
-- When adding new canvas features, use `fabricCanvasRef.current` to access Fabric.js canvas
-- Shape selection should update both `shapeRegistryRef` and `AnnotationContext` state
-- Color values: Use `hexToRgba(color, alpha)` for consistent RGBA formatting
-- Pan boundaries: Check `backgroundImageRef.current` dimensions before panning
-- Multi-select: Use `annotations.filter(a => a.selected)` to get selected annotations
-- Delete operations: Must call both `canvas.remove(shape)` and `removeAnnotation(id)`
-- **Always reference MCP tools for implementation patterns**: Use `context7` for Fabric.js/Semi Design docs, `deepwiki` for React/fabric.js repo best practices
+**Repository Reference:**
+- GitHub: `karlorz/react-image-annotate`
+- Use `deepwiki` for best practices: `mcp__deepwiki__ask_question` with repo `karlorz/react-image-annotate`
+- Use `context7` for API documentation
 
 **Layout Architecture** (Updated 2025-10-20):
 - Follows **new-api** design pattern (`QuantumNous/new-api`)
@@ -254,49 +221,30 @@ cd web && bun add <pkg>           # Add frontend dep
 - React 18.3 (downgraded for Semi Design compatibility)
 - React Router DOM 7 (nested routes)
 - Semi Design 2.86 (UI components)
-- Fabric.js 6 (canvas annotations)
+- **@karlorz/react-image-annotate 4.0.3** (primary annotation library)
 - **Tailwind CSS 3.4.18** (integrated with Semi Design via CSS layers)
 - i18next + react-i18next (i18n)
+- Material-UI (MUI) 6.5.0 (supplementary UI components)
 
-**Annotation Canvas Zoom Architecture** (Updated 2025-10-28):
+**Annotation System Architecture:**
 
-The annotation page implements a dual-zoom system inspired by AnyLabeling:
+The annotation page uses `@karlorz/react-image-annotate`, a complete annotation solution with built-in tools, keyboard shortcuts, and multi-language support.
 
-**Two Zoom Modes:**
-1. **FIT_WIDTH** (Default ON):
-   - Image scales to fit container width automatically
-   - Auto-adjusts on window resize via ResizeObserver
-   - Formula: `canvasZoom = (containerWidth - 2) / imageWidth`
-   - Background image: Always at 1:1 scale (scaleX: 1, scaleY: 1)
-   - Zoom handled by: Fabric canvas zoom property
-   - Toggle button: Active/highlighted state
+**Component Structure:**
+- `web/src/pages/Annotation.jsx` - Main annotation page (ACTIVE)
+  - Wraps `ReactImageAnnotate` component
+  - Integrates with `ThemeContext` for light/dark mode
+  - Maps i18next language to annotator language (en/zh/vi)
+  - Handles image loading and annotation persistence
+  - Provides navigation callbacks (next/prev/exit)
 
-2. **MANUAL_ZOOM** (Toggle OFF):
-   - Image displays at actual pixel size (e.g., 1635×1280px)
-   - Background image: At 1:1 scale (scaleX: 1, scaleY: 1)
-   - Canvas zoom: 1.0 (100%)
-   - Image position: Centered `(canvasWidth - imgWidth) / 2`
-   - Window resize: Does NOT change zoom/scale
-   - Toggle button: Inactive/normal state
-
-**Key Implementation Details:**
-- **Background image scale**: Always 1.0 in BOTH modes (never scaled)
-- **Zoom control**: Fabric canvas zoom property only
-- **Positioning**: Origin (0, 0) for FIT_WIDTH, centered for MANUAL
-- **State tracking**: `zoomModeRef` to handle ResizeObserver timing
-- **Image loading**: `imageLoadedRef` flag prevents premature centering
-- **No double-scaling**: Old `resizeBackgroundImage()` removed, replaced with `centerBackgroundImage()`
-
-**Files:**
-- `web/src/pages/Annotation.jsx` - Zoom mode state, toggle handlers
-- `web/src/components/Canvas/AnnotationToolsToolbar.jsx` - Fit Width button (Maximize2 icon)
-- `web/src/components/Canvas/AnnotationCanvas.jsx` - Canvas zoom, image positioning, ResizeObserver
-
-**Troubleshooting:**
-- If image shrinks on refresh: Check background image scale is 1.0, not fitted
-- If only corner visible: Check image position is (0, 0) for FIT_WIDTH mode
-- If toggle doesn't change size: Check `resetToCenter()` is called and `zoomModeRef` is updated
-- If inconsistent on load: Check `imageLoadedRef` flag and ResizeObserver coordination
+**Legacy Fabric.js Implementation:**
+- `web/src/pages/AnnotationLegacy.jsx` - Custom Fabric.js-based implementation (INACTIVE)
+  - Custom canvas with AnnotationCanvas, AnnotationToolsToolbar, LabelsPanel
+  - AnnotationContext for state management
+  - Advanced features: dual zoom modes, pan constraints, multi-select
+  - Kept for reference but not actively used
+  - See "Legacy Implementation" section below for details
 
 **Theme handling:**
 - `ThemeContext` persists `light` / `dark` / `auto` and toggles `<html>` classes
@@ -456,15 +404,18 @@ API_ACCESS_TOKEN_EXPIRE_MINUTES="5256000000"
 data-labeling/
 ├── web/                  # React frontend
 │   ├── src/
-│   │   ├── pages/        # 7 pages (Console, Projects, ProjectDetail, etc.)
-│   │   ├── components/   # Layout/, Canvas/
-│   │   ├── contexts/     # ThemeContext
+│   │   ├── pages/        # 7 pages + annotation
+│   │   │   ├── Annotation.jsx          # Active annotation page (@karlorz/react-image-annotate)
+│   │   │   ├── AnnotationLegacy.jsx    # Legacy Fabric.js implementation (inactive)
+│   │   │   ├── Console.jsx, Projects.jsx, Datasets.jsx, etc.
+│   │   ├── components/   # Layout/, Canvas/ (legacy)
+│   │   ├── contexts/     # ThemeContext, AnnotationContext (legacy)
 │   │   ├── utils/        # i18n config
 │   │   ├── index.css     # CSS layers: tailwind-base, semi, tailwind-components, tailwind-utils
 │   │   ├── main.tsx      # App entry, imports semi.css + index.css
 │   │   └── App.tsx       # Routes, NO CSS imports
 │   ├── dist/             # Built frontend (git-ignored)
-│   ├── package.json      # bun deps
+│   ├── package.json      # bun deps (@karlorz/react-image-annotate v4.0.3)
 │   ├── vite.config.ts    # Vite + Semi plugin with cssLayer: true
 │   ├── tailwind.config.js # Tailwind v3 with Semi Design token mapping
 │   └── postcss.config.js  # PostCSS with tailwindcss plugin (NOT @tailwindcss/postcss)
@@ -483,27 +434,26 @@ data-labeling/
 └── CLAUDE.local.md       # Agent instructions (this file)
 ```
 
-## Implementation Status (as of 2025-10-31)
+## Implementation Status (as of 2025-11-10)
 
 ### ✅ Completed
 **Frontend:**
 - React 18 + Vite SPA with 7 routed pages
-- **Annotation canvas with 5 working tools** (rectangle, circle, polygon, line, select)
-- **Advanced selection system**: Single select, multi-select with Shift+click, click-to-deselect
-- **Annotation List Panel**: Dedicated panel with visibility/lock/delete controls (NEW in feat/clone)
-- **Label Assignment Dialog**: Post-creation label assignment with color picker (NEW in feat/clone)
-- **Canvas Pan Constraints**: Prevents over-panning beyond image boundaries (NEW in feat/clone)
-- **Hover Interactions**: Visual feedback on annotation hover (dashed stroke, handles) (NEW in feat/clone)
-- **Dual Zoom Modes**: FIT_WIDTH (auto-scale) and MANUAL_ZOOM (1:1 pixels) (NEW in feat/clone)
+- **Annotation system using @karlorz/react-image-annotate v4.0.3**
+  - 6 annotation tools: select, box, polygon, point, line, expanding-line
+  - Built-in keyboard shortcuts: S (select), B (box), P (polygon), O (point)
+  - Multi-language support (EN/VI/ZH) via I18nProvider
+  - Light/dark theme integration
+  - Task description panel with Markdown support
+  - Region class labels (Defect1, Defect2, Defect3)
+  - Image navigation callbacks (next/prev/exit)
+  - Clone/settings/fullscreen controls
 - Responsive sidebar (auto-collapses on annotation page)
-- Theme switching (light/dark) with proper annotation colors
-- i18n framework (EN/VI/ZH) with 47+ new annotation-related keys
+- Theme switching (light/dark) with proper integration
+- i18n framework (EN/VI/ZH) with comprehensive coverage
 - Background image loading (`/samples/image_{ID}.jpg`)
-- Zoom controls (50%-300%)
-- 3-panel annotation layout (64px toolbar + flex canvas + 250px list panel)
 - **Tailwind CSS v3 + Semi Design integration** (CSS layers, Vite plugin, token mapping)
 - **Semi UI Dropdown menus** in header (language, theme, user)
-- **Tooltips on toolbar buttons** with keyboard shortcuts
 
 **Backend:**
 - FastAPI with JWT auth (`/token` endpoint)
@@ -519,31 +469,27 @@ data-labeling/
 - Testing (pytest with coverage)
 
 ### 🚧 Partially Implemented
-- Labels panel (UI + basic CRUD, needs advanced features)
-- Properties panel (placeholder, needs full implementation)
-- Project/Dataset management (pages only, no backend CRUD)
-- Export page (scaffold only)
 - **Annotation state persistence** (in-memory only, no backend save/load yet)
+- Project/Dataset management (pages only, no backend CRUD)
+- Export functionality (dialog UI ready, needs backend API)
+- Image navigation (UI callbacks ready, needs dataset iteration logic)
 
 ### ❌ Not Yet Implemented (MVP Requirements)
 **High Priority:**
+- **Backend annotation CRUD APIs** (POST/GET/PUT/DELETE endpoints)
 - **Annotation persistence to backend** (save/load annotations via API)
-- Backend annotation CRUD APIs (POST/GET/PUT/DELETE endpoints)
-- Undo/Redo functionality (history stack)
-- **Keyboard shortcuts for tools** (R, C, P, L, S keys)
-- Shape editing UI improvements (vertex manipulation for polygons)
+- **Dataset image listing API** (for next/previous navigation)
+- Export formats implementation (COCO JSON, YOLO TXT, CSV)
+- Project image listing and management
 - Advanced label features (nested categories, attributes)
-- Annotation validation (min size, max count)
-- Project image listing API
-- Export formats (COCO JSON, YOLO TXT, CSV)
 
 **Medium Priority:**
-- Loading states for images
-- Error boundaries for canvas
-- Canvas drag-to-pan (currently select tool only)
-- Multi-select bulk operations (batch delete, batch label)
 - Annotation statistics (count by label, coverage %)
-- Search/filter annotations in list panel
+- Loading states for images
+- Error boundaries for annotation page
+- Custom region class management (beyond Defect1/2/3)
+- Annotation validation (min size, max count)
+- Search/filter annotations
 
 ## Development Conventions
 
@@ -791,4 +737,86 @@ docker compose restart
 - Semi Design: https://semi.design/
 - Semi Design + Tailwind: https://semi.design/zh-CN/start/tailwind
 - Tailwind CSS v3: https://tailwindcss.com/docs
-- Fabric.js: http://fabricjs.com/
+- **@karlorz/react-image-annotate**: https://github.com/karlorz/react-image-annotate
+
+## Legacy Implementation Reference
+
+**Note**: The following documents the custom Fabric.js-based annotation implementation that was developed but is no longer actively used. This is kept for reference purposes only. The active implementation uses `@karlorz/react-image-annotate`.
+
+### Legacy Fabric.js Annotation System (feat/clone branch - 2025-10-31)
+
+**Location**: `web/src/pages/AnnotationLegacy.jsx` (INACTIVE)
+
+This was a comprehensive custom annotation system with advanced canvas interactions, multi-select capabilities, and improved UI/UX patterns.
+
+**Features:**
+- **Dual Zoom Modes**: FIT_WIDTH (default, auto-scales to container) and MANUAL_ZOOM (1:1 pixel size)
+- **Canvas Pan Constraints**: Limits panning to image boundaries with proper edge detection
+- **Selection Handling**: Multi-select with Shift+click, single select, click-to-deselect on canvas
+- **Annotation List Panel**: Dedicated panel showing all annotations with visibility/lock/delete controls
+- **Label Assignment**: Modal dialog for assigning labels to shapes with color picker
+- **Hover Interactions**: Visual feedback on hover (dashed stroke, handles visible)
+- **Drag & Drop**: Move annotations with proper boundary constraints
+
+**Custom Components:**
+- `AnnotationCanvas.jsx` (Legacy): ~955 lines of canvas logic
+  - Shape creation: rectangle, circle, polygon, line tools
+  - Selection modes: single, multi-select, click-to-clear
+  - Pan constraints: keeps image visible, prevents over-panning
+  - Zoom integration: syncs with parent zoom controls
+  - Annotation synchronization: two-way sync between Fabric shapes and context state
+- `AnnotationListPanel.jsx` (Legacy): 269-line component for annotation management
+  - Tree view of all annotations
+  - Visibility toggle (eye icon)
+  - Lock/unlock editing (lock icon)
+  - Delete annotation (trash icon)
+  - Select annotation by clicking list item
+- `AnnotationToolsToolbar.jsx` (Legacy): Enhanced with tooltips, fit width button
+- `LabelsPanel.jsx` (Legacy): Label management
+- `LabelAssignmentDialog.jsx` (Legacy): Modal for post-creation label assignment
+
+**Legacy Context & State:**
+- `AnnotationContext.jsx` (Legacy): Custom state management
+  - `annotations`: Array of all annotations with id, type, coordinates, label, color
+  - `activeAnnotationId`: Currently selected annotation
+  - `selectAnnotation(id)`: Select single annotation
+  - `toggleAnnotationSelection(id)`: Multi-select with Shift
+  - `clearSelection()`: Deselect all
+  - CRUD operations: add, update, remove, clear all
+
+**Legacy Technical Patterns:**
+- Refs for stable callbacks: Prevents re-render loops in canvas event handlers
+- Shape registry: Maps Fabric.js objects to annotation IDs for two-way sync
+- Color utilities: `hexToRgba()` for alpha channel support
+- Dimension computation: Handles scaled shapes with fallback logic
+- Boundary detection: Accurate edge checking for pan constraints
+
+**Legacy Zoom Architecture:**
+
+**Two Zoom Modes:**
+1. **FIT_WIDTH** (Default ON):
+   - Image scales to fit container width automatically
+   - Auto-adjusts on window resize via ResizeObserver
+   - Formula: `canvasZoom = (containerWidth - 2) / imageWidth`
+   - Background image: Always at 1:1 scale (scaleX: 1, scaleY: 1)
+   - Zoom handled by: Fabric canvas zoom property
+   - Toggle button: Active/highlighted state
+
+2. **MANUAL_ZOOM** (Toggle OFF):
+   - Image displays at actual pixel size (e.g., 1635×1280px)
+   - Background image: At 1:1 scale (scaleX: 1, scaleY: 1)
+   - Canvas zoom: 1.0 (100%)
+   - Image position: Centered `(canvasWidth - imgWidth) / 2`
+   - Window resize: Does NOT change zoom/scale
+   - Toggle button: Inactive/normal state
+
+**Legacy Implementation Notes:**
+- When adding new canvas features, use `fabricCanvasRef.current` to access Fabric.js canvas
+- Shape selection should update both `shapeRegistryRef` and `AnnotationContext` state
+- Color values: Use `hexToRgba(color, alpha)` for consistent RGBA formatting
+- Pan boundaries: Check `backgroundImageRef.current` dimensions before panning
+- Multi-select: Use `annotations.filter(a => a.selected)` to get selected annotations
+- Delete operations: Must call both `canvas.remove(shape)` and `removeAnnotation(id)`
+
+**Why Replaced:**
+The custom Fabric.js implementation was replaced by `@karlorz/react-image-annotate` to leverage a mature, well-tested, and feature-complete annotation library with built-in keyboard shortcuts, multi-language support, and consistent UX patterns. This reduces maintenance overhead and accelerates development of backend integration and export features.
