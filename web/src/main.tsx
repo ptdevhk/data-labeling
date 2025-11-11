@@ -5,6 +5,32 @@ import '@douyinfe/semi-ui/dist/css/semi.css';
 import './index.css';
 import App from './App';
 
+if (import.meta.env.DEV) {
+  const suppressedTokens = ['findDOMNode'];
+
+  const shouldSuppress = (args: unknown[]) =>
+    args.some(
+      (arg) =>
+        typeof arg === 'string' &&
+        suppressedTokens.some((token) => arg.includes(token))
+    );
+
+  const filterConsoleMethod = (method: 'warn' | 'error') => {
+    const original = console[method].bind(console);
+
+    console[method] = ((...args: unknown[]) => {
+      if (shouldSuppress(args)) {
+        return;
+      }
+
+      original(...args);
+    }) as typeof console.warn;
+  };
+
+  filterConsoleMethod('warn');
+  filterConsoleMethod('error');
+}
+
 // Configure TanStack Query client
 const queryClient = new QueryClient({
   defaultOptions: {
