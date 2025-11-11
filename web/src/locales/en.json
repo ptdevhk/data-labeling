@@ -102,6 +102,16 @@
       "fitWidth": "Fit Width",
       "fitWidthTooltip": "Toggle zoom follows window width"
     },
+    "taskTitle": "Image Annotation Task",
+    "instructions": "Instructions",
+    "instruction1": "Select an annotation tool from the left toolbar",
+    "instruction2": "Draw regions on the image to mark objects",
+    "instruction3": "Assign labels and tags to each region",
+    "instruction4": "Use keyboard shortcuts for faster annotation",
+    "tips": "Tips",
+    "tip1": "Double-click on a polygon to complete it",
+    "tip2": "Right-click to delete a point while drawing",
+    "tip3": "Use tags to mark special attributes (occluded, truncated, etc.)",
     "page": {
       "title": "Annotation #{{id}}",
       "imageSource": "Image source: {{path}}"
@@ -150,6 +160,14 @@
       "autoSave": "Auto-save",
       "lastSaved": "Last saved: {{time}}"
     },
+    "loading": "Loading annotations...",
+    "loadFailed": "Failed to load annotations",
+    "saveSuccess": "Annotations saved successfully",
+    "saveFailed": "Failed to save annotations",
+    "nextImage": "Moving to next image",
+    "lastImage": "This is the last image",
+    "prevImage": "Moving to previous image",
+    "firstImage": "This is the first image",
     "export": {
       "button": "Export",
       "waitForImage": "Please wait for image to load"
@@ -200,5 +218,7 @@
     "rights": "All rights reserved",
     "license": "MIT License",
     "reportIssue": "Report Issue"
-  }
+  },
+  "hideActions": "Hide actions",
+  "showActions": "Show actions"
 }

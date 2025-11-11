@@ -102,6 +102,16 @@
       "fitWidth": "适应宽度",
       "fitWidthTooltip": "切换缩放跟随窗口宽度"
     },
+    "taskTitle": "图像标注任务",
+    "instructions": "操作指南",
+    "instruction1": "从左侧工具栏选择标注工具",
+    "instruction2": "在图像上绘制区域以标记对象",
+    "instruction3": "为每个区域分配标签和标记",
+    "instruction4": "使用键盘快捷键加快标注",
+    "tips": "提示",
+    "tip1": "双击多边形以完成绘制",
+    "tip2": "绘制时右键单击可删除点",
+    "tip3": "使用标签标记遮挡、截断等特殊属性",
     "page": {
       "title": "标注 #{{id}}",
       "imageSource": "图片来源：{{path}}"
@@ -150,6 +160,14 @@
       "autoSave": "自动保存",
       "lastSaved": "最后保存: {{time}}"
     },
+    "loading": "正在加载标注...",
+    "loadFailed": "标注加载失败",
+    "saveSuccess": "注释保存成功",
+    "saveFailed": "保存标注失败",
+    "nextImage": "正在切换到下一张图片",
+    "lastImage": "已是最后一张图片",
+    "prevImage": "正在返回上一张图片",
+    "firstImage": "已是第一张图片",
     "export": {
       "button": "导出",
       "waitForImage": "请等待图像加载"
@@ -200,5 +218,7 @@
     "rights": "版权所有",
     "license": "MIT许可证",
     "reportIssue": "报告问题"
-  }
+  },
+  "hideActions": "隐藏操作",
+  "showActions": "显示操作"
 }

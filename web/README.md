@@ -74,36 +74,7 @@ bun run lint
 ## Project Structure
 
 ```
-src/
-├── components/
-│   ├── Canvas/              # Annotation canvas components
-│   │   ├── AnnotationCanvas.jsx
-│   │   ├── ToolsPalette.jsx
-│   │   └── LabelsPanel.jsx
-│   └── Layout/              # Global layout components
-│       ├── Header.jsx
-│       ├── Sidebar.jsx
-│       └── MainLayout.jsx
-├── contexts/                # React contexts
-│   └── ThemeContext.jsx
-├── pages/                   # Route pages
-│   ├── Console.jsx
-│   ├── Projects.jsx
-│   ├── Datasets.jsx
-│   ├── Exports.jsx
-│   ├── SettingsPage.jsx
-│   └── Annotation.jsx
-├── locales/                 # i18n translations
-│   ├── en.json
-│   ├── vi.json
-│   └── zh.json
-├── constants/               # Design tokens
-│   └── theme.js
-├── utils/                   # Utilities
-│   └── i18n.js
-├── App.jsx                  # Root component
-├── main.jsx                 # Entry point
-└── index.css                # Global styles
+
 ```
 
 ## API Integration

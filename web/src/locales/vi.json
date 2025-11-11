@@ -102,6 +102,16 @@
       "fitWidth": "Vừa chiều rộng",
       "fitWidthTooltip": "Bật/tắt thu phóng theo chiều rộng cửa sổ"
     },
+    "taskTitle": "Nhiệm vụ gắn nhãn hình ảnh",
+    "instructions": "Hướng dẫn",
+    "instruction1": "Chọn công cụ gắn nhãn ở thanh công cụ bên trái",
+    "instruction2": "Vẽ vùng trên ảnh để đánh dấu đối tượng",
+    "instruction3": "Gán nhãn và thẻ cho từng vùng",
+    "instruction4": "Sử dụng phím tắt để gắn nhãn nhanh hơn",
+    "tips": "Mẹo",
+    "tip1": "Nhấp đúp vào đa giác để hoàn thành",
+    "tip2": "Nhấp chuột phải để xóa điểm khi vẽ",
+    "tip3": "Sử dụng thẻ để đánh dấu thuộc tính đặc biệt (bị che khuất, bị cắt, ...)",
     "page": {
       "title": "Chú thích #{{id}}",
       "imageSource": "Nguồn ảnh: {{path}}"
@@ -150,6 +160,14 @@
       "autoSave": "Tự động lưu",
       "lastSaved": "Lưu lần cuối: {{time}}"
     },
+    "loading": "Đang tải chú thích...",
+    "loadFailed": "Không thể tải chú thích",
+    "saveSuccess": "Đã lưu chú thích thành công",
+    "saveFailed": "Không thể lưu chú thích",
+    "nextImage": "Chuyển sang hình tiếp theo",
+    "lastImage": "Đây là hình cuối cùng",
+    "prevImage": "Quay lại hình trước",
+    "firstImage": "Đây là hình đầu tiên",
     "export": {
       "button": "Xuất",
       "waitForImage": "Vui lòng đợi hình ảnh tải xong"
@@ -200,5 +218,7 @@
     "rights": "Bản quyền",
     "license": "Giấy phép MIT",
     "reportIssue": "Báo cáo lỗi"
-  }
+  },
+  "hideActions": "Ẩn hành động",
+  "showActions": "Hiện hành động"
 }

@@ -286,33 +286,7 @@ make generate-client              # Generate TypeScript client from OpenAPI spec
 
 ## Project Structure
 ```
-web/
-├── src/pages/           # Annotation.jsx (active), AnnotationLegacy.jsx (inactive)
-├── src/components/
-│   ├── Layout/          # Header, Footer, MainLayout, Sidebar
-│   ├── common/ui/       # CardPro, CardTable, CompactModeToggle, JSONEditor, Loading, etc.
-│   └── Annotation/      # AnnotationCanvas, AnnotationWorkspace components
-├── src/hooks/
-│   ├── common/          # useIsMobile, useSidebarCollapsed, useNavigation, etc.
-│   └── annotation/      # useAnnotationData and annotation-specific hooks
-├── src/contexts/        # ThemeContext
-├── vite.config.ts       # Semi plugin with cssLayer: true
-├── tailwind.config.js   # Semi Design token mapping
-└── package.json         # Dependencies including @karlorz/react-image-annotate
 
-svc/
-├── main.py              # FastAPI app entry
-├── routes/              # API endpoints
-├── apis/                # Business logic
-├── core/                # Auth, config, logger
-└── tests/               # Pytest suite
-
-docker-compose.yml       # Base production config
-docker-compose.override.yml # Dev overrides (auto-merged)
-Caddyfile               # Reverse proxy (API first, then static)
-Makefile                # Automation commands
-pyproject.toml          # Python dependencies (uv)
-.env.example            # Config template
 ```
 
 ## Key Files Reference

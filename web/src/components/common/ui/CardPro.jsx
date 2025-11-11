@@ -34,7 +34,7 @@ const CardPro = ({
   searchArea,
   paginationArea, // New pagination area
   // Card properties
-  shadows = '',
+  shadows,
   bordered = true,
   // Custom styles
   style,
@@ -139,12 +139,15 @@ const CardPro = ({
 
   const footerContent = renderFooter();
 
+  const allowedShadows = ['hover', 'always'];
+  const cardShadows = allowedShadows.includes(shadows) ? shadows : undefined;
+
   return (
     <Card
       className={`table-scroll-card !rounded-2xl ${className}`}
       title={headerContent}
       footer={footerContent}
-      shadows={shadows}
+      {...(cardShadows ? { shadows: cardShadows } : {})}
       bordered={bordered}
       style={style}
       {...props}
@@ -160,7 +163,7 @@ CardPro.propTypes = {
   // Style related
   className: PropTypes.string,
   style: PropTypes.object,
-  shadows: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+  shadows: PropTypes.oneOf(['hover', 'always']),
   bordered: PropTypes.bool,
   // Content areas
   statsArea: PropTypes.node,
