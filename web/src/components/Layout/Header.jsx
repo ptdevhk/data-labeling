@@ -13,7 +13,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { useSidebarCollapsed } from '../../hooks/useSidebarCollapsed';
 import { useNavigation } from '../../hooks/useNavigation';
 
-const Header = ({ onMobileMenuToggle }) => {
+const HeaderBar = ({ onMobileMenuToggle }) => {
   const { t, i18n } = useTranslation();
   const { theme, resolvedTheme, setThemeMode } = useTheme();
   const isMobile = useIsMobile();
@@ -258,4 +258,6 @@ const Header = ({ onMobileMenuToggle }) => {
   );
 };
 
-export default Header;
+export const Header = HeaderBar;
+
+export default HeaderBar;

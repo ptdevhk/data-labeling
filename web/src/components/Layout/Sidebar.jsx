@@ -20,7 +20,7 @@ const routerMap = {
   settings: '/console/settings',
 };
 
-const Sidebar = ({ onNavigate = () => {} }) => {
+const SiderBar = ({ onNavigate = () => {} }) => {
   const { t } = useTranslation();
   const [collapsed, toggleCollapsed] = useSidebarCollapsed();
   const location = useLocation();
@@ -166,4 +166,6 @@ const Sidebar = ({ onNavigate = () => {} }) => {
   );
 };
 
-export default Sidebar;
+export const Sidebar = SiderBar;
+
+export default SiderBar;

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { Button, Table, Typography, Card, Tag } from '@douyinfe/semi-ui';
+import { Button, Table, Typography, Tag } from '@douyinfe/semi-ui';
 import { IconDownload } from '@douyinfe/semi-icons';
+import CardPro from '../components/common/ui/CardPro';
 
 const { Title, Text } = Typography;
 
@@ -75,14 +76,33 @@ const Exports = () => {
   ];
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <Title heading={2}>{t('nav.exports')}</Title>
-      </div>
-      <Card>
+    <CardPro
+      type="type1"
+      descriptionArea={(
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <Title heading={2} style={{ margin: 0 }}>
+              {t('nav.exports')}
+            </Title>
+            <Text type="tertiary">
+              {t('export.subtitle', 'Review generated files and monitor export status')}
+            </Text>
+          </div>
+        </div>
+      )}
+      actionsArea={(
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-end">
+          <Button type="primary" icon={<IconDownload />}>
+            {t('export.newJob', 'New export job')}
+          </Button>
+        </div>
+      )}
+      t={t}
+    >
+      <div style={{ padding: '24px' }}>
         <Table columns={columns} dataSource={exports} />
-      </Card>
-    </div>
+      </div>
+    </CardPro>
   );
 };
 

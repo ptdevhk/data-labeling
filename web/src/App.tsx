@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { StyledEngineProvider } from '@mui/material/styles';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
-import MainLayout from '@/components/Layout/MainLayout';
+import PageLayout from '@/components/Layout/MainLayout';
 import Console from '@/pages/Console';
 import Projects from '@/pages/Projects';
 import Datasets from '@/pages/Datasets';
@@ -31,7 +31,7 @@ function AppContent() {
     <MuiThemeProvider theme={muiTheme}>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<MainLayout />}>
+              <Route path="/" element={<PageLayout />}>
               <Route index element={<Navigate to="/console" replace />} />
               <Route path="console" element={<Console />} />
               <Route path="console/projects" element={<Projects />} />

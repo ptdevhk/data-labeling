@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-const Footer = () => {
+const FooterBar = () => {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
@@ -15,4 +15,6 @@ const Footer = () => {
   );
 };
 
-export default Footer;
+export const Footer = FooterBar;
+
+export default FooterBar;

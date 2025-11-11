@@ -1,31 +1,51 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Layout } from '@douyinfe/semi-ui';
-import Header from './Header';
-import Sidebar from './Sidebar';
-import Footer from './Footer';
+import { useTranslation } from 'react-i18next';
+import HeaderBar from './Header';
+import SiderBar from './Sidebar';
+import FooterBar from './Footer';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useSidebarCollapsed } from '../../hooks/useSidebarCollapsed';
 
 const { Sider, Content } = Layout;
 
-const MainLayout = () => {
+const PageLayout = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [collapsed, , setCollapsed] = useSidebarCollapsed();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const headerHeight = isMobile ? 56 : 64;
+  const { t, i18n } = useTranslation();
+
+  // Pages that should not have inner padding (full-screen pages)
+  const shouldInnerPadding =
+    !location.pathname.includes('/annotation') &&
+    location.pathname.startsWith('/console');
 
   const isAnnotationPage = location.pathname.includes('/annotation');
   const shouldShowFooter = !isAnnotationPage && location.pathname.startsWith('/console');
-  const shouldInnerPadding = !isAnnotationPage;
-  const showSider = !isMobile || drawerOpen;
+  const isConsoleRoute = location.pathname.startsWith('/console');
+  const showSider = isConsoleRoute && (!isMobile || drawerOpen);
+
+  const headerOffset = `${headerHeight}px`;
+  const annotationOffset = `calc(${headerHeight}px + 8px)`;
+  const contentMarginTop = isAnnotationPage ? annotationOffset : headerOffset;
+  const contentMinHeight = isAnnotationPage
+    ? `calc(100vh - ${headerHeight}px - 8px)`
+    : `calc(100vh - ${headerHeight}px)`;
+  const contentOverflow = isAnnotationPage ? 'hidden' : isMobile ? 'visible' : 'auto';
 
   useEffect(() => {
     if (isMobile && drawerOpen && collapsed) {
       setCollapsed(false);
     }
   }, [isMobile, drawerOpen, collapsed, setCollapsed]);
+
+  useEffect(() => {
+    document.title = t('common.appName');
+    document.documentElement.setAttribute('lang', i18n.language);
+  }, [i18n.language, t]);
 
   return (
     <Layout
@@ -34,6 +54,7 @@ const MainLayout = () => {
         display: 'flex',
         flexDirection: 'column',
         overflow: isMobile ? 'visible' : 'hidden',
+        '--header-height': headerOffset,
       }}
     >
       <Layout.Header
@@ -47,7 +68,7 @@ const MainLayout = () => {
           zIndex: 100,
         }}
       >
-        <Header
+        <HeaderBar
           onMobileMenuToggle={() => setDrawerOpen((prev) => !prev)}
           drawerOpen={drawerOpen}
         />
@@ -57,7 +78,6 @@ const MainLayout = () => {
           overflow: isMobile ? 'visible' : 'auto',
           display: 'flex',
           flexDirection: 'column',
-          marginTop: `${headerHeight}px`,
         }}
       >
         {showSider && (
@@ -73,7 +93,7 @@ const MainLayout = () => {
               width: 'var(--sidebar-current-width)',
             }}
           >
-            <Sidebar
+            <SiderBar
               onNavigate={() => {
                 if (isMobile) setDrawerOpen(false);
               }}
@@ -94,19 +114,20 @@ const MainLayout = () => {
         >
           <Content
             style={{
-              flex: '1 1 0',
-              minHeight: 0,
-              overflowY: isAnnotationPage ? 'hidden' : (isMobile ? 'visible' : 'auto'),
+              flex: '1 0 auto',
+              overflowY: contentOverflow,
               WebkitOverflowScrolling: 'touch',
               padding: shouldInnerPadding ? (isMobile ? '5px' : '24px') : '0',
               position: 'relative',
+              marginTop: contentMarginTop,
+              minHeight: contentMinHeight,
             }}
           >
             <Outlet />
           </Content>
           {shouldShowFooter && (
             <Layout.Footer style={{ padding: 0, marginTop: 'auto' }}>
-              <Footer />
+              <FooterBar />
             </Layout.Footer>
           )}
         </Layout>
@@ -115,4 +136,6 @@ const MainLayout = () => {
   );
 };
 
-export default MainLayout;
+export const MainLayout = PageLayout;
+
+export default PageLayout;

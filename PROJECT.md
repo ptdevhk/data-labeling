@@ -27,8 +27,11 @@ Adopt Gitflow for structured collaboration: Develop features in isolated branche
 The UI/UX design establishes a professional, accessible foundation optimized for extended labeling sessions, blending Console efficiency with precise canvas interactions. Emphasize minimalism to reduce cognitive load, ensuring scalability for future LLM elements.
 
 - **Layout Structure**:
-  - **Global Navigation**: Collapsible sidebar (20% width on desktop, hamburger on mobile) for projects, datasets, exports, and settings; top header with search, notifications bell, user avatar dropdown, and dark/light mode toggle.
-  - **Main Content Areas**: Console uses card grids (3-column on desktop, 1-column mobile) for project overviews; annotation view employs split layout (tools sidebar: 15%, canvas: 70%, properties panel: 15%).
+  - **Global Navigation**: Collapsible sidebar (250px expanded, 64px collapsed on desktop; hamburger drawer on mobile) for projects, datasets, exports, and settings; top header with search, notifications bell, user avatar dropdown, and dark/light mode toggle.
+  - **Main Content Areas**:
+    - **Console Overview**: Simple card grids (3-column on desktop, 1-column mobile) for project summary cards
+    - **Data Views**: Use CardPro component for data-intensive pages (Projects list, Datasets, Exports) with structured content areas
+    - **Annotation View**: Custom split layout (tools sidebar: 15%, canvas: 70%, properties panel: 15%)
   - **Responsive System**: CSS Grid/Flexbox with media queries; breakpoints: 480px (mobile: stack vertically), 768px (tablet: horizontal nav), 1024px (desktop: full split-view), 1440px (large: expanded previews).
 
   #### Responsive Sidebar Implementation (✅ Completed - 2025-10-09)
@@ -70,6 +73,39 @@ The UI/UX design establishes a professional, accessible foundation optimized for
   - Mobile-first drawer prevents viewport clutter on small screens
   - CSS variables enable theme-agnostic sizing (works with light/dark modes)
   - localStorage persistence reduces friction for returning users
+
+  #### CardPro Component Pattern (QuantumNous/new-api Integration)
+  The CardPro component provides structured layouts for data-intensive views, organizing content into six distinct areas: statistics, description, tabs, actions, search, and pagination (fixed at bottom).
+
+  **CardPro Layout Types:**
+  - **Type 1 (Operational)**: Description + Actions + Search areas
+    - **Use Cases**: Projects list, Datasets management, User management, Token/API key management
+    - **Purpose**: CRUD operations with action buttons (Create, Edit, Delete, Bulk actions)
+    - **Example**: Projects page with "New Project" button, search filter, and project table
+
+  - **Type 2 (Query-based)**: Statistics + Search areas
+    - **Use Cases**: Export logs, Usage analytics, Annotation history, System monitoring
+    - **Purpose**: Read-only data views with filtering and metrics display
+    - **Example**: Export history page showing stats (total exports, formats) and searchable log table
+
+  - **Type 3 (Complex)**: Description + Tabs + Actions + Search areas
+    - **Use Cases**: Multi-section admin views, Advanced settings, Channel management (future)
+    - **Purpose**: Complex workflows requiring tab navigation, actions, and filtering
+    - **Example**: Settings page with tabbed sections (Account, Preferences, API) and action buttons
+
+  **Component Integration:**
+  - Import from `web/src/components/common/ui/CardPro.jsx`
+  - Props: `type`, `descriptionArea`, `statsArea`, `tabsArea`, `actionsArea`, `searchArea`, `paginationArea`
+  - Responsive: Automatically hides certain areas on mobile (≤480px)
+  - Works with `CardTable` wrapper for consistent table styling
+  - Use `CompactModeToggle` for user-controlled table density
+
+  **Implementation Guidelines:**
+  - Console overview page: Use simple Semi Design `Card` components in grid layout
+  - Projects/Datasets pages: CardPro Type 1 with action buttons and search
+  - Export logs: CardPro Type 2 with statistics and filtering
+  - Annotation workspace: Custom layout (not CardPro - prioritizes canvas space)
+  - Settings/Admin views: CardPro Type 3 if multiple sections required
 - **Header and Sidebar Navigation**:
   - **Top Header**: A fixed, slim bar (64px height) spanning the full width, providing quick-access global controls. Key items from left to right:
     - **Toggle Sidebar Button**
@@ -205,6 +241,53 @@ Focus on a functional MVP: Standalone React SPA supporting manual labeling with 
 | **Package Manager**   | Bun                                | Speedy installs for CI/dev. |
 | **Local Storage**     | Dexie.js (IndexedDB wrapper)       | Efficient, queryable persistence for auto-save drafts. |
 
+#### Common UI Components (web/src/components/common/ui/)
+Shared component library integrated from QuantumNous/new-api for consistent UX patterns:
+
+| Component              | Purpose                            | Usage Guidelines |
+|------------------------|-----------------------------------|------------------|
+| **CardPro**           | Structured content container       | Import: `import { CardPro } from '@/components/common/ui/CardPro';`<br/>Use Type 1/2/3 based on page requirements (see CardPro Pattern section) |
+| **CardTable**         | Table wrapper for CardPro          | Consistent table styling within cards; handles overflow scrolling |
+| **CompactModeToggle** | Table density control              | User preference for compact vs normal row spacing; state persisted via `useTableCompactMode()` |
+| **JSONEditor**        | Syntax-highlighted JSON editing    | For advanced users editing class definitions or export configs |
+| **Loading**           | Minimum loading time indicator     | Use `useMinimumLoadingTime()` hook to ensure 300-500ms minimum display for perceived responsiveness |
+| **ScrollableContainer** | Custom scrollbar styling         | Applies consistent scrollbar theme (light/dark mode compatible) |
+| **SelectableButtonGroup** | Multi-select button groups    | For filter panels or batch actions; integrates with Semi Design ButtonGroup |
+| **RenderUtils**       | Common rendering utilities         | Helper functions for date formatting, status badges, truncated text |
+
+**Import Path Convention:**
+```javascript
+// Preferred: Use path aliases configured in vite.config.js
+import { CardPro } from '@/components/common/ui/CardPro';
+import { useIsMobile, useSidebarCollapsed } from '@/hooks/common';
+
+// Alternative: Relative imports
+import { CardPro } from '../../../components/common/ui/CardPro';
+```
+
+#### Common Hooks (web/src/hooks/common/)
+Reusable React hooks for consistent behavior across the application:
+
+| Hook                    | Purpose                            | Usage Example |
+|------------------------|-----------------------------------|---------------|
+| **useIsMobile()**      | Device detection (≤480px)          | `const isMobile = useIsMobile();` - Use for responsive UI decisions |
+| **useSidebarCollapsed()** | Sidebar state management        | `const [collapsed, setCollapsed] = useSidebarCollapsed();` - Syncs with localStorage |
+| **useNavigation()**    | Enhanced navigation utilities      | Navigation helpers with route awareness and guards |
+| **useMinimumLoadingTime()** | Loading UX improvement        | `const showLoading = useMinimumLoadingTime(isLoading, 300);` - Prevents flashing |
+| **useContainerWidth()** | Dynamic width calculations        | ResizeObserver-based container width tracking |
+| **useTableCompactMode()** | Table density preferences       | `const [compact, setCompact] = useTableCompactMode();` - User preference persistence |
+| **useNotifications()** | Toast notification system          | Wrapper around React-Toastify with app-specific defaults |
+| **useUserPermissions()** | Permission-based rendering       | Role-based UI element visibility (future auth integration) |
+| **useHeaderBar()**     | Header state management            | Controls header visibility and behavior |
+| **useSidebar()**       | Sidebar navigation data            | Provides navigation items with i18n support |
+| **useSecureVerification()** | Security confirmation dialogs | For destructive actions requiring user confirmation |
+
+**Best Practices:**
+- Always use `useIsMobile()` instead of manual window.matchMedia for consistency
+- Prefer `useMinimumLoadingTime()` for all async operations to improve perceived performance
+- Use `useTableCompactMode()` with `CompactModeToggle` component for user-controlled table density
+- Leverage `useNavigation()` for programmatic routing with type safety
+
 #### Semi Design Best Practices
 Based on official Semi Design documentation:
 
@@ -273,6 +356,89 @@ make docker-up        # Auto-builds frontend, spins up services
 - **Build Failures**: Run `uv lock` then `docker compose build --no-cache`.
 - **Static 404s**: Ensure `web/dist` exists pre-up.
 - **Routing Errors**: Verify Caddyfile handles (API first).
+
+### Implementation Patterns and Architecture
+
+#### CSS Layer Architecture (Tailwind v3 + Semi Design)
+Semi Design CSS integration follows a strict layering pattern for proper style precedence:
+- Semi CSS imported ONLY in `web/src/main.tsx`: `import '@douyinfe/semi-ui/dist/css/semi.css';`
+- Vite plugin (`@douyinfe/vite-plugin-semi`) with `cssLayer: true` automatically wraps Semi CSS in `@layer semi`
+- **CSS layer order** (web/src/index.css):
+  1. `tailwind-base` - Tailwind reset/normalize
+  2. `semi` - Semi Design components (auto-wrapped by Vite plugin)
+  3. `tailwind-components` - Custom component styles
+  4. `tailwind-utils` - Tailwind utilities (highest priority)
+- **DO NOT** import Semi Design CSS in other files (App.tsx, components, or use `@import`)
+- Tailwind config maps Semi Design CSS variables for token consistency
+
+#### Fixed Header Layout Pattern
+Following new-api architecture, layout responsibilities are clearly divided:
+
+**MainLayout Component**:
+- Creates fixed header structure (position: fixed, top: 0, zIndex: 100)
+- Header height: 56px mobile, 64px desktop
+- Manages sidebar margin (marginLeft: var(--sidebar-current-width))
+- Content padding: 24px desktop, 5px mobile (via shouldInnerPadding)
+- **Does NOT add top margin** - this is the page's responsibility
+
+**Individual Pages**:
+- Each page must add its own marginTop
+- Standard console pages: `style={{ marginTop: '80px' }}` (64px header + 16px gap)
+- Full-screen pages (Annotation): `style={{ marginTop: '64px', height: 'calc(100vh - 64px)' }}`
+- Use inline styles for highest specificity and dynamic values
+
+**Why Inline Styles**:
+- Dynamic header heights based on device (useIsMobile hook)
+- Different pages need different offsets
+- Highest CSS specificity (no layer conflicts)
+- Clear and explicit (no hidden CSS dependencies)
+- Production-ready pattern from new-api
+
+#### Annotation Implementation (@karlorz/react-image-annotate)
+Current annotation system uses a mature library with these integration patterns:
+
+**Language Mapping**:
+```javascript
+const languageMap = {
+  'en': 'en',
+  'vi': 'vi',
+  'zh': 'zh',
+  'zh-CN': 'zh'
+};
+```
+
+**Theme Integration**:
+- Pass `resolvedTheme` from `ThemeContext` to maintain consistency
+- Library automatically adapts to light/dark mode
+
+**Image Structure**:
+```javascript
+{
+  src: `/samples/image_${id}.jpg`,
+  name: `Image ${id}`,
+  regions: [],
+  pixelSize: { w: 1920, h: 1080 }
+}
+```
+
+**Navigation Callbacks**:
+- `onExit(output)`: Saves annotations and navigates back
+- `onNextImage(output)`: Navigate to next image (TODO: implement dataset iteration)
+- `onPrevImage(output)`: Navigate to previous image (TODO: implement dataset iteration)
+
+#### Docker Compose Architecture
+Project uses base + override pattern for environment-specific configurations:
+
+**File Structure**:
+- `docker-compose.yml`: Base production configuration
+- `docker-compose.override.yml`: Development overrides (auto-merged)
+
+**ENVIRONMENT Build Argument Priority**:
+1. Existing `.env` file (if present in repo)
+2. ENVIRONMENT=develop: Uses `.env.dev` → `.env`
+3. ENVIRONMENT=production: Uses `.env.example` → `.env`
+
+**Important**: `.dockerignore` does NOT exclude `.env` or `.env.dev` to allow Docker builds to use them
 
 ### Future Roadmap
 - **Phase 2**: LLM endpoints (`/llm/suggest` via OpenAI/Hugging Face); enhance auto-save with real-time backend syncing via WebSockets.

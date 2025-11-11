@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { Button, Table, Typography, Card } from '@douyinfe/semi-ui';
+import { Button, Table, Typography } from '@douyinfe/semi-ui';
 import { IconPlus, IconImage } from '@douyinfe/semi-icons';
+import CardPro from '../components/common/ui/CardPro';
 
 const { Title, Text } = Typography;
 
@@ -56,17 +57,33 @@ const Datasets = () => {
   ];
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <Title heading={2}>{t('nav.datasets')}</Title>
-        <Button type="primary" icon={<IconPlus />}>
-          {t('dataset.upload')}
-        </Button>
-      </div>
-      <Card>
+    <CardPro
+      type="type1"
+      descriptionArea={(
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <Title heading={2} style={{ margin: 0 }}>
+              {t('nav.datasets')}
+            </Title>
+            <Text type="tertiary">
+              {t('dataset.subtitle', 'Manage your dataset library and uploads')}
+            </Text>
+          </div>
+        </div>
+      )}
+      actionsArea={(
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-end">
+          <Button type="primary" icon={<IconPlus />}>
+            {t('dataset.upload')}
+          </Button>
+        </div>
+      )}
+      t={t}
+    >
+      <div style={{ padding: '24px' }}>
         <Table columns={columns} dataSource={datasets} />
-      </Card>
-    </div>
+      </div>
+    </CardPro>
   );
 };
 
