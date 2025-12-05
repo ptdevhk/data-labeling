@@ -1,0 +1,326 @@
+name: Deploy Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - 'feature/**'
+      - 'fix/**'
+      - develop
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - deploy
+          - cleanup
+          - status
+
+env:
+  # SSH connection settings (REQUIRED: configure via GitHub Repository Secrets)
+  # DEPLOY_HOST must be set in GitHub Settings → Secrets and variables → Actions → Secrets
+  DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+  DEPLOY_USER: ${{ vars.DEPLOY_USER || 'ubuntu' }}
+  DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+  # Preview-specific settings
+  PREVIEW_URL: ${{ vars.PREVIEW_URL || 'https://preview.pt-mes.com' }}
+  PREVIEW_PORT: ${{ vars.PREVIEW_PORT || '4173' }}
+  PREVIEW_PATH: ${{ vars.PREVIEW_PATH || '/home/ubuntu/data-labeling-preview' }}
+  # Port binding: use 0.0.0.0 for external access, 127.0.0.1 for localhost only
+  PORT_BIND: ${{ vars.PORT_BIND || '127.0.0.1' }}
+
+# Single preview slot - latest deployment wins
+concurrency:
+  group: preview-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    # Preview failures should NOT block PRs
+    continue-on-error: true
+    timeout-minutes: 15
+
+    # Skip for workflow_dispatch cleanup/status
+    if: >
+      github.event_name != 'workflow_dispatch' ||
+      github.event.inputs.action == 'deploy'
+
+    outputs:
+      preview_url: ${{ steps.result.outputs.preview_url }}
+      preview_status: ${{ steps.result.outputs.status }}
+
+    steps:
+      - name: Check required configuration
+        id: config-check
+        run: |
+          if [ -z "${{ secrets.DEPLOY_HOST }}" ]; then
+            echo "::warning::DEPLOY_HOST secret is not set. Preview deployment will be skipped."
+            echo "Configure DEPLOY_HOST in GitHub → Settings → Secrets and variables → Actions → Secrets"
+            echo "configured=false" >> $GITHUB_OUTPUT
+          else
+            echo "DEPLOY_HOST is configured"
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout repository
+        if: steps.config-check.outputs.configured == 'true'
+        uses: actions/checkout@v5
+
+      - name: Determine preview name
+        if: steps.config-check.outputs.configured == 'true'
+        id: preview-name
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            PREVIEW_NAME="pr-${{ github.event.pull_request.number }}"
+          else
+            BRANCH="${{ github.ref_name }}"
+            PREVIEW_NAME=$(echo "$BRANCH" | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]' | cut -c1-20)
+          fi
+          echo "name=$PREVIEW_NAME" >> $GITHUB_OUTPUT
+
+      - name: Setup SSH
+        if: steps.config-check.outputs.configured == 'true'
+        id: ssh-setup
+        continue-on-error: true
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
+
+      - name: Check SSH secret exists
+        if: steps.ssh-setup.outcome == 'failure'
+        run: |
+          echo "::warning::SSH key not configured. Preview deployment skipped."
+          echo "Add PRODUCTION_SSH_KEY secret to enable preview deployments."
+          echo "status=skipped" >> $GITHUB_OUTPUT
+
+      - name: Configure SSH connection
+        if: steps.ssh-setup.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ env.DEPLOY_PORT }} -H ${{ env.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+          # Configure SSH multiplexing for connection reuse
+          cat >> ~/.ssh/config << EOF
+          Host ${{ env.DEPLOY_HOST }}
+            Port ${{ env.DEPLOY_PORT }}
+            ControlMaster auto
+            ControlPath ~/.ssh/ctrl-%C
+            ControlPersist 60
+            ServerAliveInterval 30
+            ServerAliveCountMax 2
+            ConnectTimeout 15
+            BatchMode yes
+          EOF
+          chmod 600 ~/.ssh/config 2>/dev/null || true
+
+      - name: Verify SSH connection
+        id: ssh-verify
+        if: steps.ssh-setup.outcome == 'success'
+        continue-on-error: true
+        run: |
+          if ssh ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} "echo 'SSH OK'" 2>/dev/null; then
+            echo "connected=true" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::Cannot connect to server. Preview deployment skipped."
+            echo "connected=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy preview
+        id: deploy
+        if: steps.ssh-verify.outputs.connected == 'true'
+        continue-on-error: true
+        env:
+          PREVIEW_NAME: ${{ steps.preview-name.outputs.name }}
+        run: |
+          # Copy script and execute (reuses master connection)
+          scp bin/deploy-preview.sh ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/tmp/ 2>/dev/null || true
+
+          # Pass environment variables to the deployment script
+          OUTPUT=$(ssh ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} \
+            "export PREVIEW_PATH='${{ env.PREVIEW_PATH }}' && \
+             export PREVIEW_PORT='${{ env.PREVIEW_PORT }}' && \
+             export PORT_BIND='${{ env.PORT_BIND }}' && \
+             chmod +x /tmp/deploy-preview.sh && \
+             /tmp/deploy-preview.sh deploy '$PREVIEW_NAME' '${{ github.sha }}' '${{ github.repository }}'" 2>&1) || true
+
+          echo "$OUTPUT"
+
+          # Extract status
+          STATUS=$(echo "$OUTPUT" | grep "^PREVIEW_STATUS=" | tail -1 | cut -d= -f2 || echo "unknown")
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
+      - name: Cleanup SSH connection
+        if: steps.ssh-setup.outcome == 'success'
+        run: |
+          ssh -O exit ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} 2>/dev/null || true
+
+      - name: Determine result
+        id: result
+        run: |
+          STATUS="${{ steps.deploy.outputs.status }}"
+
+          if [ "${{ steps.config-check.outputs.configured }}" != "true" ]; then
+            echo "status=skipped_no_host" >> $GITHUB_OUTPUT
+            echo "preview_url=" >> $GITHUB_OUTPUT
+          elif [ "${{ steps.ssh-setup.outcome }}" != "success" ]; then
+            echo "status=skipped_no_key" >> $GITHUB_OUTPUT
+            echo "preview_url=" >> $GITHUB_OUTPUT
+          elif [ "${{ steps.ssh-verify.outputs.connected }}" != "true" ]; then
+            echo "status=skipped_no_connection" >> $GITHUB_OUTPUT
+            echo "preview_url=" >> $GITHUB_OUTPUT
+          elif [ "$STATUS" == "success" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "preview_url=${{ env.PREVIEW_URL }}" >> $GITHUB_OUTPUT
+          else
+            echo "status=failed_${STATUS}" >> $GITHUB_OUTPUT
+            echo "preview_url=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.result.outputs.status }}';
+            const previewUrl = '${{ steps.result.outputs.preview_url }}';
+            const previewName = '${{ steps.preview-name.outputs.name }}';
+            const sha = '${{ github.sha }}'.substring(0, 7);
+
+            let body;
+            if (status === 'success') {
+              body = `## 🚀 Preview Deployment
+
+            Your preview is ready!
+
+            | Property | Value |
+            |----------|-------|
+            | **URL** | ${previewUrl} |
+            | **Branch/PR** | \`${previewName}\` |
+            | **Commit** | \`${sha}\` |
+            | **Updated** | ${new Date().toISOString()} |
+
+            > ⚠️ This is a shared preview slot. It will be overwritten by newer deployments.`;
+            } else if (status.startsWith('skipped')) {
+              body = `## ⏭️ Preview Deployment Skipped
+
+            Preview deployment was skipped: \`${status}\`
+
+            This does not affect your PR - previews are optional.`;
+            } else {
+              body = `## ⚠️ Preview Deployment Issue
+
+            Preview deployment had an issue: \`${status}\`
+
+            This does not block your PR - previews are optional.
+
+            <details>
+            <summary>Troubleshooting</summary>
+
+            - Check [workflow logs](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})
+            - The preview server may be temporarily unavailable
+            - Try re-running the workflow
+
+            </details>`;
+            }
+
+            // Find and update existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Preview Deployment')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+      - name: Create summary
+        if: always()
+        run: |
+          STATUS="${{ steps.result.outputs.status }}"
+          {
+            echo "## Preview Deployment"
+            echo ""
+            if [ "$STATUS" == "success" ]; then
+              echo "✅ **Status:** Success"
+              echo "🔗 **URL:** ${{ env.PREVIEW_URL }}"
+            elif [[ "$STATUS" == skipped* ]]; then
+              echo "⏭️ **Status:** Skipped ($STATUS)"
+            else
+              echo "⚠️ **Status:** $STATUS"
+            fi
+            echo ""
+            echo "| Property | Value |"
+            echo "|----------|-------|"
+            echo "| Branch/PR | \`${{ steps.preview-name.outputs.name }}\` |"
+            echo "| Commit | \`${{ github.sha }}\` |"
+          } >> $GITHUB_STEP_SUMMARY
+
+  # Manual cleanup action
+  cleanup-preview:
+    name: Cleanup Preview
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'cleanup'
+    continue-on-error: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
+
+      - name: Configure and run cleanup
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ env.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+          scp bin/deploy-preview.sh ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/tmp/
+          ssh ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} \
+            "chmod +x /tmp/deploy-preview.sh && /tmp/deploy-preview.sh cleanup"
+
+  # Manual status check
+  status-preview:
+    name: Preview Status
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'status'
+    continue-on-error: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
+
+      - name: Configure and get status
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ env.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+          scp bin/deploy-preview.sh ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/tmp/
+          ssh ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} \
+            "chmod +x /tmp/deploy-preview.sh && /tmp/deploy-preview.sh status"

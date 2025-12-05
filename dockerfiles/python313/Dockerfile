@@ -7,7 +7,7 @@ ARG ENVIRONMENT=production
 
 # Install uv and dependencies
 FROM python:${PYTHON_VERSION}-slim AS builder
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=docker.io/astral/uv:latest /uv /uvx /bin/
 
 # Re-declare ARG to make it available in this stage
 ARG ENVIRONMENT=production
