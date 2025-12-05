@@ -1,0 +1,102 @@
+import React from 'react';
+import ReactImageAnnotate, { I18nProvider } from '@karlorz/react-image-annotate';
+import PropTypes from 'prop-types';
+
+const AnnotationCanvas = ({
+  image,
+  theme,
+  language,
+  onExit,
+  onNextImage,
+  onPrevImage,
+  t,
+}) => {
+  const taskDescription = `# ${t('annotation.taskTitle', 'Image Annotation Task')}
+
+## ${t('annotation.instructions', 'Instructions')}
+
+1. ${t('annotation.instruction1', 'Select an annotation tool from the left toolbar')}
+2. ${t('annotation.instruction2', 'Draw regions on the image to mark objects')}
+3. ${t('annotation.instruction3', 'Assign labels and tags to each region')}
+4. ${t('annotation.instruction4', 'Use keyboard shortcuts for faster annotation')}:
+   - **Select**: S
+   - **Box**: B
+   - **Polygon**: P
+   - **Point**: O
+
+## ${t('annotation.tips', 'Tips')}
+
+- ${t('annotation.tip1', 'Double-click on a polygon to complete it')}
+- ${t('annotation.tip2', 'Right-click to delete a point while drawing')}
+- ${t('annotation.tip3', 'Use tags to mark special attributes (occluded, truncated, etc.)')}`;
+
+  const regionClsList = [
+    t('annotation.class.defect1', 'Defect1'),
+    t('annotation.class.defect2', 'Defect2'),
+    t('annotation.class.defect3', 'Defect3'),
+  ];
+
+  const enabledTools = [
+    'select',
+    'create-box',
+    'create-polygon',
+    'create-point',
+    'create-line',
+    'create-expanding-line',
+  ];
+
+  return (
+    <I18nProvider language={language}>
+      <div
+        style={{
+          width: '100%',
+          height: 'calc(100vh - 140px)', // Full viewport minus header and CardPro padding
+          minHeight: '600px',
+          backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
+          transition: 'background-color 0.3s ease',
+          overflow: 'hidden',
+        }}
+      >
+        <ReactImageAnnotate
+          key={theme}
+          taskDescription={taskDescription}
+          labelImages={true}
+          regionClsList={regionClsList}
+          enabledTools={enabledTools}
+          selectedTool='select'
+          allowComments={true}
+          hideClone={false}
+          hideSettings={false}
+          hideFullScreen={false}
+          hidePrev={false}
+          hideNext={false}
+          images={[image]}
+          onExit={onExit}
+          onNextImage={onNextImage}
+          onPrevImage={onPrevImage}
+          theme={theme}
+        />
+      </div>
+    </I18nProvider>
+  );
+};
+
+AnnotationCanvas.propTypes = {
+  image: PropTypes.shape({
+    src: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    regions: PropTypes.array,
+    pixelSize: PropTypes.shape({
+      w: PropTypes.number,
+      h: PropTypes.number,
+    }),
+  }).isRequired,
+  theme: PropTypes.string.isRequired,
+  language: PropTypes.string.isRequired,
+  onExit: PropTypes.func.isRequired,
+  onNextImage: PropTypes.func.isRequired,
+  onPrevImage: PropTypes.func.isRequired,
+  t: PropTypes.func.isRequired,
+};
+
+export default AnnotationCanvas;

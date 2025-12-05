@@ -53,6 +53,8 @@ export default {
         'semi-medium': 'var(--semi-border-radius-medium, 6px)',
         'semi-large': 'var(--semi-border-radius-large, 12px)',
         'semi-full': 'var(--semi-border-radius-full, 9999px)',
+        // Override Tailwind's default rounded-2xl (18px) to match new-api (16px)
+        '2xl': '16px',
       },
       fontFamily: {
         sans: [

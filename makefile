@@ -9,7 +9,7 @@ all: build-frontend start-backend
 
 clean-frontend-cache: ## Clear frontend cache and dependencies (fixes Vite hangs)
 	@echo "🧹 Clearing frontend cache and dependencies..."
-	@cd $(FRONTEND_DIR) && rm -rf node_modules bun.lockb .vite
+	@cd $(FRONTEND_DIR) && rm -rf node_modules bun.lock .vite
 	@echo "✅ Frontend cache cleared. Run 'cd web && bun install' to reinstall."
 
 build-frontend:
@@ -124,6 +124,57 @@ dep-sync: ## Sync venv installation with 'requirements.txt' file.
 dep-update: ## Update all the deps.
 	@chmod +x ./bin/update_deps.sh
 	@./bin/update_deps.sh
+
+#################################################
+# Library Development Workflow
+#################################################
+
+.PHONY: link-annotate
+link-annotate: ## Link local @karlorz/react-image-annotate for development
+	@if [ -z "$(LIB_PATH)" ]; then \
+		echo "Usage: make link-annotate LIB_PATH=../react-image-annotate"; \
+		exit 1; \
+	fi
+	@echo "🔗 Linking local react-image-annotate from $(LIB_PATH)..."
+	@cd $(FRONTEND_DIR) && bun link $(LIB_PATH)
+	@echo "✅ Linked. Run 'make unlink-annotate' when done."
+
+.PHONY: unlink-annotate
+unlink-annotate: ## Unlink local library and restore from npm
+	@echo "🔓 Unlinking local react-image-annotate..."
+	@cd $(FRONTEND_DIR) && rm -rf node_modules/@karlorz/react-image-annotate
+	@cd $(FRONTEND_DIR) && bun install
+	@echo "✅ Restored npm version."
+
+.PHONY: update-annotate
+update-annotate: ## Update @karlorz/react-image-annotate to latest version
+	@echo "📦 Updating @karlorz/react-image-annotate..."
+	@cd $(FRONTEND_DIR) && bun update @karlorz/react-image-annotate
+	@echo "✅ Updated. Current version:"
+	@cd $(FRONTEND_DIR) && bun pm ls | grep react-image-annotate || true
+
+.PHONY: check-annotate
+check-annotate: ## Check current vs latest version of @karlorz/react-image-annotate
+	@echo "📋 Installed version:"
+	@cd $(FRONTEND_DIR) && cat node_modules/@karlorz/react-image-annotate/package.json | grep '"version"' | head -1
+	@echo ""
+	@echo "📋 Latest on npm:"
+	@npm view @karlorz/react-image-annotate version 2>/dev/null || echo "  (unable to fetch)"
+	@echo ""
+	@INSTALLED=$$(cd $(FRONTEND_DIR) && cat node_modules/@karlorz/react-image-annotate/package.json | grep '"version"' | head -1 | sed 's/[^0-9.]//g'); \
+	LATEST=$$(npm view @karlorz/react-image-annotate version 2>/dev/null); \
+	if [ "$$INSTALLED" != "$$LATEST" ] && [ -n "$$LATEST" ]; then \
+		echo "⚠️  Update available: $$INSTALLED → $$LATEST"; \
+		echo "   Run: make update-annotate"; \
+	else \
+		echo "✅ Up to date"; \
+	fi
+
+.PHONY: dev-annotate
+dev-annotate: ## Start frontend dev with HMR for annotation development
+	@echo "🚀 Starting annotation dev environment..."
+	@echo "Tip: For lib changes, use 'make link-annotate LIB_PATH=../react-image-annotate'"
+	@cd $(FRONTEND_DIR) && bun run dev
 
 .PHONY: run-container
 run-container: docker-up ## Run the app in a docker container (alias for docker-up).

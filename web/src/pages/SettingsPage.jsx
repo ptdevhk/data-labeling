@@ -1,12 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import {
-  Typography,
-  Card,
-  Form,
-  Select,
-  Switch,
-  Button,
-} from '@douyinfe/semi-ui';
+import { Typography, Form, Select, Switch, Button } from '@douyinfe/semi-ui';
+import CardPro from '../components/common/ui/CardPro';
 
 const { Title } = Typography;
 
@@ -19,17 +13,27 @@ const SettingsPage = () => {
   };
 
   return (
-    <div>
-      <Title heading={2} style={{ marginBottom: 24 }}>
-        {t('nav.settings')}
-      </Title>
-      <Card>
+    <CardPro
+      type="type1"
+      descriptionArea={(
+        <div className="flex flex-col gap-2">
+          <Title heading={2} style={{ margin: 0 }}>
+            {t('nav.settings')}
+          </Title>
+          <Typography.Text type="tertiary">
+            {t('settings.subtitle', 'Configure your workspace preferences')}
+          </Typography.Text>
+        </div>
+      )}
+      t={t}
+    >
+      <div style={{ padding: '24px' }}>
         <Form layout="vertical">
           <Form.Section text={t('settings.general')}>
             <Form.Select
               field="language"
               label={t('settings.language')}
-              style={{ width: 200 }}
+              style={{ width: 240 }}
               onChange={changeLanguage}
               value={i18n.language}
             >
@@ -45,8 +49,8 @@ const SettingsPage = () => {
             {t('common.save')}
           </Button>
         </Form>
-      </Card>
-    </div>
+      </div>
+    </CardPro>
   );
 };
 

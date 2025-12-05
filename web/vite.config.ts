@@ -22,10 +22,21 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(version),
   },
+  publicDir: 'public', // Explicitly set public directory
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      'react-is': path.resolve(__dirname, './node_modules/react-is'),
+      'prop-types': path.resolve(__dirname, './node_modules/prop-types'),
     },
+  },
+  optimizeDeps: {
+    include: [
+      'react-is',
+      'prop-types',
+      'hoist-non-react-statics',
+      '@karlorz/react-image-annotate',
+    ],
   },
   server: {
     port: 5173,

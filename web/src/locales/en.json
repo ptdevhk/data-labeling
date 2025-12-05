@@ -35,7 +35,8 @@
     "alwaysDark": "Always use dark theme",
     "followSystem": "Follow system theme",
     "skip": "Skip",
-    "assign": "Assign"
+    "assign": "Assign",
+    "active": "Active"
   },
   "nav": {
     "projects": "Projects",
@@ -80,13 +81,58 @@
       "point": "Point",
       "eraser": "Eraser",
       "undo": "Undo",
-      "redo": "Redo"
+      "redo": "Redo",
+      "toolbarAria": "Annotation tools",
+      "hints": {
+        "select": "Select and move shapes",
+        "rectangle": "Draw rectangle",
+        "eraser": "Erase shapes",
+        "undo": "Undo action",
+        "redo": "Redo action"
+      }
     },
     "canvas": {
       "zoom": "Zoom",
       "reset": "Reset View",
       "pan": "Pan",
-      "fullscreen": "Fullscreen"
+      "fullscreen": "Fullscreen",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "resetViewTooltip": "Reset View",
+      "fitWidth": "Fit Width",
+      "fitWidthTooltip": "Toggle zoom follows window width"
+    },
+    "taskTitle": "Image Annotation Task",
+    "instructions": "Instructions",
+    "instruction1": "Select an annotation tool from the left toolbar",
+    "instruction2": "Draw regions on the image to mark objects",
+    "instruction3": "Assign labels and tags to each region",
+    "instruction4": "Use keyboard shortcuts for faster annotation",
+    "tips": "Tips",
+    "tip1": "Double-click on a polygon to complete it",
+    "tip2": "Right-click to delete a point while drawing",
+    "tip3": "Use tags to mark special attributes (occluded, truncated, etc.)",
+    "page": {
+      "title": "Annotation #{{id}}",
+      "imageSource": "Image source: {{path}}"
+    },
+    "inspector": {
+      "title": "Annotation Inspector",
+      "subtitle": {
+        "selected": "Details for the selected rectangle",
+        "empty": "Select a rectangle to inspect its details."
+      },
+      "emptyState": "After drawing, click a rectangle or choose it in the list below to review its measurements.",
+      "size": "Size",
+      "area": "Area",
+      "aspect": "Aspect",
+      "position": "Position"
+    },
+    "list": {
+      "title": "Annotations",
+      "total": "Total: {{count}}",
+      "empty": "Draw rectangles on the canvas to create annotations.",
+      "focus": "Focus"
     },
     "labels": {
       "title": "Labels",
@@ -98,7 +144,33 @@
       "assignLabel": "Assign Label",
       "selectOrCreateLabel": "Select an existing label or create a new one",
       "createNew": "Create New",
-      "labelName": "Label Name"
+      "labelName": "Label Name",
+      "unassigned": "Unassigned",
+      "annotationCount": "{{count}} annotations",
+      "selectShape": "Select a shape to edit attributes"
+    },
+    "class": {
+      "defect1": "Defect1",
+      "defect2": "Defect2",
+      "defect3": "Defect3"
+    },
+    "save": {
+      "button": "Save",
+      "success": "Annotations saved successfully",
+      "autoSave": "Auto-save",
+      "lastSaved": "Last saved: {{time}}"
+    },
+    "loading": "Loading annotations...",
+    "loadFailed": "Failed to load annotations",
+    "saveSuccess": "Annotations saved successfully",
+    "saveFailed": "Failed to save annotations",
+    "nextImage": "Moving to next image",
+    "lastImage": "This is the last image",
+    "prevImage": "Moving to previous image",
+    "firstImage": "This is the first image",
+    "export": {
+      "button": "Export",
+      "waitForImage": "Please wait for image to load"
     }
   },
   "theme": {
@@ -118,7 +190,15 @@
     "name": "Export Name",
     "format": "Format",
     "status": "Status",
-    "createdAt": "Created At"
+    "createdAt": "Created At",
+    "dialog": {
+      "title": "Export Annotations",
+      "export": "Export",
+      "format": "Export Format",
+      "stats": "Total Annotations: {{count}}",
+      "labels": "Total Labels: {{count}}",
+      "noAnnotations": "No annotations to export"
+    }
   },
   "settings": {
     "general": "General",
@@ -138,5 +218,7 @@
     "rights": "All rights reserved",
     "license": "MIT License",
     "reportIssue": "Report Issue"
-  }
+  },
+  "hideActions": "Hide actions",
+  "showActions": "Show actions"
 }

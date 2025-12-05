@@ -1,7 +1,7 @@
-import { useEffect, useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useEffect, useMemo, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Nav, Divider, Button } from '@douyinfe/semi-ui';
+import { Nav, Button } from '@douyinfe/semi-ui';
 import {
   IconGridRectangle,
   IconFolder,
@@ -20,10 +20,11 @@ const routerMap = {
   settings: '/console/settings',
 };
 
-const Sidebar = ({ onNavigate = () => {} }) => {
+const SiderBar = ({ onNavigate = () => {} }) => {
   const { t } = useTranslation();
   const [collapsed, toggleCollapsed] = useSidebarCollapsed();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navItems = [
     { itemKey: 'console', text: t('nav.console'), icon: <IconGridRectangle /> },
@@ -57,32 +58,22 @@ const Sidebar = ({ onNavigate = () => {} }) => {
     }
   }, [collapsed]);
 
-  const SELECTED_COLOR = 'var(--semi-color-primary)';
+  const handleSelect = useCallback(
+    ({ itemKey }) => {
+      if (itemKey == null) {
+        return;
+      }
 
-  const renderNavItem = (item) => {
-    const isSelected = selectedKeys.includes(item.itemKey);
-    const textColor = isSelected ? SELECTED_COLOR : 'inherit';
+      const key = String(itemKey);
+      const next = routerMap[key];
 
-    return (
-      <Nav.Item
-        key={item.itemKey}
-        itemKey={item.itemKey}
-        text={
-          <span
-            className='truncate font-medium text-sm'
-            style={{ color: textColor }}
-          >
-            {item.text}
-          </span>
-        }
-        icon={
-          <div className='sidebar-icon-container flex-shrink-0'>
-            {item.icon}
-          </div>
-        }
-      />
-    );
-  };
+      if (next) {
+        navigate(next);
+        onNavigate();
+      }
+    },
+    [navigate, onNavigate],
+  );
 
   return (
     <div
@@ -92,36 +83,25 @@ const Sidebar = ({ onNavigate = () => {} }) => {
         background: 'var(--semi-color-bg-0)',
       }}
     >
+      {!collapsed && (
+        <div className='sidebar-group-label'>{t('nav.workspace')}</div>
+      )}
       <Nav
         className='sidebar-nav'
         defaultIsCollapsed={collapsed}
         isCollapsed={collapsed}
         onCollapseChange={toggleCollapsed}
         selectedKeys={selectedKeys}
-        renderWrapper={({ itemElement, props }) => {
-          const to = routerMap[props.itemKey];
-
-          if (!to) return itemElement;
-
-          return (
-            <Link
-              style={{ textDecoration: 'none' }}
-              to={to}
-              onClick={onNavigate}
-            >
-              {itemElement}
-            </Link>
-          );
-        }}
+        onSelect={handleSelect}
       >
-        <Divider className='sidebar-divider' style={{ marginTop: '12px' }} />
-
-        <div className='sidebar-section'>
-          {!collapsed && (
-            <div className='sidebar-group-label'>{t('nav.workspace')}</div>
-          )}
-          {navItems.map((item) => renderNavItem(item))}
-        </div>
+        {navItems.map((item) => (
+          <Nav.Item
+            key={item.itemKey}
+            itemKey={item.itemKey}
+            text={item.text}
+            icon={item.icon}
+          />
+        ))}
       </Nav>
 
       {!collapsed && (
@@ -166,4 +146,6 @@ const Sidebar = ({ onNavigate = () => {} }) => {
   );
 };
 
-export default Sidebar;
+export const Sidebar = SiderBar;
+
+export default SiderBar;
