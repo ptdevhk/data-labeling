@@ -1,3 +1,9 @@
+## [0.2.1](https://github.com/ptdevhk/data-labeling/compare/v0.2.0...v0.2.1) (2025-12-05)
+
+### Bug Fixes
+
+* Add deployment automation scripts and workflows ([11dcfc9](https://github.com/ptdevhk/data-labeling/commit/11dcfc94c641b7a81833022f6da8adf69de66c6b))
+
 ## [0.2.0](https://github.com/ptdevhk/data-labeling/compare/v0.1.3...v0.2.0) (2025-10-23)
 
 ### Features
