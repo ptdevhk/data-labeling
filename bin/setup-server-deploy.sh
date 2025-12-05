@@ -16,7 +16,10 @@ PRODUCTION_PATH="${PRODUCTION_PATH:-/home/ubuntu/data-labeling}"
 PREVIEW_PATH="${PREVIEW_PATH:-/home/ubuntu/data-labeling-preview}"
 BACKUP_DIR="${BACKUP_DIR:-/home/ubuntu/backups/data-labeling}"
 LOG_DIR="${LOG_DIR:-/home/ubuntu/logs}"
-REPO_URL="${REPO_URL:-https://github.com/ptdevhk/data-labeling.git}"
+# SSH URL for private repos, HTTPS for public repos
+# Override with REPO_URL environment variable if needed
+REPO_URL="${REPO_URL:-git@github.com:ptdevhk/data-labeling.git}"
+REPO_URL_HTTPS="${REPO_URL_HTTPS:-https://github.com/ptdevhk/data-labeling.git}"
 PRODUCTION_DOMAIN="${PRODUCTION_DOMAIN:-labeling.pt-mes.com}"
 PREVIEW_DOMAIN="${PREVIEW_DOMAIN:-preview.pt-mes.com}"
 PRODUCTION_PORT="${PRODUCTION_PORT:-5002}"
@@ -139,8 +142,16 @@ if [ -d "$PRODUCTION_PATH/.git" ]; then
 else
     log_warn "Production repo not found"
     echo "Cloning repository..."
-    git clone "$REPO_URL" "$PRODUCTION_PATH"
-    log_ok "Repository cloned"
+    # Try SSH first (for private repos), fall back to HTTPS (for public repos)
+    if git clone "$REPO_URL" "$PRODUCTION_PATH" 2>&1; then
+        log_ok "Repository cloned via SSH"
+    elif git clone "$REPO_URL_HTTPS" "$PRODUCTION_PATH" 2>&1; then
+        log_ok "Repository cloned via HTTPS"
+    else
+        log_err "Failed to clone repository"
+        log_info "For private repos, run bin/setup-deploy-key.sh first to configure SSH access"
+        exit 1
+    fi
 fi
 
 # 6. Setup .env file

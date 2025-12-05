@@ -4,35 +4,50 @@ Automated deployment for `data-labeling` to production and preview environments.
 
 ## Prerequisites
 
-Before deploying, configure these **GitHub Repository Secrets**:
+### 1. Configure `.env` file
+
+Add deployment settings to your `.env` file:
+
+```bash
+# Server hostname/IP for deployment
+DEPLOY_HOST="your-server.example.com"
+
+# GitHub Personal Access Token (required for PRIVATE repos)
+# Create at: https://github.com/settings/tokens (scopes: repo)
+GITHUB_PAT="ghp_xxxxxxxxxxxxxxxxxxxx"
+```
+
+### 2. Configure GitHub Repository Secrets
 
 Go to **GitHub → Settings → Secrets and variables → Actions → Secrets** and add:
 
 | Secret | Description | Example |
 |--------|-------------|---------|
 | `DEPLOY_HOST` | Server IP or hostname | `my-server.example.com` |
-| `PRODUCTION_SSH_KEY` | SSH private key | Contents of `~/.ssh/deploy_key` |
+| `PRODUCTION_SSH_KEY` | SSH private key | Contents of `~/.ssh/github-actions-deploy` |
+
+### 3. Run Setup Script
 
 **Automated setup** (recommended):
 ```bash
-# Option 1: Use .env file (default)
-./bin/setup-deploy-key.sh
+# For PRIVATE repos (uses GITHUB_PAT from .env)
+./bin/setup-deploy-key.sh --use-pat --yes
 
-# Option 2: Use specific env file
-./bin/setup-deploy-key.sh --env-file .env.production
+# For PUBLIC repos (no PAT needed)
+./bin/setup-deploy-key.sh --yes
 
-# Option 3: Override via environment variable
-DEPLOY_HOST=my-server.example.com ./bin/setup-deploy-key.sh
+# Use specific env file
+./bin/setup-deploy-key.sh --env-file .env.production --use-pat --yes
 
 # Show help
 ./bin/setup-deploy-key.sh --help
 ```
 
 This script will:
-1. Load `DEPLOY_HOST` from env file or environment variable
-2. Generate a dedicated deploy key (`~/.ssh/github-actions-deploy`)
-3. Copy the public key to the production server's ubuntu user
-4. Optionally set GitHub secrets via `gh` CLI
+1. Load `DEPLOY_HOST` and `GITHUB_PAT` from `.env` file
+2. Generate a dedicated deploy key (`~/.ssh/github-actions-deploy`) for GitHub Actions → Server
+3. Configure server to access private GitHub repo (using PAT)
+4. Set GitHub secrets (`DEPLOY_HOST`, `PRODUCTION_SSH_KEY`) via `gh` CLI
 
 **Manual CLI setup**:
 ```bash
@@ -329,6 +344,33 @@ PR opened → deploy-preview.yml → SSH → deploy-preview.sh deploy pr-123 sha
 ## Troubleshooting
 
 Replace `your-server.example.com` with your actual server hostname/IP.
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| `Permission denied (publickey)` in GitHub Actions | SSH key secret corrupted or not set | Re-upload: `gh secret set PRODUCTION_SSH_KEY < ~/.ssh/github-actions-deploy` |
+| SSH works locally but fails in Actions | GitHub secret encoding issue | Re-run `./bin/setup-deploy-key.sh --yes` |
+| `DEPLOY_HOST secret is not set` | Secret not configured | Set secret: `gh secret set DEPLOY_HOST --body "your-server.com"` |
+| Deployment succeeds but site not accessible | Caddy not configured | Check `/etc/caddy/Caddyfile` has domain configured |
+| Health check fails | Container not started | Check logs: `docker compose logs` |
+
+### SSH Key Issues
+
+If GitHub Actions fails with `Permission denied (publickey)`:
+
+```bash
+# 1. Test key locally first
+ssh -i ~/.ssh/github-actions-deploy ubuntu@your-server.example.com "echo OK"
+
+# 2. If local works but Actions fails, re-upload the secret:
+gh secret set PRODUCTION_SSH_KEY < ~/.ssh/github-actions-deploy --repo ptdevhk/data-labeling
+
+# 3. If local also fails, re-run full setup:
+./bin/setup-deploy-key.sh --yes
+```
+
+### Debugging Commands
 
 ```bash
 # Check production status

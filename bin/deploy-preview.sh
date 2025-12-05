@@ -184,10 +184,14 @@ deploy_preview() {
     if [ ! -d "${PREVIEW_PATH}/.git" ]; then
         log_info "Cloning repository..."
         rm -rf "$PREVIEW_PATH" 2>/dev/null || true
-        if ! git clone "https://github.com/${github_repo}.git" "$PREVIEW_PATH" 2>&1; then
-            log_error "Failed to clone repository"
-            echo "PREVIEW_STATUS=clone_failed"
-            return 1
+        # Try SSH first (for private repos), fall back to HTTPS (for public repos)
+        if ! git clone "git@github.com:${github_repo}.git" "$PREVIEW_PATH" 2>&1; then
+            log_warn "SSH clone failed, trying HTTPS..."
+            if ! git clone "https://github.com/${github_repo}.git" "$PREVIEW_PATH" 2>&1; then
+                log_error "Failed to clone repository"
+                echo "PREVIEW_STATUS=clone_failed"
+                return 1
+            fi
         fi
     fi
 

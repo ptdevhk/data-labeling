@@ -25,9 +25,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 DEPLOY_KEY_NAME="${DEPLOY_KEY_NAME:-github-actions-deploy}"
 DEPLOY_KEY_PATH="${DEPLOY_KEY_PATH:-$HOME/.ssh/${DEPLOY_KEY_NAME}}"
+REPO_DEPLOY_KEY_NAME="${REPO_DEPLOY_KEY_NAME:-github-repo-deploy}"
+REPO_DEPLOY_KEY_PATH="${REPO_DEPLOY_KEY_PATH:-$HOME/.ssh/${REPO_DEPLOY_KEY_NAME}}"
 ENV_FILE=""
 FORCE_OVERWRITE=false
 AUTO_YES=false
+SKIP_REPO_KEY=false
+USE_PAT=false
 
 #######################################
 # Colors
@@ -56,6 +60,8 @@ Options:
   -e, --env-file FILE   Load environment from FILE (default: .env)
   -f, --force           Overwrite existing deploy key without prompting
   -y, --yes             Auto-confirm all prompts (non-interactive mode)
+  --skip-repo-key       Skip adding deploy key to GitHub repo (for public repos)
+  --use-pat             Use Personal Access Token for private repo access (instead of deploy key)
   -h, --help            Show this help message
 
 Examples:
@@ -63,6 +69,8 @@ Examples:
   $(basename "$0") --env-file .env.production
   $(basename "$0") -e .env.staging -y        # Non-interactive
   $(basename "$0") --force --yes             # Overwrite key, auto-confirm
+  $(basename "$0") --skip-repo-key           # Public repo, no repo deploy key needed
+  $(basename "$0") --use-pat                 # Use PAT for private repo (prompts for token)
   DEPLOY_HOST=my-server.com $(basename "$0") # Override via env var
 
 Environment Variables (from .env file or command line):
@@ -73,7 +81,12 @@ Environment Variables (from .env file or command line):
   ROOT_SSH_KEY      SSH key for root access (default: auto-detect)
   DEPLOY_KEY_NAME   Name for the deploy key (default: github-actions-deploy)
   DEPLOY_KEY_PATH   Path to store the key (default: ~/.ssh/github-actions-deploy)
-  GITHUB_REPO       Repository for secrets (default: ptdevhk/data-labeling)
+  GITHUB_REPO       Repository for secrets (default: auto-detect from git remote)
+  GITHUB_PAT        Personal Access Token for private repo access (optional)
+
+Note: For PRIVATE repositories, this script can use either:
+  1. Deploy key (SSH) - Generates key and adds to GitHub repo (default)
+  2. Personal Access Token (HTTPS) - Use --use-pat flag
 EOF
 }
 
@@ -98,6 +111,14 @@ parse_args() {
                 ;;
             -y|--yes)
                 AUTO_YES=true
+                shift
+                ;;
+            --skip-repo-key)
+                SKIP_REPO_KEY=true
+                shift
+                ;;
+            --use-pat)
+                USE_PAT=true
                 shift
                 ;;
             -h|--help)
@@ -342,10 +363,238 @@ test_deploy_access() {
 }
 
 #######################################
+# Setup repo deploy key (for private repos)
+# This allows the server to clone/fetch from GitHub
+#######################################
+setup_repo_deploy_key() {
+    if [ "$SKIP_REPO_KEY" = true ]; then
+        log_info "Skipping repo deploy key setup (--skip-repo-key)"
+        return 0
+    fi
+
+    # Auto-detect repo
+    local repo="${GITHUB_REPO:-}"
+    if [ -z "$repo" ]; then
+        repo=$(git -C "$PROJECT_ROOT" remote get-url origin 2>/dev/null | sed -E 's|.*github\.com[:/](.+)(\.git)?$|\1|' | sed 's/\.git$//')
+    fi
+
+    if [ -z "$repo" ]; then
+        log_warn "Could not detect GitHub repo, skipping repo deploy key"
+        return 0
+    fi
+
+    # Check if repo is private
+    local is_private
+    is_private=$(gh api "repos/$repo" --jq '.private' 2>/dev/null || echo "unknown")
+
+    if [ "$is_private" = "false" ]; then
+        log_info "Repository is public, repo deploy key not needed"
+        return 0
+    fi
+
+    log_info "Setting up access for private repository: $repo"
+
+    # Use PAT if requested
+    if [ "$USE_PAT" = true ]; then
+        setup_repo_with_pat "$repo"
+        return $?
+    fi
+
+    # Try SSH key approach
+    log_info "Trying SSH key approach..."
+
+    # Check for existing GitHub SSH key first
+    local github_key=""
+    local github_key_candidates=(
+        "$HOME/.ssh/github"
+        "$HOME/.ssh/id_ed25519"
+        "$HOME/.ssh/id_rsa"
+    )
+
+    for key in "${github_key_candidates[@]}"; do
+        if [ -f "$key" ]; then
+            # Test if this key works with GitHub (exit code 1 is OK - GitHub returns 1 for successful auth)
+            local ssh_output
+            ssh_output=$(ssh -i "$key" -o BatchMode=yes -o StrictHostKeyChecking=no -T git@github.com 2>&1 || true)
+            if echo "$ssh_output" | grep -q "successfully authenticated"; then
+                github_key="$key"
+                log_ok "Found working GitHub SSH key: $key"
+                break
+            fi
+        fi
+    done
+
+    if [ -n "$github_key" ]; then
+        # Use existing GitHub key - pass it to the setup function
+        log_info "Using existing GitHub SSH key instead of generating new one"
+        setup_server_ssh_for_github "$github_key"
+        return $?
+    fi
+
+    # Try to generate and add deploy key
+    if [ -f "$REPO_DEPLOY_KEY_PATH" ]; then
+        if [ "$FORCE_OVERWRITE" = true ]; then
+            log_info "Overwriting existing repo deploy key (--force)"
+            rm -f "$REPO_DEPLOY_KEY_PATH" "$REPO_DEPLOY_KEY_PATH.pub"
+        else
+            log_info "Using existing repo deploy key"
+        fi
+    fi
+
+    if [ ! -f "$REPO_DEPLOY_KEY_PATH" ]; then
+        log_info "Generating repo deploy key..."
+        ssh-keygen -t ed25519 -C "$REPO_DEPLOY_KEY_NAME" -f "$REPO_DEPLOY_KEY_PATH" -N ""
+        chmod 600 "$REPO_DEPLOY_KEY_PATH"
+        chmod 644 "$REPO_DEPLOY_KEY_PATH.pub"
+        log_ok "Repo deploy key generated: $REPO_DEPLOY_KEY_PATH"
+    fi
+
+    # Try to add deploy key to GitHub repo
+    local pub_key
+    pub_key=$(cat "$REPO_DEPLOY_KEY_PATH.pub")
+
+    log_info "Adding deploy key to GitHub repository..."
+    if gh api "repos/$repo/keys" -f title="Server Deploy Key ($(hostname))" -f key="$pub_key" -f read_only=true 2>/dev/null; then
+        log_ok "Deploy key added to GitHub repository"
+        setup_server_ssh_for_github "$REPO_DEPLOY_KEY_PATH"
+        return $?
+    else
+        log_warn "Could not add deploy key to GitHub (deploy keys may be disabled)"
+        log_info "Falling back to PAT method..."
+        setup_repo_with_pat "$repo"
+        return $?
+    fi
+}
+
+#######################################
+# Setup server SSH for GitHub access
+#######################################
+setup_server_ssh_for_github() {
+    local key_to_copy="${1:-$REPO_DEPLOY_KEY_PATH}"
+
+    log_info "Configuring server to use SSH for git operations..."
+    log_info "Using key: $key_to_copy"
+
+    local ssh_opts=(-p "$DEPLOY_PORT")
+    local scp_opts=(-P "$DEPLOY_PORT")  # scp uses -P (capital) for port
+    if [ -n "${ROOT_SSH_KEY:-}" ] && [ -f "$ROOT_SSH_KEY" ]; then
+        ssh_opts+=(-i "$ROOT_SSH_KEY")
+        scp_opts+=(-i "$ROOT_SSH_KEY")
+    fi
+
+    # Copy key to server
+    local remote_key_path="/home/$DEPLOY_USER/.ssh/$REPO_DEPLOY_KEY_NAME"
+    scp "${scp_opts[@]}" "$key_to_copy" "$ROOT_USER@$DEPLOY_HOST:$remote_key_path"
+
+    ssh "${ssh_opts[@]}" "$ROOT_USER@$DEPLOY_HOST" bash -s << EOF
+set -e
+
+# Fix permissions
+chown $DEPLOY_USER:$DEPLOY_USER $remote_key_path
+chmod 600 $remote_key_path
+
+# Configure SSH to use this key for github.com
+SSH_CONFIG="/home/$DEPLOY_USER/.ssh/config"
+touch "\$SSH_CONFIG"
+
+if ! grep -q "Host github.com" "\$SSH_CONFIG" 2>/dev/null; then
+    cat >> "\$SSH_CONFIG" << 'SSHEOF'
+
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile $remote_key_path
+    IdentitiesOnly yes
+SSHEOF
+fi
+
+chown $DEPLOY_USER:$DEPLOY_USER "\$SSH_CONFIG"
+chmod 600 "\$SSH_CONFIG"
+
+# Add GitHub to known hosts
+ssh-keyscan github.com >> /home/$DEPLOY_USER/.ssh/known_hosts 2>/dev/null || true
+chown $DEPLOY_USER:$DEPLOY_USER /home/$DEPLOY_USER/.ssh/known_hosts
+
+echo "Server SSH configured for GitHub access"
+EOF
+
+    log_ok "Server configured to access private GitHub repository via SSH"
+}
+
+#######################################
+# Setup server with PAT for GitHub access
+#######################################
+setup_repo_with_pat() {
+    local repo="$1"
+
+    log_info "Setting up GitHub access using Personal Access Token..."
+
+    # Get PAT from environment or prompt
+    local pat="${GITHUB_PAT:-}"
+    if [ -z "$pat" ]; then
+        if [ "$AUTO_YES" = true ]; then
+            log_err "GITHUB_PAT environment variable not set (required in --yes mode)"
+            log_info "Set it via: GITHUB_PAT=ghp_xxxx $0 --use-pat --yes"
+            return 1
+        fi
+        echo ""
+        echo "Enter your GitHub Personal Access Token (PAT):"
+        echo "  Create one at: https://github.com/settings/tokens"
+        echo "  Required scopes: repo (for private repos)"
+        echo ""
+        read -s -p "PAT: " pat
+        echo ""
+    fi
+
+    if [ -z "$pat" ]; then
+        log_err "No PAT provided"
+        return 1
+    fi
+
+    # Configure git on server to use PAT
+    local ssh_opts=(-p "$DEPLOY_PORT")
+    if [ -n "${ROOT_SSH_KEY:-}" ] && [ -f "$ROOT_SSH_KEY" ]; then
+        ssh_opts+=(-i "$ROOT_SSH_KEY")
+    fi
+
+    log_info "Configuring server to use HTTPS with PAT for git operations..."
+
+    ssh "${ssh_opts[@]}" "$ROOT_USER@$DEPLOY_HOST" bash -s << EOF
+set -e
+
+# Configure git credential helper to store credentials
+sudo -u $DEPLOY_USER git config --global credential.helper store
+
+# Store the PAT for github.com
+CRED_FILE="/home/$DEPLOY_USER/.git-credentials"
+echo "https://$pat@github.com" > "\$CRED_FILE"
+chown $DEPLOY_USER:$DEPLOY_USER "\$CRED_FILE"
+chmod 600 "\$CRED_FILE"
+
+# Configure git to use HTTPS instead of SSH for github.com
+sudo -u $DEPLOY_USER git config --global url."https://github.com/".insteadOf "git@github.com:"
+
+echo "Server configured for GitHub HTTPS access with PAT"
+EOF
+
+    log_ok "Server configured to access private GitHub repository via PAT"
+}
+
+#######################################
 # Show GitHub setup instructions
 #######################################
 show_github_instructions() {
-    local repo="${GITHUB_REPO:-ptdevhk/data-labeling}"
+    # Auto-detect repo from git remote if not set
+    local repo="${GITHUB_REPO:-}"
+    if [ -z "$repo" ]; then
+        repo=$(git -C "$PROJECT_ROOT" remote get-url origin 2>/dev/null | sed -E 's|.*github\.com[:/](.+)(\.git)?$|\1|' | sed 's/\.git$//')
+        if [ -z "$repo" ]; then
+            log_warn "Could not detect GitHub repo from git remote"
+            log_info "Set GITHUB_REPO environment variable or run from a git repository"
+            return
+        fi
+        log_info "Detected repository: $repo"
+    fi
 
     echo ""
     echo "========================================"
@@ -445,6 +694,11 @@ main() {
     # Test deploy access
     if test_deploy_access; then
         echo ""
+
+        # Setup repo deploy key for private repos
+        setup_repo_deploy_key
+        echo ""
+
         show_github_instructions
         echo ""
         echo "========================================"
