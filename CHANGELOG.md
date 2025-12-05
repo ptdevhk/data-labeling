@@ -1,3 +1,9 @@
+## [0.2.6](https://github.com/ptdevhk/data-labeling/compare/v0.2.5...v0.2.6) (2025-12-05)
+
+### Bug Fixes
+
+* Improve deploy-preview checkout logic and permissions ([5788a54](https://github.com/ptdevhk/data-labeling/commit/5788a544ba141e4ecf0d4c1b5971628ab8cad46a))
+
 ## [0.2.5](https://github.com/ptdevhk/data-labeling/compare/v0.2.4...v0.2.5) (2025-12-05)
 
 ### Bug Fixes
