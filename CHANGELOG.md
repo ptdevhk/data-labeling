@@ -1,3 +1,9 @@
+## [0.2.5](https://github.com/ptdevhk/data-labeling/compare/v0.2.4...v0.2.5) (2025-12-05)
+
+### Bug Fixes
+
+* Prevent deployment with wrong version due to git fetch failures ([4e62e35](https://github.com/ptdevhk/data-labeling/commit/4e62e35439ef802bfc21428a8ab39d503aa6756d))
+
 ## [0.2.4](https://github.com/ptdevhk/data-labeling/compare/v0.2.3...v0.2.4) (2025-12-05)
 
 ### Bug Fixes
