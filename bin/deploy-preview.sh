@@ -219,6 +219,13 @@ deploy_preview() {
             pr_number="${preview_name#pr-}"
             log_info "Fetching PR #$pr_number ref..."
 
+            # First, move to detached HEAD to allow branch operations
+            # This avoids "refusing to fetch into branch checked out" error
+            git checkout --detach HEAD 2>/dev/null || true
+
+            # Delete old PR branch if it exists (to allow fresh fetch)
+            git branch -D "pr-${pr_number}" 2>/dev/null || true
+
             # Fetch the PR head ref directly from GitHub
             if git fetch origin "pull/${pr_number}/head:pr-${pr_number}" 2>&1; then
                 if git checkout "pr-${pr_number}" 2>&1; then
