@@ -13,7 +13,28 @@ Go to **GitHub → Settings → Secrets and variables → Actions → Secrets** 
 | `DEPLOY_HOST` | Server IP or hostname | `my-server.example.com` |
 | `PRODUCTION_SSH_KEY` | SSH private key | Contents of `~/.ssh/deploy_key` |
 
-Or via CLI:
+**Automated setup** (recommended):
+```bash
+# Option 1: Use .env file (default)
+./bin/setup-deploy-key.sh
+
+# Option 2: Use specific env file
+./bin/setup-deploy-key.sh --env-file .env.production
+
+# Option 3: Override via environment variable
+DEPLOY_HOST=my-server.example.com ./bin/setup-deploy-key.sh
+
+# Show help
+./bin/setup-deploy-key.sh --help
+```
+
+This script will:
+1. Load `DEPLOY_HOST` from env file or environment variable
+2. Generate a dedicated deploy key (`~/.ssh/github-actions-deploy`)
+3. Copy the public key to the production server's ubuntu user
+4. Optionally set GitHub secrets via `gh` CLI
+
+**Manual CLI setup**:
 ```bash
 gh secret set DEPLOY_HOST --body "my-server.example.com" --repo ptdevhk/data-labeling
 gh secret set PRODUCTION_SSH_KEY < ~/.ssh/deploy_key --repo ptdevhk/data-labeling
@@ -23,7 +44,13 @@ gh secret set PRODUCTION_SSH_KEY < ~/.ssh/deploy_key --repo ptdevhk/data-labelin
 
 Replace `your-server.example.com` with your actual server hostname/IP.
 
-### One-time Server Setup
+### One-time Deploy Key Setup (from local machine)
+```bash
+# Requires root SSH access to production server
+DEPLOY_HOST=your-server.example.com ./bin/setup-deploy-key.sh
+```
+
+### One-time Server Setup (installs Node.js, bun, clones repo)
 ```bash
 ssh ubuntu@your-server.example.com 'bash -s' < bin/setup-server-deploy.sh
 ```
@@ -365,7 +392,8 @@ PRODUCTION_DOMAIN=myapp.example.com PREVIEW_DOMAIN=preview.example.com \
 
 ```
 bin/
-├── setup-server-deploy.sh   # One-time setup
+├── setup-deploy-key.sh      # Generate deploy key + configure GitHub secrets
+├── setup-server-deploy.sh   # One-time server setup (Node.js, bun, repo clone)
 ├── deploy-production.sh     # Production: status, update, deploy
 └── deploy-preview.sh        # Preview: status, cleanup, deploy
 
