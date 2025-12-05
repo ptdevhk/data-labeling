@@ -1,3 +1,33 @@
+## [0.2.5](https://github.com/ptdevhk/data-labeling/compare/v0.2.4...v0.2.5) (2025-12-05)
+
+### Bug Fixes
+
+* Prevent deployment with wrong version due to git fetch failures ([4e62e35](https://github.com/ptdevhk/data-labeling/commit/4e62e35439ef802bfc21428a8ab39d503aa6756d))
+
+## [0.2.4](https://github.com/ptdevhk/data-labeling/compare/v0.2.3...v0.2.4) (2025-12-05)
+
+### Bug Fixes
+
+* Improve deployment scripts for private/public repo support ([444d724](https://github.com/ptdevhk/data-labeling/commit/444d7249e257a99e5f78964c3b8cc22fe1f431c0))
+
+## [0.2.3](https://github.com/ptdevhk/data-labeling/compare/v0.2.2...v0.2.3) (2025-12-05)
+
+### Bug Fixes
+
+* Use repository secrets instead of environment secrets ([df1f6d6](https://github.com/ptdevhk/data-labeling/commit/df1f6d6391d777a33498a565845096d596db7a7d))
+
+## [0.2.2](https://github.com/ptdevhk/data-labeling/compare/v0.2.1...v0.2.2) (2025-12-05)
+
+### Bug Fixes
+
+* Add deploy key setup script and update deployment docs ([d2632d2](https://github.com/ptdevhk/data-labeling/commit/d2632d2d366987fce44914d69dad2bff788d5ed7))
+
+## [0.2.1](https://github.com/ptdevhk/data-labeling/compare/v0.2.0...v0.2.1) (2025-12-05)
+
+### Bug Fixes
+
+* Add deployment automation scripts and workflows ([11dcfc9](https://github.com/ptdevhk/data-labeling/commit/11dcfc94c641b7a81833022f6da8adf69de66c6b))
+
 ## [0.2.0](https://github.com/ptdevhk/data-labeling/compare/v0.1.3...v0.2.0) (2025-10-23)
 
 ### Features
