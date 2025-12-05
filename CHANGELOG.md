@@ -1,3 +1,9 @@
+## [0.2.2](https://github.com/ptdevhk/data-labeling/compare/v0.2.1...v0.2.2) (2025-12-05)
+
+### Bug Fixes
+
+* Add deploy key setup script and update deployment docs ([d2632d2](https://github.com/ptdevhk/data-labeling/commit/d2632d2d366987fce44914d69dad2bff788d5ed7))
+
 ## [0.2.1](https://github.com/ptdevhk/data-labeling/compare/v0.2.0...v0.2.1) (2025-12-05)
 
 ### Bug Fixes
