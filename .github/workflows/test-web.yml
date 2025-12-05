@@ -61,7 +61,9 @@ jobs:
         working-directory: ./web
         run: |
           echo "Installing frontend dependencies..."
-          bun install
+          # Use --ignore-scripts to skip native module compilation (sharp, canvas, etc.)
+          # This avoids libvips build failures on macOS ARM64
+          bun install --ignore-scripts
 
       - name: Run Linter
         if: steps.filter.outputs.frontend == 'true'
