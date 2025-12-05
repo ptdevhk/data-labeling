@@ -1,3 +1,9 @@
+## [0.2.4](https://github.com/ptdevhk/data-labeling/compare/v0.2.3...v0.2.4) (2025-12-05)
+
+### Bug Fixes
+
+* Improve deployment scripts for private/public repo support ([444d724](https://github.com/ptdevhk/data-labeling/commit/444d7249e257a99e5f78964c3b8cc22fe1f431c0))
+
 ## [0.2.3](https://github.com/ptdevhk/data-labeling/compare/v0.2.2...v0.2.3) (2025-12-05)
 
 ### Bug Fixes
