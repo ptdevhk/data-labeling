@@ -35,7 +35,8 @@ jobs:
   deploy:
     name: Deploy Release to Production
     runs-on: ubuntu-latest
-    environment: production
+    # Note: Using repository secrets directly (not environment secrets) for easier management
+    # To use environment-level secrets, uncomment: environment: production
     timeout-minutes: 15
 
     steps:
