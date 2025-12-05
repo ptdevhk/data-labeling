@@ -565,9 +565,10 @@ set -e
 # Configure git credential helper to store credentials
 sudo -u $DEPLOY_USER git config --global credential.helper store
 
-# Store the PAT for github.com
+# Store the PAT for github.com (format: https://USERNAME:TOKEN@github.com)
+# GitHub accepts "x-access-token" as username for PAT authentication
 CRED_FILE="/home/$DEPLOY_USER/.git-credentials"
-echo "https://$pat@github.com" > "\$CRED_FILE"
+echo "https://x-access-token:$pat@github.com" > "\$CRED_FILE"
 chown $DEPLOY_USER:$DEPLOY_USER "\$CRED_FILE"
 chmod 600 "\$CRED_FILE"
 

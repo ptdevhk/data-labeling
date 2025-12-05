@@ -227,11 +227,31 @@ fetch_and_checkout() {
         git stash push -m "deploy-auto-stash-$(date +%Y%m%d_%H%M%S)" 2>/dev/null || true
     fi
 
-    git_fetch_with_retry
-    git checkout "$version"
+    # Fetch must succeed - fail early if network/auth issues
+    if ! git_fetch_with_retry; then
+        log_error "Git fetch failed - cannot proceed with deployment"
+        log_error "Check network connectivity and git credentials"
+        exit 1
+    fi
 
+    # Checkout the requested version
+    if ! git checkout "$version" 2>&1; then
+        log_error "Failed to checkout version: $version"
+        exit 1
+    fi
+
+    # Verify we actually got the requested version
     local actual_ref=$(git describe --tags --always)
     log_info "Checked out: $actual_ref"
+
+    # Verify checkout matches requested version (for tags)
+    if [[ "$version" == v* ]]; then
+        if [[ "$actual_ref" != "$version" ]]; then
+            log_error "Version mismatch! Requested: $version, Got: $actual_ref"
+            log_error "This may indicate the tag doesn't exist or wasn't fetched"
+            exit 1
+        fi
+    fi
 }
 
 build_frontend() {
