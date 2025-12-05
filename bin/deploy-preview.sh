@@ -210,10 +210,42 @@ deploy_preview() {
     # Fetch and checkout with retry
     git_fetch_with_retry || true
 
+    # Try to checkout the specific SHA
     if ! git checkout "$git_sha" 2>&1; then
-        log_error "Failed to checkout $git_sha"
-        echo "PREVIEW_STATUS=checkout_failed"
-        return 1
+        log_warn "SHA $git_sha not found, trying to fetch PR ref..."
+
+        # Check if preview_name starts with "pr-" to determine PR number
+        if [[ "$preview_name" == pr-* ]]; then
+            pr_number="${preview_name#pr-}"
+            log_info "Fetching PR #$pr_number ref..."
+
+            # Fetch the PR head ref directly from GitHub
+            if git fetch origin "pull/${pr_number}/head:pr-${pr_number}" 2>&1; then
+                if git checkout "pr-${pr_number}" 2>&1; then
+                    log_info "Successfully checked out PR #$pr_number"
+                else
+                    log_error "Failed to checkout PR ref"
+                    echo "PREVIEW_STATUS=checkout_failed"
+                    return 1
+                fi
+            else
+                log_error "Failed to fetch PR ref"
+                echo "PREVIEW_STATUS=checkout_failed"
+                return 1
+            fi
+        else
+            # For branch-based previews, try to fetch and checkout the branch
+            log_warn "Attempting to find branch for preview: $preview_name"
+
+            # Try to match the preview name back to a branch
+            if git fetch origin 2>&1 && git checkout "origin/HEAD" 2>&1; then
+                log_warn "Fell back to origin/HEAD"
+            else
+                log_error "Failed to checkout $git_sha"
+                echo "PREVIEW_STATUS=checkout_failed"
+                return 1
+            fi
+        fi
     fi
 
     # Create .env with unique secret key for preview
