@@ -1,3 +1,9 @@
+## [0.2.3](https://github.com/ptdevhk/data-labeling/compare/v0.2.2...v0.2.3) (2025-12-05)
+
+### Bug Fixes
+
+* Use repository secrets instead of environment secrets ([df1f6d6](https://github.com/ptdevhk/data-labeling/commit/df1f6d6391d777a33498a565845096d596db7a7d))
+
 ## [0.2.2](https://github.com/ptdevhk/data-labeling/compare/v0.2.1...v0.2.2) (2025-12-05)
 
 ### Bug Fixes
