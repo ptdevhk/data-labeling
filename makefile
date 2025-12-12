@@ -80,12 +80,12 @@ lint-react: lint-frontend lint-i18n	## Run all React/frontend linters.
 .PHONY: lint-frontend
 lint-frontend: ## Run ESLint on frontend code.
 	@echo "Running ESLint on frontend..."
-	@cd $(FRONTEND_DIR) && npm run lint
+	@bun run lint
 
 .PHONY: lint-i18n
 lint-i18n: ## Run the i18n linter.
 	@echo "Running i18n linter..."
-	@cd $(FRONTEND_DIR) && npm run lint:i18n
+	@bun run --filter '@data-labeling/web' lint:i18n
 
 .PHONY: lint-check
 lint-check:  ## Check whether the codebase satisfies the linter rules.

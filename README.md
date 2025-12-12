@@ -17,7 +17,7 @@ Web-based image annotation tool with automated semantic versioning.
 **Solution**:
 ```bash
 make clean-frontend-cache
-cd web && bun install --force
+bun install --force
 bun run dev
 ```
 
