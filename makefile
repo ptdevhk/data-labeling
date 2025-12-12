@@ -13,16 +13,16 @@ build-all: build-lib build-frontend
 
 build-lib: ## Build react-image-annotate library
 	@echo "Building react-image-annotate library..."
-	@cd $(LIB_DIR) && bun run build
+	@bun run build:lib
 
 clean-frontend-cache: ## Clear frontend cache and dependencies (fixes Vite hangs)
 	@echo "🧹 Clearing frontend cache and dependencies..."
 	@cd $(FRONTEND_DIR) && rm -rf node_modules .vite
 	@echo "✅ Frontend cache cleared. Run 'bun install' from root to reinstall."
 
-build-frontend:
+build-frontend: ## Build React frontend
 	@echo "Building frontend..."
-	@cd $(FRONTEND_DIR) && bun install && bun run build
+	@bun run build:web
 
 generate-client: ## Generate TypeScript API client from FastAPI OpenAPI spec
 	@echo "Generating TypeScript API client..."
@@ -31,7 +31,7 @@ generate-client: ## Generate TypeScript API client from FastAPI OpenAPI spec
 
 start-frontend: ## Start frontend dev server (Vite on port 5173)
 	@echo "Starting frontend dev server..."
-	@cd $(FRONTEND_DIR) && bun install && bun run dev
+	@bun run dev
 
 start-backend: ## Start backend dev server (blocking, use Ctrl+C to stop)
 	@echo "Starting backend dev server..."
@@ -140,13 +140,12 @@ dep-update: ## Update all the deps.
 .PHONY: dev-lib
 dev-lib: ## Start library in watch mode for development
 	@echo "Starting library in watch mode..."
-	@cd $(LIB_DIR) && bun run dev
+	@bun run dev:lib
 
 .PHONY: dev-all
 dev-all: ## Parallel development (lib watch + frontend dev) with HMR
 	@echo "Starting parallel development..."
-	@(cd $(LIB_DIR) && bun run dev) & \
-	 (cd $(FRONTEND_DIR) && bun run dev)
+	@bun run dev:all
 
 .PHONY: check-annotate
 check-annotate: ## Check workspace vs npm version of @karlorz/react-image-annotate
