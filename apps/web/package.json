@@ -1,5 +1,5 @@
 {
-  "name": "data-labeling",
+  "name": "@data-labeling/web",
   "private": true,
   "version": "0.2.6",
   "type": "module",
@@ -13,14 +13,14 @@
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
     "openapi-ts": "openapi-ts",
-    "generate-client": "../bin/generate-client.sh"
+    "generate-client": "../../bin/generate-client.sh"
   },
   "dependencies": {
     "@douyinfe/semi-icons": "^2.86.0",
     "@douyinfe/semi-ui": "^2.86.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@karlorz/react-image-annotate": "^4.0.7",
+    "@karlorz/react-image-annotate": "workspace:*",
     "@mui/material": "^6.5.0",
     "@visactor/react-vchart": "^2.0.5",
     "axios": "^1.12.2",

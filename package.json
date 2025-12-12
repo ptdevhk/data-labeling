@@ -1,5 +1,21 @@
 {
-  "dependencies": {
-    "@mui/material": "^6"
+  "name": "data-labeling",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --cwd apps/web dev",
+    "dev:lib": "bun run --cwd packages/react-image-annotate dev",
+    "build": "bun run build:lib && bun run build:web",
+    "build:web": "bun run --cwd apps/web build",
+    "build:lib": "bun run --cwd packages/react-image-annotate build",
+    "lint": "bun run --cwd apps/web lint",
+    "type-check": "bun run --cwd apps/web type-check",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }
