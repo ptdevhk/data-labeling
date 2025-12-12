@@ -8,7 +8,7 @@ jobs:
   commitlint:
     name: Validate Commit Messages
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -39,7 +39,15 @@ jobs:
           echo "$PR_TITLE" | ./node_modules/.bin/commitlint
 
       - name: Validate commit messages
-        working-directory: /tmp
         run: |
-          cd $GITHUB_WORKSPACE
-          /tmp/node_modules/.bin/commitlint --cwd /tmp --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+          # Get each commit message and pipe to commitlint (avoids git cwd issues)
+          FAILED=0
+          for SHA in $(git rev-list ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}); do
+            echo "Validating commit $SHA..."
+            MSG=$(git log -1 --format="%B" "$SHA")
+            if ! echo "$MSG" | /tmp/node_modules/.bin/commitlint; then
+              echo "::error::Commit $SHA failed validation"
+              FAILED=1
+            fi
+          done
+          exit $FAILED
