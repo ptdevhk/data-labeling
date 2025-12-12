@@ -31,6 +31,11 @@ export default defineConfig({
         __dirname,
         '../../packages/react-image-annotate/src/lib.js'
       ),
+      // Force single React instance for workspace packages
+      'react': path.resolve(__dirname, '../../node_modules/react'),
+      'react-dom': path.resolve(__dirname, '../../node_modules/react-dom'),
+      'react/jsx-runtime': path.resolve(__dirname, '../../node_modules/react/jsx-runtime'),
+      'react/jsx-dev-runtime': path.resolve(__dirname, '../../node_modules/react/jsx-dev-runtime'),
     },
   },
   optimizeDeps: {
