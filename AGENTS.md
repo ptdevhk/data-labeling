@@ -36,7 +36,20 @@
 
 ## Project Overview
 
-Web-based image annotation tool with React SPA frontend + FastAPI backend. Monorepo structure: `./web` (React+Vite) and `./svc` (FastAPI+Python).
+Web-based image annotation tool with React SPA frontend + FastAPI backend.
+
+**Monorepo Structure:**
+```
+data-labeling/
+├── apps/
+│   └── web/                    # React frontend (Vite)
+├── packages/
+│   └── react-image-annotate/   # Annotation library (workspace)
+├── svc/                        # Python backend (FastAPI)
+├── package.json                # Workspace root config
+├── bun.lock                    # Single lockfile for all JS
+└── makefile
+```
 
 **Current Stack:**
 - React 18.3 (downgraded for Semi Design compatibility)
@@ -56,17 +69,26 @@ make docker-up                    # Docker deployment on port 5002
 
 ### Essential Commands
 ```bash
+# Install (workspaces auto-linked)
+bun install                       # Install all workspace dependencies
+
 # Local Development
-make all                          # Build frontend + start backend (recommended)
+make all                          # Build lib + frontend, start backend
+make start-frontend               # Frontend dev server on port 5173
+make dev-lib                      # Library watch mode
+make dev-all                      # Parallel lib + frontend dev (HMR)
 make start-backend                # Backend only with hot reload
-cd web && bun run dev             # Frontend dev server on port 5173
-make build-frontend               # Build React to web/dist/
+
+# Build
+make build-all                    # Build lib then frontend
+make build-lib                    # Build library only
+make build-frontend               # Build frontend only
 
 # Docker
-make docker-up                    # Initial setup (builds frontend + starts containers)
-make docker-restart               # Rebuild frontend + restart containers
+make docker-up                    # Initial setup (builds + starts containers)
+make docker-restart               # Rebuild + restart containers
 make docker-down                  # Stop containers
-docker compose logs -f            # View logs (merges base + override)
+docker compose logs -f            # View logs
 
 # Quality & Testing
 make test                         # Pytest with coverage
@@ -75,6 +97,8 @@ make lint-react                   # ESLint + i18n check
 
 # API Client Generation
 make generate-client              # Generate TypeScript client from OpenAPI spec
+
+# No more bun link needed! Library is a workspace package.
 ```
 
 ## Architecture Rules
@@ -82,8 +106,8 @@ make generate-client              # Generate TypeScript client from OpenAPI spec
 ### Frontend Architecture
 
 **CSS Layer Order (CRITICAL):**
-- Semi Design CSS imported **ONLY** in `web/src/main.tsx`
-- CSS layers in `web/src/index.css`: tailwind-base → semi → tailwind-components → tailwind-utils
+- Semi Design CSS imported **ONLY** in `apps/web/src/main.tsx`
+- CSS layers in `apps/web/src/index.css`: tailwind-base → semi → tailwind-components → tailwind-utils
 - **DO NOT** import Semi CSS elsewhere (causes duplication and layer conflicts)
 - Use PostCSS `tailwindcss` plugin, NOT `@tailwindcss/postcss`
 
@@ -109,7 +133,7 @@ make generate-client              # Generate TypeScript client from OpenAPI spec
    - Fixed pagination area at bottom for all types
    - Responsive: Hides certain areas on mobile devices
 
-3. **Common UI Components (from web/src/components/common/ui/):**
+3. **Common UI Components (from apps/web/src/components/common/ui/):**
    - `CardPro`: Main content container with structured areas
    - `CardTable`: Specialized table card wrapper
    - `CompactModeToggle`: Toggle between compact/normal table views
@@ -119,7 +143,7 @@ make generate-client              # Generate TypeScript client from OpenAPI spec
    - `SelectableButtonGroup`: Multi-select button groups
    - `RenderUtils`: Common rendering utilities
 
-4. **Essential Hooks (from web/src/hooks/common/):**
+4. **Essential Hooks (from apps/web/src/hooks/common/):**
    - `useIsMobile()`: Device detection for responsive UI
    - `useSidebarCollapsed()`: Sidebar state management
    - `useNavigation()`: Enhanced navigation utilities
@@ -159,7 +183,7 @@ make generate-client              # Generate TypeScript client from OpenAPI spec
 
 **Routing Order (critical for SPA):**
 1. API routes (`/api*`, `/token`, `/health`)
-2. Static files (`/assets` → `web/dist/assets`)
+2. Static files (`/assets` → `apps/web/dist/assets`)
 3. SPA catch-all (`/{full_path:path}` → `index.html`)
 
 ### Docker Compose
@@ -280,20 +304,16 @@ make generate-client              # Generate TypeScript client from OpenAPI spec
 
 ### Vite Dev Server Hang
 **Problem**: Vite prints "$ vite" then hangs
-- **Fix**: `make clean-frontend-cache && cd web && bun install --force`
+- **Fix**: `make clean-frontend-cache && bun install --force`
 - **Cause**: Bun cache corruption with Node 24 + Vite 7
 - **Prevention**: Run clean-frontend-cache when switching branches
 
-## Project Structure
-```
-
-```
-
 ## Key Files Reference
-- `web/src/main.tsx`: Entry point, imports Semi CSS
-- `web/src/index.css`: CSS layer definitions
-- `web/vite.config.ts`: Semi Design plugin configuration
-- `web/tailwind.config.js`: Semi token mapping
+- `apps/web/src/main.tsx`: Entry point, imports Semi CSS
+- `apps/web/src/index.css`: CSS layer definitions
+- `apps/web/vite.config.ts`: Semi Design plugin configuration
+- `apps/web/tailwind.config.js`: Semi token mapping
+- `packages/react-image-annotate/src/`: Annotation library source
 - `svc/main.py`: FastAPI app with routing order
 - `Caddyfile`: Reverse proxy configuration
 - `.dockerignore`: Excludes .venv/, node_modules/, .env.local (NOT .env)
