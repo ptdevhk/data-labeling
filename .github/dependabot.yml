@@ -1,0 +1,76 @@
+# GitHub Dependabot configuration
+# Automatically updates dependencies and creates pull requests
+
+version: 2
+updates:
+  # Maintain npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    # Automatically merge minor and patch updates
+    open-pull-requests-limit: 10
+    # Group updates for better organization
+    groups:
+      # Group all production dependencies together
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group all development dependencies together
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+    # Commit message configuration
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    # Labels to add to pull requests
+    labels:
+      - "dependencies"
+      - "automated"
+    # Reviewers (update with your GitHub usernames)
+    # reviewers:
+    #   - "your-github-username"
+    # assignees:
+    #   - "your-github-username"
+    # Rebase strategy
+    rebase-strategy: "auto"
+    # Allow Dependabot to update vulnerable dependencies
+    allow:
+      - dependency-type: "all"
+    # Ignore major version updates for specific packages that may break
+    ignore:
+      # Keep React 17 for now (React 18 requires migration)
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      # Keep webpack 4 for now (webpack 5 requires configuration changes)
+      - dependency-name: "webpack"
+        update-types: ["version-update:semver-major"]
+      # Keep react-scripts 3.x (newer versions may require Node.js changes)
+      - dependency-name: "react-scripts"
+        update-types: ["version-update:semver-major"]
+
+  # Maintain GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "github-actions"
+      - "automated"
