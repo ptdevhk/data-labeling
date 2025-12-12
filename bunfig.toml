@@ -1,0 +1,7 @@
+# Bun configuration for monorepo
+# https://bun.sh/docs/runtime/bunfig
+
+[install]
+# Use hoisted linker to ensure flat node_modules structure
+# Required for Semi Design's vite-plugin-semi sass resolution
+linker = "hoisted"

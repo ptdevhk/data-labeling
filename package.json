@@ -1,0 +1,25 @@
+{
+  "name": "data-labeling",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter '@data-labeling/web' dev",
+    "dev:lib": "bun run --filter '@karlorz/react-image-annotate' dev",
+    "dev:all": "bun run --filter '*' dev",
+    "build": "bun run build:lib && bun run build:web",
+    "build:web": "bun run --filter '@data-labeling/web' build",
+    "build:lib": "bun run --filter '@karlorz/react-image-annotate' build",
+    "lint": "bun run --filter '@data-labeling/web' lint",
+    "lint:all": "bun run --filter '*' lint",
+    "type-check": "bun run --filter '@data-labeling/web' type-check",
+    "test": "bun run --filter '*' test",
+    "test:lib": "bun run --filter '@karlorz/react-image-annotate' test"
+  },
+  "devDependencies": {
+    "@douyinfe/semi-theme-default": "^2.89.0",
+    "typescript": "^5.9.3"
+  }
+}

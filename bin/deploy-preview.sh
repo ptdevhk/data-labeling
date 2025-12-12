@@ -289,7 +289,7 @@ services:
       - "${PORT_BIND}:${PREVIEW_PORT}:5002"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./web/dist:/web/dist:ro
+      - ./apps/web/dist:/web/dist:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -300,45 +300,46 @@ volumes:
   caddy_config:
 EOF
 
-    # Build frontend
+    # Build frontend (monorepo: install at root, build lib then web)
     log_info "Building frontend..."
     export PATH="$HOME/.bun/bin:/usr/local/bin:$PATH"
 
-    if [ -d "web" ]; then
-        cd web || true
-        if command -v bun &> /dev/null; then
-            # Use --ignore-scripts to skip native module compilation (canvas, etc.)
-            # Add timeout protection for slow network connections
-            log_info "Installing dependencies (timeout: ${BUN_INSTALL_TIMEOUT}s)..."
-            if ! timeout "$BUN_INSTALL_TIMEOUT" bun install --ignore-scripts 2>&1; then
-                log_warn "Bun install timed out or failed, trying npm..."
-                timeout "$BUN_INSTALL_TIMEOUT" npm install 2>&1 || {
-                    log_warn "Failed to install dependencies (continuing anyway)"
-                }
-            fi
+    if command -v bun &> /dev/null; then
+        # Use --ignore-scripts to skip native module compilation (canvas, etc.)
+        # Add timeout protection for slow network connections
+        log_info "Installing workspace dependencies (timeout: ${BUN_INSTALL_TIMEOUT}s)..."
+        if ! timeout "$BUN_INSTALL_TIMEOUT" bun install --ignore-scripts 2>&1; then
+            log_warn "Bun install timed out or failed, trying npm..."
+            timeout "$BUN_INSTALL_TIMEOUT" npm install 2>&1 || {
+                log_warn "Failed to install dependencies (continuing anyway)"
+            }
+        fi
 
-            log_info "Building frontend..."
-            if ! bun run build 2>&1; then
-                log_warn "Bun build failed, trying npm..."
-                if ! npm run build 2>&1; then
-                    log_error "Failed to build frontend"
-                    echo "PREVIEW_STATUS=build_failed"
-                    return 1
-                fi
-            fi
-        else
-            log_warn "bun not found, trying npm"
-            timeout "$BUN_INSTALL_TIMEOUT" npm install 2>&1 && npm run build 2>&1 || {
+        log_info "Building library..."
+        if ! bun run build:lib 2>&1; then
+            log_warn "Library build failed (continuing anyway)"
+        fi
+
+        log_info "Building frontend..."
+        if ! bun run build:web 2>&1; then
+            log_warn "Bun build failed, trying npm..."
+            if ! npm run build:web 2>&1; then
                 log_error "Failed to build frontend"
                 echo "PREVIEW_STATUS=build_failed"
                 return 1
-            }
+            fi
         fi
-        cd ..
+    else
+        log_warn "bun not found, trying npm"
+        timeout "$BUN_INSTALL_TIMEOUT" npm install 2>&1 && npm run build:lib 2>&1 && npm run build:web 2>&1 || {
+            log_error "Failed to build frontend"
+            echo "PREVIEW_STATUS=build_failed"
+            return 1
+        }
     fi
 
     # Verify build output
-    if [ ! -f "web/dist/index.html" ]; then
+    if [ ! -f "apps/web/dist/index.html" ]; then
         log_error "Frontend build output not found"
         echo "PREVIEW_STATUS=build_missing"
         return 1

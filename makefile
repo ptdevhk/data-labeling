@@ -1,20 +1,28 @@
-FRONTEND_DIR = ./web
+FRONTEND_DIR = ./apps/web
+LIB_DIR = ./packages/react-image-annotate
 BACKEND_DIR = .
 VERSION_FILE = ./VERSION
 
-.PHONY: all build-frontend start-frontend start-backend stop-backend clean-frontend-cache docker-up docker-down docker-build docker-restart generate-client version-sync version-bump version-current
+.PHONY: all build-all build-lib build-frontend start-frontend start-backend stop-backend clean-frontend-cache docker-up docker-down docker-build docker-restart generate-client version-sync version-bump version-current dev-lib dev-all check-annotate
 
-# Local development: build frontend and start backend with auto-restart
-all: build-frontend start-backend
+# Local development: build library and frontend, then start backend
+all: build-all start-backend
+
+# Build library first, then frontend
+build-all: build-lib build-frontend
+
+build-lib: ## Build react-image-annotate library
+	@echo "Building react-image-annotate library..."
+	@bun run build:lib
 
 clean-frontend-cache: ## Clear frontend cache and dependencies (fixes Vite hangs)
 	@echo "🧹 Clearing frontend cache and dependencies..."
-	@cd $(FRONTEND_DIR) && rm -rf node_modules bun.lockb .vite
-	@echo "✅ Frontend cache cleared. Run 'cd web && bun install' to reinstall."
+	@cd $(FRONTEND_DIR) && rm -rf node_modules .vite
+	@echo "✅ Frontend cache cleared. Run 'bun install' from root to reinstall."
 
-build-frontend:
+build-frontend: ## Build React frontend
 	@echo "Building frontend..."
-	@cd $(FRONTEND_DIR) && bun install && bun run build
+	@bun run build:web
 
 generate-client: ## Generate TypeScript API client from FastAPI OpenAPI spec
 	@echo "Generating TypeScript API client..."
@@ -23,7 +31,7 @@ generate-client: ## Generate TypeScript API client from FastAPI OpenAPI spec
 
 start-frontend: ## Start frontend dev server (Vite on port 5173)
 	@echo "Starting frontend dev server..."
-	@cd $(FRONTEND_DIR) && bun install && bun run dev
+	@bun run dev
 
 start-backend: ## Start backend dev server (blocking, use Ctrl+C to stop)
 	@echo "Starting backend dev server..."
@@ -72,12 +80,12 @@ lint-react: lint-frontend lint-i18n	## Run all React/frontend linters.
 .PHONY: lint-frontend
 lint-frontend: ## Run ESLint on frontend code.
 	@echo "Running ESLint on frontend..."
-	@cd $(FRONTEND_DIR) && npm run lint
+	@bun run lint
 
 .PHONY: lint-i18n
 lint-i18n: ## Run the i18n linter.
 	@echo "Running i18n linter..."
-	@cd $(FRONTEND_DIR) && npm run lint:i18n
+	@bun run --filter '@data-labeling/web' lint:i18n
 
 .PHONY: lint-check
 lint-check:  ## Check whether the codebase satisfies the linter rules.
@@ -124,6 +132,28 @@ dep-sync: ## Sync venv installation with 'requirements.txt' file.
 dep-update: ## Update all the deps.
 	@chmod +x ./bin/update_deps.sh
 	@./bin/update_deps.sh
+
+#################################################
+# Library Development Workflow
+#################################################
+
+.PHONY: dev-lib
+dev-lib: ## Start library in watch mode for development
+	@echo "Starting library in watch mode..."
+	@bun run dev:lib
+
+.PHONY: dev-all
+dev-all: ## Parallel development (lib watch + frontend dev) with HMR
+	@echo "Starting parallel development..."
+	@bun run dev:all
+
+.PHONY: check-annotate
+check-annotate: ## Check workspace vs npm version of @karlorz/react-image-annotate
+	@echo "📋 Workspace version:"
+	@cat $(LIB_DIR)/package.json | grep '"version"' | head -1
+	@echo ""
+	@echo "📋 Latest on npm:"
+	@npm view @karlorz/react-image-annotate version 2>/dev/null || echo "  (unable to fetch)"
 
 .PHONY: run-container
 run-container: docker-up ## Run the app in a docker container (alias for docker-up).

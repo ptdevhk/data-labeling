@@ -1,0 +1,224 @@
+{
+  "common": {
+    "appName": "Công Cụ Gắn Nhãn Dữ Liệu",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "register": "Đăng ký",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "create": "Tạo mới",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "export": "Xuất",
+    "import": "Nhập",
+    "upload": "Tải lên",
+    "download": "Tải xuống",
+    "settings": "Cài đặt",
+    "notifications": "Thông báo",
+    "help": "Trợ giúp",
+    "continue": "Tiếp tục",
+    "annotate": "Gắn nhãn",
+    "view": "Xem",
+    "openMenu": "Mở Menu",
+    "toggleSidebar": "Bật/Tắt Thanh Bên",
+    "toggleTheme": "Chuyển Đổi Chủ Đề",
+    "profile": "Hồ sơ",
+    "workspace": "Không gian làm việc",
+    "collapseSidebar": "Thu gọn thanh bên",
+    "changeLanguage": "Đổi ngôn ngữ",
+    "lightMode": "Chế độ sáng",
+    "darkMode": "Chế độ tối",
+    "autoMode": "Chế độ tự động",
+    "alwaysLight": "Luôn sử dụng giao diện sáng",
+    "alwaysDark": "Luôn sử dụng giao diện tối",
+    "followSystem": "Theo cài đặt hệ thống",
+    "skip": "Bỏ qua",
+    "assign": "Gán nhãn",
+    "active": "Đang hoạt động"
+  },
+  "nav": {
+    "projects": "Dự án",
+    "datasets": "Dữ liệu",
+    "exports": "Xuất dữ liệu",
+    "settings": "Cài đặt",
+    "workspace": "Không gian làm việc",
+    "collapseSidebar": "Thu gọn thanh bên",
+    "home": "Trang chủ",
+    "console": "Bảng điều khiển"
+  },
+  "console": {
+    "title": "Bảng điều khiển",
+    "subtitle": "Tổng quan các dự án gắn nhãn của bạn",
+    "createProject": "Tạo dự án",
+    "projectStats": "Thông tin dự án",
+    "recentProjects": "Dự án gần đây",
+    "totalProjects": "Tổng số dự án",
+    "totalImages": "Tổng số ảnh",
+    "labeledImages": "Ảnh đã gắn nhãn",
+    "completionRate": "Tỷ lệ hoàn thành",
+    "noProjects": "Chưa có dự án nào. Tạo dự án đầu tiên để bắt đầu.",
+    "quickActions": "Hành động nhanh",
+    "projectActivity": "Hoạt động dự án",
+    "noActivity": "Hoạt động sẽ hiển thị khi bạn bắt đầu gắn nhãn."
+  },
+  "project": {
+    "name": "Tên dự án",
+    "description": "Mô tả",
+    "createdAt": "Ngày tạo",
+    "updatedAt": "Ngày cập nhật",
+    "status": "Trạng thái",
+    "actions": "Hành động"
+  },
+  "annotation": {
+    "tools": {
+      "select": "Chọn",
+      "rectangle": "Hình chữ nhật",
+      "polygon": "Đa giác",
+      "circle": "Hình tròn",
+      "line": "Đường thẳng",
+      "point": "Điểm",
+      "eraser": "Tẩy",
+      "undo": "Hoàn tác",
+      "redo": "Làm lại",
+      "toolbarAria": "Công cụ chú thích",
+      "hints": {
+        "select": "Chọn và di chuyển hình",
+        "rectangle": "Vẽ hình chữ nhật",
+        "eraser": "Xóa hình",
+        "undo": "Hoàn tác thao tác",
+        "redo": "Làm lại thao tác"
+      }
+    },
+    "canvas": {
+      "zoom": "Thu phóng",
+      "reset": "Đặt lại",
+      "pan": "Di chuyển",
+      "fullscreen": "Toàn màn hình",
+      "zoomIn": "Phóng to",
+      "zoomOut": "Thu nhỏ",
+      "resetViewTooltip": "Đặt lại góc nhìn",
+      "fitWidth": "Vừa chiều rộng",
+      "fitWidthTooltip": "Bật/tắt thu phóng theo chiều rộng cửa sổ"
+    },
+    "taskTitle": "Nhiệm vụ gắn nhãn hình ảnh",
+    "instructions": "Hướng dẫn",
+    "instruction1": "Chọn công cụ gắn nhãn ở thanh công cụ bên trái",
+    "instruction2": "Vẽ vùng trên ảnh để đánh dấu đối tượng",
+    "instruction3": "Gán nhãn và thẻ cho từng vùng",
+    "instruction4": "Sử dụng phím tắt để gắn nhãn nhanh hơn",
+    "tips": "Mẹo",
+    "tip1": "Nhấp đúp vào đa giác để hoàn thành",
+    "tip2": "Nhấp chuột phải để xóa điểm khi vẽ",
+    "tip3": "Sử dụng thẻ để đánh dấu thuộc tính đặc biệt (bị che khuất, bị cắt, ...)",
+    "page": {
+      "title": "Chú thích #{{id}}",
+      "imageSource": "Nguồn ảnh: {{path}}"
+    },
+    "inspector": {
+      "title": "Trình kiểm tra chú thích",
+      "subtitle": {
+        "selected": "Chi tiết của hình chữ nhật đã chọn",
+        "empty": "Chọn một hình chữ nhật để xem chi tiết"
+      },
+      "emptyState": "Sau khi vẽ, bấm vào hình chữ nhật hoặc chọn trong danh sách bên dưới để xem số đo.",
+      "size": "Kích thước",
+      "area": "Diện tích",
+      "aspect": "Tỷ lệ",
+      "position": "Vị trí"
+    },
+    "list": {
+      "title": "Danh sách chú thích",
+      "total": "Tổng số: {{count}}",
+      "empty": "Vẽ hình chữ nhật trên canvas để tạo chú thích.",
+      "focus": "Định vị"
+    },
+    "labels": {
+      "title": "Nhãn",
+      "addClass": "Thêm lớp",
+      "className": "Tên lớp",
+      "color": "Màu",
+      "attributes": "Thuộc tính",
+      "totalAnnotations": "Tổng số chú thích: {{count}}",
+      "assignLabel": "Gán nhãn",
+      "selectOrCreateLabel": "Chọn nhãn có sẵn hoặc tạo mới",
+      "createNew": "Tạo mới",
+      "labelName": "Tên nhãn",
+      "unassigned": "Chưa gán",
+      "annotationCount": "{{count}} chú thích",
+      "selectShape": "Chọn một hình để chỉnh sửa thuộc tính"
+    },
+    "class": {
+      "defect1": "Khuyết tật 1",
+      "defect2": "Khuyết tật 2",
+      "defect3": "Khuyết tật 3"
+    },
+    "save": {
+      "button": "Lưu",
+      "success": "Đã lưu chú thích thành công",
+      "autoSave": "Tự động lưu",
+      "lastSaved": "Lưu lần cuối: {{time}}"
+    },
+    "loading": "Đang tải chú thích...",
+    "loadFailed": "Không thể tải chú thích",
+    "saveSuccess": "Đã lưu chú thích thành công",
+    "saveFailed": "Không thể lưu chú thích",
+    "nextImage": "Chuyển sang hình tiếp theo",
+    "lastImage": "Đây là hình cuối cùng",
+    "prevImage": "Quay lại hình trước",
+    "firstImage": "Đây là hình đầu tiên",
+    "export": {
+      "button": "Xuất",
+      "waitForImage": "Vui lòng đợi hình ảnh tải xong"
+    }
+  },
+  "theme": {
+    "light": "Chế độ sáng",
+    "dark": "Chế độ tối",
+    "toggle": "Chuyển đổi chủ đề"
+  },
+  "dataset": {
+    "name": "Tên bộ dữ liệu",
+    "imageName": "Tên ảnh",
+    "status": "Trạng thái",
+    "images": "Số ảnh",
+    "createdAt": "Ngày tạo",
+    "upload": "Tải lên bộ dữ liệu"
+  },
+  "export": {
+    "name": "Tên xuất dữ liệu",
+    "format": "Định dạng",
+    "status": "Trạng thái",
+    "createdAt": "Ngày tạo",
+    "dialog": {
+      "title": "Xuất Chú Thích",
+      "export": "Xuất",
+      "format": "Định Dạng Xuất",
+      "stats": "Tổng Chú Thích: {{count}}",
+      "labels": "Tổng Nhãn: {{count}}",
+      "noAnnotations": "Không có chú thích để xuất"
+    }
+  },
+  "settings": {
+    "general": "Chung",
+    "language": "Ngôn ngữ",
+    "appearance": "Giao diện",
+    "darkMode": "Chế độ tối"
+  },
+  "footer": {
+    "about": "Giới thiệu",
+    "github": "GitHub Repository",
+    "documentation": "Tài liệu",
+    "resources": "Tài nguyên",
+    "exportFormats": "Định dạng xuất",
+    "settings": "Cài đặt",
+    "version": "Phiên bản",
+    "buildInfo": "Phiên bản ổn định mới nhất",
+    "rights": "Bản quyền",
+    "license": "Giấy phép MIT",
+    "reportIssue": "Báo cáo lỗi"
+  },
+  "hideActions": "Ẩn hành động",
+  "showActions": "Hiện hành động"
+}
