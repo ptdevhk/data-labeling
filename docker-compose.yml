@@ -28,7 +28,7 @@ services:
         target: /etc/caddy/Caddyfile
         consistency: cached
       - type: bind
-        source: ./web/dist
+        source: ./apps/web/dist
         target: /web/dist
         consistency: cached
       - type: volume

@@ -50,10 +50,9 @@ jobs:
 
     - name: Build frontend
       run: |
-        cd web
         bun install
-        bun run build
-        cd ..
+        bun run build:lib
+        bun run build:web
 
     - name: Spin up container
       run: |
