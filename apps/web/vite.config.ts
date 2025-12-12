@@ -11,7 +11,7 @@ const { vitePluginSemi } = semiPluginPkg
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Read version from VERSION file at build time
-const version = readFileSync(path.resolve(__dirname, '../VERSION'), 'utf-8').trim()
+const version = readFileSync(path.resolve(__dirname, '../../VERSION'), 'utf-8').trim()
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -28,6 +28,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       'react-is': path.resolve(__dirname, './node_modules/react-is'),
       'prop-types': path.resolve(__dirname, './node_modules/prop-types'),
+      // Explicit alias for workspace package (ensures HMR works)
+      '@karlorz/react-image-annotate': path.resolve(
+        __dirname,
+        '../../packages/react-image-annotate/src'
+      ),
     },
   },
   optimizeDeps: {
@@ -35,11 +40,14 @@ export default defineConfig({
       'react-is',
       'prop-types',
       'hoist-non-react-statics',
-      '@karlorz/react-image-annotate',
     ],
   },
   server: {
     port: 5173,
+    // Watch workspace packages for changes
+    watch: {
+      ignored: ['!**/packages/**'],
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:5002',

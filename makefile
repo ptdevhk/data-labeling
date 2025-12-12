@@ -1,16 +1,24 @@
-FRONTEND_DIR = ./web
+FRONTEND_DIR = ./apps/web
+LIB_DIR = ./packages/react-image-annotate
 BACKEND_DIR = .
 VERSION_FILE = ./VERSION
 
-.PHONY: all build-frontend start-frontend start-backend stop-backend clean-frontend-cache docker-up docker-down docker-build docker-restart generate-client version-sync version-bump version-current
+.PHONY: all build-all build-lib build-frontend start-frontend start-backend stop-backend clean-frontend-cache docker-up docker-down docker-build docker-restart generate-client version-sync version-bump version-current dev-lib dev-all check-annotate
 
-# Local development: build frontend and start backend with auto-restart
-all: build-frontend start-backend
+# Local development: build library and frontend, then start backend
+all: build-all start-backend
+
+# Build library first, then frontend
+build-all: build-lib build-frontend
+
+build-lib: ## Build react-image-annotate library
+	@echo "Building react-image-annotate library..."
+	@cd $(LIB_DIR) && bun run build
 
 clean-frontend-cache: ## Clear frontend cache and dependencies (fixes Vite hangs)
 	@echo "🧹 Clearing frontend cache and dependencies..."
-	@cd $(FRONTEND_DIR) && rm -rf node_modules bun.lock .vite
-	@echo "✅ Frontend cache cleared. Run 'cd web && bun install' to reinstall."
+	@cd $(FRONTEND_DIR) && rm -rf node_modules .vite
+	@echo "✅ Frontend cache cleared. Run 'bun install' from root to reinstall."
 
 build-frontend:
 	@echo "Building frontend..."
@@ -129,52 +137,24 @@ dep-update: ## Update all the deps.
 # Library Development Workflow
 #################################################
 
-.PHONY: link-annotate
-link-annotate: ## Link local @karlorz/react-image-annotate for development
-	@if [ -z "$(LIB_PATH)" ]; then \
-		echo "Usage: make link-annotate LIB_PATH=../react-image-annotate"; \
-		exit 1; \
-	fi
-	@echo "🔗 Linking local react-image-annotate from $(LIB_PATH)..."
-	@cd $(FRONTEND_DIR) && bun link $(LIB_PATH)
-	@echo "✅ Linked. Run 'make unlink-annotate' when done."
+.PHONY: dev-lib
+dev-lib: ## Start library in watch mode for development
+	@echo "Starting library in watch mode..."
+	@cd $(LIB_DIR) && bun run dev
 
-.PHONY: unlink-annotate
-unlink-annotate: ## Unlink local library and restore from npm
-	@echo "🔓 Unlinking local react-image-annotate..."
-	@cd $(FRONTEND_DIR) && rm -rf node_modules/@karlorz/react-image-annotate
-	@cd $(FRONTEND_DIR) && bun install
-	@echo "✅ Restored npm version."
-
-.PHONY: update-annotate
-update-annotate: ## Update @karlorz/react-image-annotate to latest version
-	@echo "📦 Updating @karlorz/react-image-annotate..."
-	@cd $(FRONTEND_DIR) && bun update @karlorz/react-image-annotate
-	@echo "✅ Updated. Current version:"
-	@cd $(FRONTEND_DIR) && bun pm ls | grep react-image-annotate || true
+.PHONY: dev-all
+dev-all: ## Parallel development (lib watch + frontend dev) with HMR
+	@echo "Starting parallel development..."
+	@(cd $(LIB_DIR) && bun run dev) & \
+	 (cd $(FRONTEND_DIR) && bun run dev)
 
 .PHONY: check-annotate
-check-annotate: ## Check current vs latest version of @karlorz/react-image-annotate
-	@echo "📋 Installed version:"
-	@cd $(FRONTEND_DIR) && cat node_modules/@karlorz/react-image-annotate/package.json | grep '"version"' | head -1
+check-annotate: ## Check workspace vs npm version of @karlorz/react-image-annotate
+	@echo "📋 Workspace version:"
+	@cat $(LIB_DIR)/package.json | grep '"version"' | head -1
 	@echo ""
 	@echo "📋 Latest on npm:"
 	@npm view @karlorz/react-image-annotate version 2>/dev/null || echo "  (unable to fetch)"
-	@echo ""
-	@INSTALLED=$$(cd $(FRONTEND_DIR) && cat node_modules/@karlorz/react-image-annotate/package.json | grep '"version"' | head -1 | sed 's/[^0-9.]//g'); \
-	LATEST=$$(npm view @karlorz/react-image-annotate version 2>/dev/null); \
-	if [ "$$INSTALLED" != "$$LATEST" ] && [ -n "$$LATEST" ]; then \
-		echo "⚠️  Update available: $$INSTALLED → $$LATEST"; \
-		echo "   Run: make update-annotate"; \
-	else \
-		echo "✅ Up to date"; \
-	fi
-
-.PHONY: dev-annotate
-dev-annotate: ## Start frontend dev with HMR for annotation development
-	@echo "🚀 Starting annotation dev environment..."
-	@echo "Tip: For lib changes, use 'make link-annotate LIB_PATH=../react-image-annotate'"
-	@cd $(FRONTEND_DIR) && bun run dev
 
 .PHONY: run-container
 run-container: docker-up ## Run the app in a docker container (alias for docker-up).

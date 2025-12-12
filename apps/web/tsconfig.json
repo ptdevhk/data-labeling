@@ -24,10 +24,16 @@
     "allowJs": true,
 
     /* Path aliases */
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@karlorz/react-image-annotate": ["../../packages/react-image-annotate/src"],
+      "@karlorz/react-image-annotate/*": ["../../packages/react-image-annotate/src/*"]
     }
   },
   "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [
+    { "path": "./tsconfig.node.json" },
+    { "path": "../../packages/react-image-annotate" }
+  ]
 }
