@@ -421,10 +421,38 @@ const languageMap = {
 }
 ```
 
-**Navigation Callbacks**:
-- `onExit(output)`: Saves annotations and navigates back
+**Callback Props** (✅ Implemented):
+- `onExit(output)`: Saves annotations and navigates back to projects
+- `onSave(output)`: Saves to localStorage without navigation (no page redirect)
 - `onNextImage(output)`: Navigate to next image (TODO: implement dataset iteration)
 - `onPrevImage(output)`: Navigate to previous image (TODO: implement dataset iteration)
+- `onExport(state)`: Opens export dialog with current library state
+
+**Save & Export Feature** (✅ Implemented - 2024-12):
+The annotation workspace includes integrated Save and Export functionality:
+
+- **Save Button**: Persists annotations to localStorage in AnyLabeling-compatible JSON format
+  - Converts normalized regions (0-1) to absolute pixel coordinates
+  - Preserves region colors for reload
+  - Shows toast notification on success
+  - Does NOT navigate away from the page
+
+- **Export Button**: Opens dialog with format selection
+  - Supported formats: JSON (AnyLabeling), YOLO TXT, COCO JSON, Pascal VOC XML
+  - Shows correct annotation count from library state
+  - Downloads files directly to browser
+
+- **Region Format Conversion**:
+  - Library uses normalized coordinates (x, y, w, h as 0-1 values)
+  - Storage uses absolute pixels (for AnyLabeling compatibility)
+  - `convertRegionsToShapes()`: Library → Storage
+  - `convertShapesToRegions()`: Storage → Library (includes color assignment)
+
+- **Key Files**:
+  - `apps/web/src/hooks/annotation/useAnnotationData.js`: State management, save/export logic
+  - `apps/web/src/components/Annotation/AnnotationExportDialog.jsx`: Export format dialog
+  - `packages/react-image-annotate/src/hooks/useAnnotator.js`: onSave/onExport handlers
+  - `packages/react-image-annotate/src/MainLayout/index.jsx`: Save/Export buttons in toolbar
 
 #### Docker Compose Architecture
 Project uses base + override pattern for environment-specific configurations:
@@ -441,33 +469,49 @@ Project uses base + override pattern for environment-specific configurations:
 **Important**: `.dockerignore` does NOT exclude `.env` or `.env.dev` to allow Docker builds to use them
 
 ### Future Roadmap
+- **Phase 1.5** (Next Priority):
+  - Backend annotation CRUD APIs (POST/GET/PUT/DELETE)
+  - Annotation persistence to backend (currently localStorage only)
+  - Dataset image listing API for next/prev navigation
+  - Project/Dataset management backend
+
 - **Phase 2**: LLM endpoints (`/llm/suggest` via OpenAI/Hugging Face); enhance auto-save with real-time backend syncing via WebSockets.
-- **Enhancements**: Collaboration (WebSockets), advanced exports (VOC/Pascal).
+- **Enhancements**: Collaboration (WebSockets), batch annotation operations.
 - **Scaling**: Horizontal backend pods; CDN for assets.
 
-### Project Structure
+### Project Structure (Monorepo)
 ```
 data-labeling/
-├── web/                 # Frontend SPA
-│   ├── src/             # Components, contexts, utils
-│   ├── dist/            # Build artifacts (.gitignore)
-│   ├── public/          # Static files
-│   └── package.json     # Scripts/deps
-├── svc/                 # Backend API
-│   ├── core/            # Config, deps, auth
-│   ├── routes/          # Endpoint routers
-│   ├── models/          # DB schemas
-│   ├── tests/           # Pytest suite
-│   └── main.py          # App instantiation
-├── dockerfiles/         # Custom builds (e.g., python313/)
-├── .dockerignore        # Build exclusions
-├── Caddyfile            # Proxy directives
-├── docker-compose.yml   # Stack definition
-├── Makefile             # Dev targets (e.g., docker-up)
-├── pyproject.toml       # Python deps (uv-managed)
-├── uv.lock              # Locked env
-├── .env.example         # Config template
-└── PROJECT.md           # This spec
+├── apps/
+│   └── web/                    # React frontend (Vite)
+│       ├── src/
+│       │   ├── components/
+│       │   │   └── Annotation/  # AnnotationWorkspace, Canvas, ExportDialog
+│       │   ├── hooks/
+│       │   │   └── annotation/  # useAnnotationData
+│       │   └── utils/           # exportFormats.js
+│       ├── dist/                # Build artifacts
+│       └── package.json
+├── packages/
+│   └── react-image-annotate/   # Annotation library (workspace)
+│       └── src/
+│           ├── Annotator/       # Main component
+│           ├── hooks/           # useAnnotator (headless hook)
+│           ├── MainLayout/      # Toolbar with Save/Export
+│           └── I18nProvider/    # i18n translations
+├── svc/                        # Python backend (FastAPI)
+│   ├── core/                   # Config, deps, auth
+│   ├── routes/                 # Endpoint routers
+│   ├── models/                 # DB schemas
+│   └── main.py                 # App instantiation
+├── dockerfiles/                # Custom builds
+├── package.json                # Workspace root config
+├── bun.lock                    # Single lockfile for all JS
+├── Caddyfile                   # Proxy directives
+├── docker-compose.yml          # Stack definition
+├── Makefile                    # Dev targets
+├── pyproject.toml              # Python deps (uv-managed)
+└── PROJECT.md                  # This spec
 ```
 
 ### Deliverables

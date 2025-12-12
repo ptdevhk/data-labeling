@@ -6,6 +6,39 @@
 
 Web-based image annotation tool with automated semantic versioning.
 
+## Features
+
+- **Manual Annotation Tools**: Box, Polygon, Point, Line, Expanding Line
+- **Save & Export**:
+  - Save to localStorage (persists annotations without page navigation)
+  - Export formats: JSON (AnyLabeling), YOLO TXT, COCO JSON, Pascal VOC XML
+- **Multi-language**: English, Vietnamese, Chinese (i18next)
+- **Theming**: Light/Dark mode with Semi Design
+- **Responsive**: Desktop and mobile support with collapsible sidebar
+
+## Quick Start
+
+```bash
+# Install dependencies
+bun install
+
+# Start development (frontend + backend)
+make all
+
+# Or just frontend
+make start-frontend   # http://localhost:5173
+
+# Docker deployment
+make docker-up        # http://localhost:5002
+```
+
+## Tech Stack
+
+- **Frontend**: React 18, Vite, Semi Design, Tailwind CSS
+- **Annotation**: @karlorz/react-image-annotate (workspace package)
+- **Backend**: FastAPI (Python 3.13)
+- **Deployment**: Docker Compose + Caddy
+
 ## Troubleshooting
 
 ### Vite Dev Server Hangs on Startup

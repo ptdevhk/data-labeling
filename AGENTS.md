@@ -213,17 +213,20 @@ make generate-client              # Generate TypeScript client from OpenAPI spec
 - Responsive sidebar with collapse state
 - **Common UI components from QuantumNous/new-api** (CardPro, CardTable, etc.)
 - **Common hooks from QuantumNous/new-api** (useIsMobile, useSidebarCollapsed, etc.)
+- **Annotation Save/Export functionality**:
+  - Save button (persists to localStorage, no navigation)
+  - Export button with format selection (JSON, YOLO, COCO, Pascal VOC)
+  - `onSave` and `onExport` callbacks added to react-image-annotate library
+  - Region color preservation for reload
+  - Export dialog with annotation count from library state
 
 ### 🚧 Partially Implemented
-- Annotation persistence (in-memory only, no backend save)
 - Project/Dataset management (UI exists, no backend CRUD)
-- Export functionality (UI ready, needs backend API)
 
 ### ❌ TODO (MVP Priority)
 - **Backend annotation CRUD APIs** (POST/GET/PUT/DELETE)
-- **Annotation persistence to backend**
+- **Annotation persistence to backend** (currently localStorage only)
 - **Dataset image listing API** (for next/prev navigation)
-- Export formats (COCO JSON, YOLO TXT, CSV)
 - Project/Dataset CRUD operations
 
 ## Development Conventions
@@ -309,11 +312,27 @@ make generate-client              # Generate TypeScript client from OpenAPI spec
 - **Prevention**: Run clean-frontend-cache when switching branches
 
 ## Key Files Reference
+
+### Frontend Core
 - `apps/web/src/main.tsx`: Entry point, imports Semi CSS
 - `apps/web/src/index.css`: CSS layer definitions
 - `apps/web/vite.config.ts`: Semi Design plugin configuration
 - `apps/web/tailwind.config.js`: Semi token mapping
-- `packages/react-image-annotate/src/`: Annotation library source
+
+### Annotation Feature
+- `apps/web/src/components/Annotation/AnnotationWorkspace.jsx`: Main annotation page
+- `apps/web/src/components/Annotation/AnnotationCanvas.jsx`: Canvas wrapper for react-image-annotate
+- `apps/web/src/components/Annotation/AnnotationExportDialog.jsx`: Export format dialog
+- `apps/web/src/hooks/annotation/useAnnotationData.js`: Annotation state, save/export logic
+- `apps/web/src/utils/exportFormats.js`: YOLO, COCO, VOC, JSON export utilities
+
+### Library (react-image-annotate)
+- `packages/react-image-annotate/src/Annotator/index.jsx`: Main component (accepts onSave, onExport)
+- `packages/react-image-annotate/src/hooks/useAnnotator.js`: Headless hook with Save/Export handlers
+- `packages/react-image-annotate/src/MainLayout/index.jsx`: Toolbar with Save/Export buttons
+- `packages/react-image-annotate/src/I18nProvider/index.jsx`: i18n translations (en, zh, vi)
+
+### Backend & Config
 - `svc/main.py`: FastAPI app with routing order
 - `Caddyfile`: Reverse proxy configuration
 - `.dockerignore`: Excludes .venv/, node_modules/, .env.local (NOT .env)
