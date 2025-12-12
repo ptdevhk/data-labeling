@@ -16,6 +16,7 @@
     "test": "bun test"
   },
   "devDependencies": {
+    "@douyinfe/semi-theme-default": "^2.89.0",
     "typescript": "^5.9.3"
   }
 }

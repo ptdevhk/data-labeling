@@ -33,7 +33,6 @@
   },
   "include": ["src"],
   "references": [
-    { "path": "./tsconfig.node.json" },
-    { "path": "../../packages/react-image-annotate" }
+    { "path": "./tsconfig.node.json" }
   ]
 }

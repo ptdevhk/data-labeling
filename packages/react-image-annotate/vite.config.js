@@ -82,6 +82,7 @@ export default defineConfig(({ command, mode }) => {
           'react',
           'react-dom',
           'react/jsx-runtime',
+          'prop-types',
           '@emotion/react',
           '@emotion/styled',
           '@mui/material',

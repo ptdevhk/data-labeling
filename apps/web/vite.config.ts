@@ -19,6 +19,29 @@ export default defineConfig({
     react(),
     vitePluginSemi({ cssLayer: true }),
   ],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // Help sass resolve ~ imports for Semi Design in Bun workspaces
+        loadPaths: [
+          path.resolve(__dirname, '../../node_modules'),
+          path.resolve(__dirname, '../../node_modules/@douyinfe'),
+          path.resolve(__dirname, './node_modules'),
+        ],
+        // Resolve tilde imports by stripping the ~ prefix
+        importers: [
+          {
+            findFileUrl(url: string) {
+              if (!url.startsWith('~')) return null
+              const modulePath = url.slice(1) // Remove ~
+              const resolved = path.resolve(__dirname, '../../node_modules', modulePath)
+              return new URL(`file://${resolved}`)
+            },
+          },
+        ],
+      },
+    },
+  },
   define: {
     __APP_VERSION__: JSON.stringify(version),
   },

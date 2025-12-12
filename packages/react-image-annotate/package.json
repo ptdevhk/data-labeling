@@ -43,6 +43,7 @@
     "color-alpha": "^2.0.0",
     "get-image-data": "^5.0.0",
     "immer": "^11.0.1",
+    "lodash": "^4.17.21",
     "material-survey": "^2.1.0",
     "mmgc1-cpp": "^1.0.51",
     "moment": "^2.30.1",
