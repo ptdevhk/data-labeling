@@ -22,16 +22,20 @@ jobs:
 
       - name: Install commitlint
         run: |
+          # Install in temp directory to avoid workspace:* protocol conflict
+          cd /tmp
+          npm init -y
           npm install --no-save \
             @commitlint/cli@^19.0.0 \
             @commitlint/config-conventional@^19.0.0
+          cd -
 
       - name: Validate PR title
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          echo "$PR_TITLE" | npx commitlint
+          echo "$PR_TITLE" | /tmp/node_modules/.bin/commitlint --config $GITHUB_WORKSPACE/commitlint.config.js
 
       - name: Validate commit messages
         run: |
-          npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+          /tmp/node_modules/.bin/commitlint --config $GITHUB_WORKSPACE/commitlint.config.js --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
