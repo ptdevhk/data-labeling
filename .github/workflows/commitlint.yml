@@ -28,14 +28,18 @@ jobs:
           npm install --no-save \
             @commitlint/cli@^19.0.0 \
             @commitlint/config-conventional@^19.0.0
-          cd -
+          # Copy config file to temp directory so module resolution works
+          cp $GITHUB_WORKSPACE/commitlint.config.js /tmp/
 
       - name: Validate PR title
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
+        working-directory: /tmp
         run: |
-          echo "$PR_TITLE" | /tmp/node_modules/.bin/commitlint --config $GITHUB_WORKSPACE/commitlint.config.js
+          echo "$PR_TITLE" | ./node_modules/.bin/commitlint
 
       - name: Validate commit messages
+        working-directory: /tmp
         run: |
-          /tmp/node_modules/.bin/commitlint --config $GITHUB_WORKSPACE/commitlint.config.js --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+          cd $GITHUB_WORKSPACE
+          /tmp/node_modules/.bin/commitlint --cwd /tmp --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
