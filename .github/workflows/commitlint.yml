@@ -39,13 +39,15 @@ jobs:
           echo "$PR_TITLE" | ./node_modules/.bin/commitlint
 
       - name: Validate commit messages
+        working-directory: /tmp
         run: |
-          # Get each commit message and pipe to commitlint (avoids git cwd issues)
+          # Get each commit message and pipe to commitlint
+          # Run git commands with -C to specify repo path, keep cwd as /tmp for commitlint
           FAILED=0
-          for SHA in $(git rev-list ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}); do
+          for SHA in $(git -C $GITHUB_WORKSPACE rev-list ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}); do
             echo "Validating commit $SHA..."
-            MSG=$(git log -1 --format="%B" "$SHA")
-            if ! echo "$MSG" | /tmp/node_modules/.bin/commitlint; then
+            MSG=$(git -C $GITHUB_WORKSPACE log -1 --format="%B" "$SHA")
+            if ! echo "$MSG" | ./node_modules/.bin/commitlint; then
               echo "::error::Commit $SHA failed validation"
               FAILED=1
             fi
