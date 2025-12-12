@@ -1,8 +1,6 @@
 import React from 'react';
-import CardPro from '../common/ui/CardPro';
-// import AnnotationDescription from './AnnotationDescription';
-// import AnnotationActions from './AnnotationActions';
 import AnnotationCanvas from './AnnotationCanvas';
+import AnnotationExportDialog from './AnnotationExportDialog';
 import { useAnnotationData } from '../../hooks/annotation/useAnnotationData';
 
 const AnnotationWorkspace = () => {
@@ -11,19 +9,24 @@ const AnnotationWorkspace = () => {
   const {
     // State
     loading,
-    // currentImageIndex,
-    // totalImages,
     resolvedTheme,
+    exportDialogVisible,
+    labels,
 
     // Handlers
     handleExit,
+    handleSave,
     handleNextImage,
     handlePrevImage,
-    // saveAnnotations,
+    handleExport,
+    handleImageLoad,
+    openExportDialog,
+    closeExportDialog,
 
     // Data
     getCurrentImage,
     getAnnotatorLanguage,
+    getExportAnnotationCount,
 
     // i18n
     t,
@@ -31,52 +34,38 @@ const AnnotationWorkspace = () => {
 
   if (loading) {
     return (
-      <div className='flex items-center justify-center h-full py-20'>
-        <div className='text-semi-text-2'>
+      <div className="flex items-center justify-center h-full py-20">
+        <div className="text-semi-text-2">
           {t('annotation.loading', 'Loading annotations...')}
         </div>
       </div>
     );
   }
 
-  // const handleSave = async () => {
-  //   const currentImage = getCurrentImage();
-  //   await saveAnnotations({ images: [currentImage] });
-  // };
-
   return (
-    <CardPro
-      type='type1'
-      // descriptionArea={
-      //   <AnnotationDescription
-      //     currentImageIndex={currentImageIndex}
-      //     totalImages={totalImages}
-      //     t={t}
-      //   />
-      // }
-      // actionsArea={
-      //   <AnnotationActions
-      //     currentImageIndex={currentImageIndex}
-      //     totalImages={totalImages}
-      //     onSave={handleSave}
-      //     onPrev={handlePrevImage}
-      //     onNext={handleNextImage}
-      //     onExit={handleExit}
-      //     t={t}
-      //   />
-      // }
-      t={t}
-    >
+    <>
       <AnnotationCanvas
         image={getCurrentImage()}
         theme={resolvedTheme}
         language={getAnnotatorLanguage()}
         onExit={handleExit}
+        onSave={handleSave}
         onNextImage={handleNextImage}
         onPrevImage={handlePrevImage}
+        onExport={openExportDialog}
+        onImageLoad={handleImageLoad}
         t={t}
       />
-    </CardPro>
+
+      <AnnotationExportDialog
+        visible={exportDialogVisible}
+        onCancel={closeExportDialog}
+        onExport={handleExport}
+        annotationCount={getExportAnnotationCount()}
+        labelCount={labels.length}
+        t={t}
+      />
+    </>
   );
 };
 

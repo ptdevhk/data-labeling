@@ -71,6 +71,7 @@ export function useAnnotator(config = {}) {
     autoSegmentationOptions = { type: "autoseg" },
     allowComments,
     onExit,
+    onSave,
     onNextImage,
     onPrevImage,
     onRegionClassAdded,
@@ -134,7 +135,15 @@ export function useAnnotator(config = {}) {
   // Enhanced dispatch that handles header button actions
   const dispatch = useEventCallback((action) => {
     if (action.type === "HEADER_BUTTON_CLICKED") {
-      if (["Exit", "Done", "Save", "Complete"].includes(action.buttonName)) {
+      // Save button - just save, don't navigate away
+      if (action.buttonName === "Save") {
+        if (onSave) return onSave(without(state, "history"))
+        // Fallback to onExit if no onSave provided (legacy behavior)
+        if (onExit) return onExit(without(state, "history"))
+        return
+      }
+      // Exit/Done/Complete - navigate away
+      if (["Exit", "Done", "Complete"].includes(action.buttonName)) {
         if (onExit) return onExit(without(state, "history"))
       } else if (action.buttonName === "Next" && onNextImage) {
         return onNextImage(without(state, "history"))

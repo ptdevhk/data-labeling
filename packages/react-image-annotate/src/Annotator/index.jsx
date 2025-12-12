@@ -33,8 +33,10 @@ export const Annotator = ({
   videoTime,
   videoName,
   onExit,
+  onSave, // NEW: Save callback (doesn't navigate away)
   onNextImage,
   onPrevImage,
+  onExport, // NEW: Export callback
   keypointDefinitions,
   autoSegmentationOptions,
   hideHeader,
@@ -45,6 +47,7 @@ export const Annotator = ({
   hideSettings,
   hideFullScreen,
   hideSave,
+  hideExport, // NEW: Hide export button
   allowComments,
   theme, // NEW: Accept theme prop ('light', 'dark', or MUI theme object)
 }) => {
@@ -72,6 +75,7 @@ export const Annotator = ({
     autoSegmentationOptions,
     allowComments,
     onExit,
+    onSave,
     onNextImage,
     onPrevImage,
   })
@@ -97,6 +101,8 @@ export const Annotator = ({
           hideSettings={hideSettings}
           hideFullScreen={hideFullScreen}
           hideSave={hideSave}
+          hideExport={hideExport}
+          onExport={onExport}
           theme={theme}
         />
       </SettingsProvider>

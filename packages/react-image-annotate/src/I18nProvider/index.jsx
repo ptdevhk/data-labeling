@@ -11,6 +11,7 @@ export const DEFAULT_TRANSLATIONS = {
   "header.fullscreen": "Fullscreen",
   "header.window": "Window",
   "header.save": "Save",
+  "header.export": "Export",
   "header.play": "Play",
   "header.pause": "Pause",
 
@@ -62,6 +63,7 @@ export const BUILT_IN_TRANSLATIONS = {
     "header.fullscreen": "全屏",
     "header.window": "窗口",
     "header.save": "保存",
+    "header.export": "导出",
     "header.play": "播放",
     "header.pause": "暂停",
 
@@ -105,6 +107,7 @@ export const BUILT_IN_TRANSLATIONS = {
     "header.fullscreen": "Toàn màn hình",
     "header.window": "Cửa sổ",
     "header.save": "Lưu",
+    "header.export": "Xuất",
     "header.play": "Phát",
     "header.pause": "Tạm dừng",
 

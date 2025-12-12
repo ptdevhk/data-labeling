@@ -103,6 +103,8 @@ const MainLayoutInner = ({
   hideSettings = false,
   hideFullScreen = false,
   hideSave = false,
+  hideExport = false,
+  onExport,
   translations,
   theme, // Theme prop passed from outer component
 }) => {
@@ -247,6 +249,11 @@ const MainLayoutInner = ({
       fullScreenHandle.enter()
     } else if (item.name === "Window") {
       fullScreenHandle.exit()
+    } else if (item.name === "Export" && onExport) {
+      // Call onExport with current state (excluding history to reduce payload)
+      const { history, ...stateWithoutHistory } = state
+      onExport(stateWithoutHistory)
+      return // Don't dispatch for Export
     }
     dispatch({ type: "HEADER_BUTTON_CLICKED", buttonName: item.name })
   })
@@ -389,6 +396,7 @@ const MainLayoutInner = ({
                       label: t("header.fullscreen", "Fullscreen"),
                     }),
               !hideSave && { name: "Save", label: t("header.save", "Save") },
+              !hideExport && onExport && { name: "Export", label: t("header.export", "Export") },
             ].filter(Boolean)}
             onClickHeaderItem={onClickHeaderItem}
             onClickIconSidebarItem={onClickIconSidebarItem}

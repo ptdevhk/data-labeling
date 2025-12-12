@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactImageAnnotate, { I18nProvider } from '@karlorz/react-image-annotate';
 import PropTypes from 'prop-types';
 
@@ -7,10 +7,43 @@ const AnnotationCanvas = ({
   theme,
   language,
   onExit,
+  onSave,
   onNextImage,
   onPrevImage,
+  onExport,
+  onImageLoad,
   t,
 }) => {
+  const imageLoadedRef = useRef(false);
+
+  // Load image metadata when image src changes
+  useEffect(() => {
+    if (!image?.src || imageLoadedRef.current) return;
+
+    const img = new Image();
+    img.onload = () => {
+      imageLoadedRef.current = true;
+      if (onImageLoad) {
+        const imageName = image.src.split('/').pop();
+        const imageId = image.src.match(/image_(\d+)/)?.[1] || '001';
+        onImageLoad({
+          id: imageId,
+          name: imageName,
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+        });
+      }
+    };
+    img.onerror = (err) => {
+      console.error('Failed to load image for metadata:', err);
+    };
+    img.src = image.src;
+
+    return () => {
+      imageLoadedRef.current = false;
+    };
+  }, [image?.src, onImageLoad]);
+
   const taskDescription = `# ${t('annotation.taskTitle', 'Image Annotation Task')}
 
 ## ${t('annotation.instructions', 'Instructions')}
@@ -36,6 +69,12 @@ const AnnotationCanvas = ({
     t('annotation.class.defect3', 'Defect3'),
   ];
 
+  const regionTagList = [
+    t('annotation.tag.occluded', 'occluded'),
+    t('annotation.tag.truncated', 'truncated'),
+    t('annotation.tag.difficult', 'difficult'),
+  ];
+
   const enabledTools = [
     'select',
     'create-box',
@@ -50,30 +89,35 @@ const AnnotationCanvas = ({
       <div
         style={{
           width: '100%',
-          height: 'calc(100vh - 140px)', // Full viewport minus header and CardPro padding
-          minHeight: '600px',
+          height: 'calc(100vh - 80px)', // Full viewport minus header
+          minHeight: '500px',
           backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
           transition: 'background-color 0.3s ease',
           overflow: 'hidden',
         }}
       >
         <ReactImageAnnotate
-          key={theme}
+          key={`${theme}-${image?.src}`}
           taskDescription={taskDescription}
           labelImages={true}
           regionClsList={regionClsList}
+          regionTagList={regionTagList}
           enabledTools={enabledTools}
-          selectedTool='select'
+          selectedTool="select"
           allowComments={true}
           hideClone={false}
           hideSettings={false}
           hideFullScreen={false}
           hidePrev={false}
           hideNext={false}
+          hideSave={false}
+          hideExport={false}
           images={[image]}
           onExit={onExit}
+          onSave={onSave}
           onNextImage={onNextImage}
           onPrevImage={onPrevImage}
+          onExport={onExport}
           theme={theme}
         />
       </div>
@@ -94,9 +138,18 @@ AnnotationCanvas.propTypes = {
   theme: PropTypes.string.isRequired,
   language: PropTypes.string.isRequired,
   onExit: PropTypes.func.isRequired,
+  onSave: PropTypes.func,
   onNextImage: PropTypes.func.isRequired,
   onPrevImage: PropTypes.func.isRequired,
+  onExport: PropTypes.func,
+  onImageLoad: PropTypes.func,
   t: PropTypes.func.isRequired,
+};
+
+AnnotationCanvas.defaultProps = {
+  onSave: null,
+  onExport: null,
+  onImageLoad: null,
 };
 
 export default AnnotationCanvas;
