@@ -149,16 +149,17 @@ const HeaderBar = ({ onMobileMenuToggle }) => {
             <Dropdown
               position="bottomRight"
               render={
-                <Dropdown.Menu className='!bg-semi-color-bg-overlay !border-semi-color-border !shadow-lg !rounded-lg dark:!bg-gray-700 dark:!border-gray-600'>
+                <Dropdown.Menu className='!bg-semi-color-bg-overlay !border-semi-color-border !shadow-lg !rounded-[10px] dark:!bg-gray-700 dark:!border-gray-600 !p-1'>
                   {languageOptions.map((option) => (
                     <Dropdown.Item
                       key={option.value}
                       onClick={() => changeLanguage(option.value)}
-                      className={`!flex !items-center !gap-2 !px-3 !py-1.5 !text-sm !text-semi-color-text-0 dark:!text-gray-200 transition-colors ${
-                        i18n.language === option.value
-                          ? '!bg-semi-color-primary-light-default dark:!bg-blue-600 !font-semibold'
-                          : 'hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-600'
-                      }`}
+                      className='!flex !items-center !gap-2 !px-3 !py-2 !text-sm !rounded-[10px] !mx-0 !my-0.5 transition-colors'
+                      style={
+                        i18n.language.startsWith(option.value)
+                          ? { backgroundColor: 'var(--semi-color-primary-light-default)', color: 'var(--semi-color-text-0)', fontWeight: 600 }
+                          : {}
+                      }
                     >
                       <span>{option.label}</span>
                     </Dropdown.Item>
@@ -167,10 +168,11 @@ const HeaderBar = ({ onMobileMenuToggle }) => {
               }
             >
               <Button
-                icon={<IconLanguage size={18} />}
+                icon={<IconLanguage size={20} />}
                 theme="borderless"
                 type="tertiary"
-                className='!p-1.5 !text-current focus:!bg-semi-color-fill-1 dark:focus:!bg-gray-700 !rounded-full !bg-semi-color-fill-0 dark:!bg-semi-color-fill-1 hover:!bg-semi-color-fill-1 dark:hover:!bg-semi-color-fill-2 transition-colors'
+                className='!p-1.5 !rounded-full !text-current'
+                style={{ backgroundColor: 'var(--semi-color-fill-0)' }}
                 aria-label={t('common.changeLanguage')}
               />
             </Dropdown>
@@ -179,21 +181,25 @@ const HeaderBar = ({ onMobileMenuToggle }) => {
             <Dropdown
               position="bottomRight"
               render={
-                <Dropdown.Menu className='!bg-semi-color-bg-overlay !border-semi-color-border !shadow-lg !rounded-lg dark:!bg-gray-700 dark:!border-gray-600'>
+                <Dropdown.Menu className='!bg-semi-color-bg-overlay !border-semi-color-border !shadow-lg !rounded-[10px] dark:!bg-gray-700 dark:!border-gray-600 !p-1'>
                   {themeOptions.map((option) => (
                     <Dropdown.Item
                       key={option.key}
                       onClick={() => handleThemeModeChange(option.key)}
-                      className={`!flex !items-start !gap-3 !px-3 !py-1.5 !text-sm transition-colors ${
+                      className='!flex !items-start !gap-3 !px-3 !py-2 !text-sm !rounded-[10px] !mx-0 !my-0.5 transition-colors'
+                      style={
                         theme === option.key
-                          ? '!bg-semi-color-primary-light-default dark:!bg-blue-600 !font-semibold !text-semi-color-text-0 dark:!text-gray-200'
-                          : '!text-semi-color-text-0 dark:!text-gray-200 hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-600'
-                      }`}
+                          ? { backgroundColor: 'var(--semi-color-primary-light-default)', color: 'var(--semi-color-text-0)', fontWeight: 600 }
+                          : {}
+                      }
                     >
                       <span className="mt-0.5">{option.icon}</span>
                       <span className="flex flex-col text-left">
                         <span className='text-sm'>{option.label}</span>
-                        <span className='text-xs text-semi-color-text-2 dark:text-gray-400'>
+                        <span
+                          className='text-xs'
+                          style={{ color: 'var(--semi-color-text-2)' }}
+                        >
                           {option.description}
                         </span>
                       </span>
@@ -206,7 +212,8 @@ const HeaderBar = ({ onMobileMenuToggle }) => {
                 icon={getCurrentThemeIcon()}
                 theme="borderless"
                 type="tertiary"
-                className='!p-1.5 !text-current focus:!bg-semi-color-fill-1 dark:focus:!bg-gray-700 !rounded-full !bg-semi-color-fill-0 dark:!bg-semi-color-fill-1 hover:!bg-semi-color-fill-1 dark:hover:!bg-semi-color-fill-2 transition-colors'
+                className='!p-1.5 !rounded-full !text-current'
+                style={{ backgroundColor: 'var(--semi-color-fill-0)' }}
                 aria-label={t('common.toggleTheme')}
               />
             </Dropdown>
@@ -215,16 +222,16 @@ const HeaderBar = ({ onMobileMenuToggle }) => {
             <Dropdown
               position="bottomRight"
               render={
-                <Dropdown.Menu className='!bg-semi-color-bg-overlay !border-semi-color-border !shadow-lg !rounded-lg dark:!bg-gray-700 dark:!border-gray-600'>
+                <Dropdown.Menu className='!bg-semi-color-bg-overlay !border-semi-color-border !shadow-lg !rounded-[10px] dark:!bg-gray-700 dark:!border-gray-600 !p-1'>
                   <Dropdown.Item
                     onClick={() => { window.location.href = '/console/settings'; }}
-                    className='!px-3 !py-1.5 !text-sm !text-semi-color-text-0 hover:!bg-semi-color-fill-1 dark:!text-gray-200 dark:hover:!bg-blue-500 dark:hover:!text-white transition-colors'
+                    className='!px-3 !py-2 !text-sm !text-semi-color-text-0 !rounded-[10px] !mx-0 !my-0.5 hover:!bg-semi-color-primary-light-default hover:!text-semi-color-primary transition-colors'
                   >
                     {t('common.profile')}
                   </Dropdown.Item>
                   <Dropdown.Item
                     onClick={() => { window.location.href = '/console/settings'; }}
-                    className='!px-3 !py-1.5 !text-sm !text-semi-color-text-0 hover:!bg-semi-color-fill-1 dark:!text-gray-200 dark:hover:!bg-blue-500 dark:hover:!text-white transition-colors'
+                    className='!px-3 !py-2 !text-sm !text-semi-color-text-0 !rounded-[10px] !mx-0 !my-0.5 hover:!bg-semi-color-primary-light-default hover:!text-semi-color-primary transition-colors'
                   >
                     {t('common.settings')}
                   </Dropdown.Item>
@@ -234,7 +241,7 @@ const HeaderBar = ({ onMobileMenuToggle }) => {
                       localStorage.clear();
                       window.location.href = '/';
                     }}
-                    className='!px-3 !py-1.5 !text-sm !text-semi-color-text-0 hover:!bg-semi-color-fill-1 dark:!text-gray-200 dark:hover:!bg-red-500 dark:hover:!text-white transition-colors'
+                    className='!px-3 !py-2 !text-sm !text-semi-color-text-0 !rounded-[10px] !mx-0 !my-0.5 hover:!bg-semi-color-danger-light-default hover:!text-semi-color-danger transition-colors'
                   >
                     {t('common.logout')}
                   </Dropdown.Item>
@@ -244,7 +251,8 @@ const HeaderBar = ({ onMobileMenuToggle }) => {
               <Button
                 theme='borderless'
                 type='tertiary'
-                className='flex items-center gap-1.5 !p-1 !rounded-full hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-700 !bg-semi-color-fill-0 dark:!bg-semi-color-fill-1 dark:hover:!bg-semi-color-fill-2 transition-colors'
+                className='flex items-center gap-1.5 !p-0.5 !rounded-full'
+                style={{ backgroundColor: 'var(--semi-color-fill-0)' }}
               >
                 <Avatar color="blue" size="extra-small">
                   U
