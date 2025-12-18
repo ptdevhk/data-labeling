@@ -845,7 +845,11 @@ export default (state, action) => {
         }
         case "exit fullscreen":
         case "window": {
-          return setIn(state, ["fullScreen"], false)
+          return setIn(
+            setIn(state, ["fullScreen"], false),
+            ["resetZoomKey"],
+            Date.now(),
+          )
         }
         case "hotkeys": {
           return state
@@ -870,6 +874,10 @@ export default (state, action) => {
       }
       state = setIn(state, ["mode"], null)
       return setIn(state, ["selectedTool"], action.selectedTool)
+    }
+    case "RESET_ZOOM": {
+      // Signal to ImageCanvas that it should reset zoom to fit
+      return setIn(state, ["resetZoomKey"], Date.now())
     }
     case "CANCEL": {
       const { mode } = state

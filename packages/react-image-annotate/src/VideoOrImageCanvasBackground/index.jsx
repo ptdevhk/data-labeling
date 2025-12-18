@@ -15,6 +15,8 @@ const Video = styled("video")(({ theme }) => ({
 const StyledImage = styled("img")(({ theme }) => ({
   zIndex: 0,
   position: "absolute",
+  maxWidth: "none",  // Override Tailwind's default max-width: 100%
+  maxHeight: "none", // Ensure height is also unconstrained
 }))
 
 const Error = styled("div")(({ theme }) => ({

@@ -61,7 +61,11 @@ const HotkeyDiv = styled("div")(({ theme, fullscreen }) => ({
 
 const FullScreenContainer = styled("div")(({ theme }) => ({
   width: "100%",
-  height: "100vh",
+  height: "100%",
+  "& .fullscreen": {
+    width: "100%",
+    height: "100%",
+  },
   "& .fullscreen-enabled": {
     width: "100%",
     height: "100%",
@@ -237,6 +241,7 @@ const MainLayoutInner = ({
       onChangeVideoPlaying={action("CHANGE_VIDEO_PLAYING", "isPlaying")}
       onRegionClassAdded={onRegionClassAdded}
       allowComments={state.allowComments}
+      resetZoomKey={state.resetZoomKey}
     />
   )
 
@@ -352,6 +357,8 @@ const MainLayoutInner = ({
           if (!open) {
             fullScreenHandle.exit()
             action("HEADER_BUTTON_CLICKED", "buttonName")("Window")
+            // Dispatch reset zoom action when exiting fullscreen
+            dispatch({ type: "RESET_ZOOM" })
           }
         }}
       >

@@ -169,6 +169,7 @@ export const ImageCanvas = ({
   modifyingAllowedArea = false,
   keypointDefinitions,
   allowComments,
+  resetZoomKey,
 }) => {
   const canvasEl = useRef(null)
   const layoutParams = useRef({})
@@ -258,6 +259,21 @@ export const ImageCanvas = ({
     )
     // eslint-disable-next-line
   }, [imageLoaded])
+
+  // Reset zoom when resetZoomKey changes (e.g., when exiting fullscreen)
+  const prevResetZoomKey = useRef(resetZoomKey)
+  useEffect(() => {
+    // Only reset if resetZoomKey actually changed (not on initial mount)
+    if (!resetZoomKey || !imageLoaded || prevResetZoomKey.current === resetZoomKey) return
+    prevResetZoomKey.current = resetZoomKey
+    changeMat(
+      getDefaultMat(
+        zoomOnAllowedArea ? allowedArea : null,
+        layoutParams.current,
+      ),
+    )
+    // eslint-disable-next-line
+  }, [resetZoomKey])
 
   useLayoutEffect(() => {
     if (!imageDimensions) return
