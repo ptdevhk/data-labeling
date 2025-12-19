@@ -1,3 +1,55 @@
+## [0.3.0](https://github.com/ptdevhk/data-labeling/compare/v0.2.6...v0.3.0) (2025-12-19)
+
+### Features
+
+* Add annotation list panel and improve annotation state ([c686c67](https://github.com/ptdevhk/data-labeling/commit/c686c673ad3a35fed6ab580cafc1dba13ec9ff3d))
+* Add export dialog and annotation export formats ([c7cc5c2](https://github.com/ptdevhk/data-labeling/commit/c7cc5c223c31b970d221d8ba134c81bfe0ab1e4a))
+* **annotation:** add save and export functionality to annotation workspace ([508b8ea](https://github.com/ptdevhk/data-labeling/commit/508b8eaf13c38891814a11773cde7ea5428ec79f))
+* configure bun workspaces ([05eafa7](https://github.com/ptdevhk/data-labeling/commit/05eafa791b7743e975cd37a38cd9ad2078ac2f56))
+* Implement dual zoom modes for annotation canvas ([1780e15](https://github.com/ptdevhk/data-labeling/commit/1780e15a229ea66c1ed6691c6cea07f6590327eb))
+
+### Bug Fixes
+
+* Add MUI and common UI/hooks components to frontend ([bd59944](https://github.com/ptdevhk/data-labeling/commit/bd59944a017a551b40b93b6c1b8515500e6e684c))
+* Add tooltips and fit width option to annotation toolbar ([da35eae](https://github.com/ptdevhk/data-labeling/commit/da35eaeaf0cbd8064242ff64f3995bd7f34b778b))
+* address build configuration issues during migration ([2c5bfbe](https://github.com/ptdevhk/data-labeling/commit/2c5bfbe6699c404042eb22cbc553e04ea146af31))
+* **annotation:** reset zoom on fullscreen exit and preserve aspect ratio ([d7688a2](https://github.com/ptdevhk/data-labeling/commit/d7688a2f299a1b963aebab4b30f887248f97ccb3))
+* Downgrade react and react-dom to 18.3.1 and unify imports ([e36a1e3](https://github.com/ptdevhk/data-labeling/commit/e36a1e34c4c7e37637d9df0183320f41c4dc97f6))
+* Improve annotation UI layout and hover behavior ([310b27d](https://github.com/ptdevhk/data-labeling/commit/310b27d769f1e9614cf936d62916f98d7000fb55))
+* Improve canvas pan constraints and selection handling ([648313c](https://github.com/ptdevhk/data-labeling/commit/648313ca9a8d3ef660feb9e433cb303473174e16))
+* Improve canvas zoom, panning, and container handling ([ef24227](https://github.com/ptdevhk/data-labeling/commit/ef2422700d7cc6a6c5b30ee1fd04d8c13e520be4))
+* Improve settings page with theme and language handling ([fd96627](https://github.com/ptdevhk/data-labeling/commit/fd9662711ad10ecca5e0365c100b96ae861cda46))
+* isolate semantic-release install to avoid workspace:* conflicts ([0b47951](https://github.com/ptdevhk/data-labeling/commit/0b47951fc1c57f6d7b2390eaf7a380fb74208ad2))
+* lint ([546f3d5](https://github.com/ptdevhk/data-labeling/commit/546f3d58933abc8e46834b62808bde5bce33d274))
+* Refactor header menus to use Semi UI Dropdown ([c547be2](https://github.com/ptdevhk/data-labeling/commit/c547be2d82df09019c190258d4b6b7cd145712fe))
+* Refactor Sidebar navigation and update i18n strings ([2a2d160](https://github.com/ptdevhk/data-labeling/commit/2a2d160ef64693ce38d5f5a7eb2ae621df04ab13))
+* Refine dropdown and button styles in Header, update CSS reset ([6dcf086](https://github.com/ptdevhk/data-labeling/commit/6dcf0862fa364f6fcf2fcb6f80b3bd2fcc1e4886))
+* Replace external image/video URLs with local assets ([0a815db](https://github.com/ptdevhk/data-labeling/commit/0a815db82457b2a9c9260e4dfeda369e570bdfe5))
+* resolve multiple React instances in dev mode ([942a2ad](https://github.com/ptdevhk/data-labeling/commit/942a2ad0b2a7915a76d462e140034edbaad6bdab))
+* Update annotation selectability and color logic ([a2c0c08](https://github.com/ptdevhk/data-labeling/commit/a2c0c08ab8d5490beba8284be2d1d419d5e17104))
+* update backend static path for monorepo structure ([7f722c8](https://github.com/ptdevhk/data-labeling/commit/7f722c815d635ad20e1929e56eac62a2b2f85e00))
+* Update dependencies and lockfile ([f35a6d1](https://github.com/ptdevhk/data-labeling/commit/f35a6d1619f28d32c07b5682dd65df6748df63bd))
+* Update dependencies in web/package.json ([62364ac](https://github.com/ptdevhk/data-labeling/commit/62364ac30e4b360c25b29641f697704f0dc6bae2))
+* use hoisted linker for Bun workspaces ([8357648](https://github.com/ptdevhk/data-labeling/commit/83576486241bd8355adfc14b4e292e36247db652))
+* use temp directory for semantic-release to avoid invalid package name ([d4eab14](https://github.com/ptdevhk/data-labeling/commit/d4eab14bff19767ccce1ce5be6b230c2b21b2d41))
+
+### Documentation
+
+* AGENTS.md ([74fb986](https://github.com/ptdevhk/data-labeling/commit/74fb986982084d4095d03ea2cde3f92a6b9b8c67))
+* PROJECT.md ([423c779](https://github.com/ptdevhk/data-labeling/commit/423c779d3d386915d42705714d8a10c9e9fd39f0))
+* PROJECT.md ([413e182](https://github.com/ptdevhk/data-labeling/commit/413e1825a92e4941671a3acfeed55905d8497f73))
+* Replace CLAUDE.md file with symlink to AGENTS.md ([31a15ca](https://github.com/ptdevhk/data-labeling/commit/31a15cae48b7023f631323911d6698ee2ea73dc1))
+* update documentation for annotation save/export feature ([69ca693](https://github.com/ptdevhk/data-labeling/commit/69ca693a85916a4fe6cdd0feb2b4180940f45bbc))
+* update documentation for monorepo structure ([3fb2ed5](https://github.com/ptdevhk/data-labeling/commit/3fb2ed5b31973ac4155ff66021271c175ae14b02))
+* update PROJECT.md AGENTS.md ([85f124a](https://github.com/ptdevhk/data-labeling/commit/85f124aa4b2a48ede6e24184a5068ad1dde0ea14))
+
+### Code Refactoring
+
+* move web to apps/web ([03a3df9](https://github.com/ptdevhk/data-labeling/commit/03a3df913e77a4023d65b29de8947a94246fec56))
+* Refactor UI panels and improve i18n for annotation tools ([67d2e7a](https://github.com/ptdevhk/data-labeling/commit/67d2e7a6fde90aaf84159eada1360387b73bf527))
+* update build configuration for monorepo ([f5fa1a0](https://github.com/ptdevhk/data-labeling/commit/f5fa1a0738da1e3847318123cc53e98ff3624bf9))
+* Update docs for new CardPro layout and architecture ([326b674](https://github.com/ptdevhk/data-labeling/commit/326b674b4eb7017c85078fadee0df4011fcda7b3))
+
 ## [0.2.6](https://github.com/ptdevhk/data-labeling/compare/v0.2.5...v0.2.6) (2025-12-05)
 
 ### Bug Fixes
