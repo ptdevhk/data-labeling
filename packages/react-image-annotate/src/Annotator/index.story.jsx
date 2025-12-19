@@ -208,13 +208,13 @@ export const BoundingBoxAnnotatorWithOutputToConsoleLog = () => (
     showTags={false}
     images={[
       {
-        src: "https://s3.amazonaws.com/jobstorage.workaround.online/Atheer/video-frames/VID_20190111_161054.mp4_frame017.png",
+        src: exampleImage,
         name: "Bounding Box Test",
         regions: [],
       },
       {
-        src: "https://s3.amazonaws.com/jobstorage.workaround.online/Atheer/video-frames/VID_20190111_161054.mp4_frame001.png",
-        name: "Bounding Box Test",
+        src: bikeImg1,
+        name: "Bounding Box Test 2",
         regions: [],
       },
     ]}
@@ -235,7 +235,7 @@ export const BoundingBoxAnnotatorWithAllowedArea = () => (
     allowedArea={{ x: 0, y: 0.6, w: 0.3, h: 0.3 }}
     images={[
       {
-        src: "https://s3.amazonaws.com/jobstorage.workaround.online/Atheer/video-frames/VID_20190111_161054.mp4_frame017.png",
+        src: exampleImage,
         name: "Bounding Box Test",
         regions: [],
       },
@@ -483,14 +483,16 @@ export const VideoWithFramesAsEachImage = () => (
       ]}
       images={[
         {
-          src: "https://s3.amazonaws.com/asset.workaround.online/SampleVideo_1280x720_1mb.mp4",
-          frameTime: 0,
+          src: exampleImage,
           name: "Frame 1",
         },
         {
-          src: "https://s3.amazonaws.com/asset.workaround.online/SampleVideo_1280x720_1mb.mp4",
-          frameTime: 4500,
+          src: bikeImg1,
           name: "Frame 2",
+        },
+        {
+          src: bikeImg2,
+          name: "Frame 3",
         },
       ]}
     />
@@ -515,7 +517,9 @@ export const KeyframeVideo = () => (
         fn()(...args)
       }}
       showTags
-      videoSrc="https://s3.amazonaws.com/asset.workaround.online/SampleVideo_1280x720_1mb.mp4"
+      // Using a sample video from a CDN that supports CORS
+      // Fallback: replace with your own video URL or use images with frameTime
+      videoSrc="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
       videoTime={1000}
       keyframes={{
         0: {
@@ -729,7 +733,7 @@ TwoOnSamplePageWHotkeys.story = {
   name: "Two on sample page w/ hotkeys",
 }
 
-export const CoRsErrorPixelSegmentation = () => (
+export const PixelSegmentation = () => (
   <Annotator
     onExit={fn()}
     middlewares={middlewares}
@@ -738,15 +742,15 @@ export const CoRsErrorPixelSegmentation = () => (
     regionClsList={["Alpha", "Beta", "Charlie", "Delta"]}
     images={[
       {
-        src: "https://placebear.com/200/300",
-        name: "Frame 0036",
+        src: exampleImage,
+        name: "Pixel Segmentation Test",
       },
     ]}
   />
 )
 
-CoRsErrorPixelSegmentation.story = {
-  name: "CORs Error (Pixel Segmentation)",
+PixelSegmentation.story = {
+  name: "Pixel Segmentation",
 }
 
 export const ModifyAllowedArea = () => (

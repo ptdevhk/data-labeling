@@ -21,7 +21,8 @@ export const Basic = () => (
   <MainLayout
     state={{
       showTags: true,
-      selectedImage: exampleImage,
+      annotationType: "image",
+      selectedImage: 0,
       selectedTool: "select",
       taskDescription: "## Example Task Description\n\nPlease work hard.",
       labelImages: true,
@@ -60,7 +61,8 @@ export const CompletingAPolygon = () => (
   <MainLayout
     state={{
       showTags: false,
-      selectedImage: exampleImage,
+      annotationType: "image",
+      selectedImage: 0,
       selectedTool: "create-polygon",
       taskDescription: "",
       mode: {
@@ -101,7 +103,8 @@ CompletingAPolygon.story = {
 export const RegionOverlapClicking = () => (
   <MainLayout
     state={{
-      selectedImage: exampleImage,
+      annotationType: "image",
+      selectedImage: 0,
       selectedTool: "create-box",
       taskDescription: "",
       showTags: true,
@@ -151,7 +154,8 @@ export const PointDistances = () => (
   <MainLayout
     state={{
       showPointDistances: true,
-      selectedImage: exampleImage,
+      annotationType: "image",
+      selectedImage: 0,
       selectedTool: "create-point",
       taskDescription: "",
       showTags: true,
@@ -202,7 +206,8 @@ export const PointDistancesRealUnits = () => (
     state={{
       showPointDistances: true,
       pointDistancePrecision: 2,
-      selectedImage: exampleImage,
+      annotationType: "image",
+      selectedImage: 0,
       selectedTool: "create-point",
       taskDescription: "",
       showTags: true,

@@ -61,13 +61,15 @@ export const Orange2Class = () => (
   </div>
 )
 
-export const S3CorsDomain = () => (
+// Note: Original S3 CORS domain story removed - external URL was inaccessible
+// Using local orange image for reliable testing
+export const LocalImageSegmentation = () => (
   <div style={{ width: "95vw", height: "95vh" }}>
     <FullImageSegmentationAnnotator
       images={[
         {
-          name: "Seve's Desk",
-          src: "https://s3.amazonaws.com/datasets.workaround.online/faces/010041.jpg",
+          name: "Local Image Segmentation",
+          src: orange,
           regions: [
             [0, 100, 125],
             [0, 100, 150],
@@ -92,8 +94,8 @@ export const S3CorsDomain = () => (
   </div>
 )
 
-S3CorsDomain.story = {
-  name: "S3 CORS domain",
+LocalImageSegmentation.story = {
+  name: "Local Image Segmentation",
 }
 
 export const Orange3Class = () => (

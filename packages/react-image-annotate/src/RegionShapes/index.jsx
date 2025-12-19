@@ -184,7 +184,7 @@ export const WrappedRegionList = memo(
         const Component = RegionComponents[r.type]
         return (
           <Component
-            key={r.regionId}
+            key={r.id || r.regionId || `region-${Math.random()}`}
             region={r}
             iw={iw}
             ih={ih}
