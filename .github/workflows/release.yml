@@ -41,32 +41,33 @@ jobs:
       - name: Run tests
         run: make test
 
-  # Run Frontend tests  
+  # Run Frontend tests
   test-frontend:
     name: Frontend Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      
+
       - uses: actions/setup-node@v6
         with:
           node-version: '20'
-          
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-          
+
       - name: Install dependencies
-        working-directory: ./web
         run: bun install
-        
+
       - name: Run linter
         run: make lint-react
-        
-      - name: Build
-        working-directory: ./web
-        run: bun run build
+
+      - name: Build library
+        run: bun run build:lib
+
+      - name: Build frontend
+        run: bun run build:web
 
   # Run Docker build test
   test-docker:
@@ -74,24 +75,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        
+
       - name: Setup environment
         run: cp .env.example .env
-        
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-          
+
       - name: Build frontend
         run: |
-          cd web
           bun install
-          bun run build
-          
+          bun run build:lib
+          bun run build:web
+
       - name: Test Docker containers
         run: |
           docker compose -f docker-compose.yml up -d

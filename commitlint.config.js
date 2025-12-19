@@ -26,6 +26,9 @@ module.exports = {
     (message) => /^Bump .+ from .+ to .+/.test(message),
     (message) => message.startsWith('Update ') && message.includes('.config.js'),
     (message) => message.startsWith('Merge branch '),
-    (message) => message.startsWith('Merge ') && message.includes(' into ')
+    (message) => message.startsWith('Merge ') && message.includes(' into '),
+    // Git subtree commits
+    (message) => message.startsWith("Merge commit '") && message.includes("' as '"),
+    (message) => message.startsWith("Squashed '") && message.includes("' content from commit")
   ]
 };

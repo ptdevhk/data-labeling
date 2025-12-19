@@ -24,14 +24,8 @@ echo "================================================"
 echo "Updating Frontend dependencies..."
 echo "================================================"
 
-# Navigate to frontend directory
-cd web
-
-# Update all dependencies to their latest versions
+# Update all workspace dependencies from project root
 bun update
-
-# Return to project root
-cd ..
 
 echo ""
 echo "================================================"
@@ -40,10 +34,10 @@ echo "================================================"
 echo ""
 echo "Summary:"
 echo "  ✓ Python dependencies updated (uv.lock)"
-echo "  ✓ Frontend dependencies updated (bun.lockb)"
+echo "  ✓ Frontend dependencies updated (bun.lock)"
 echo ""
 echo "Next steps:"
-echo "  1. Review changes: git diff uv.lock web/bun.lockb"
+echo "  1. Review changes: git diff uv.lock bun.lock"
 echo "  2. Test the application: make all"
 echo "  3. Run linters: make lint"
 echo "  4. Run tests: make test"

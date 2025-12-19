@@ -203,8 +203,8 @@ backup_current() {
     fi
 
     # Backup frontend dist (for quick rollback without rebuild)
-    if [ -d "$DEPLOY_PATH/web/dist" ]; then
-        cp -r "$DEPLOY_PATH/web/dist" "$backup_path/web-dist"
+    if [ -d "$DEPLOY_PATH/apps/web/dist" ]; then
+        cp -r "$DEPLOY_PATH/apps/web/dist" "$backup_path/web-dist"
         log_info "Frontend dist backed up"
     fi
 
@@ -256,25 +256,28 @@ fetch_and_checkout() {
 
 build_frontend() {
     log_info "Building frontend..."
-    cd "$DEPLOY_PATH/web"
+    cd "$DEPLOY_PATH"
 
     # Ensure bun is in PATH
     export PATH="$HOME/.bun/bin:/usr/local/bin:$PATH"
 
     # Use --ignore-scripts to skip native module compilation (canvas, etc.)
     # This speeds up installs significantly on servers
-    log_info "Installing dependencies..."
-    if [ -f "bun.lockb" ]; then
+    log_info "Installing workspace dependencies..."
+    if [ -f "bun.lock" ]; then
         bun install --frozen-lockfile --ignore-scripts || bun install --ignore-scripts
     else
         bun install --ignore-scripts
     fi
 
-    log_info "Running build..."
-    bun run build
+    log_info "Building library..."
+    bun run build:lib
 
-    if [ ! -d "dist" ] || [ ! -f "dist/index.html" ]; then
-        log_error "Frontend build failed - dist/index.html not found"
+    log_info "Building frontend..."
+    bun run build:web
+
+    if [ ! -d "apps/web/dist" ] || [ ! -f "apps/web/dist/index.html" ]; then
+        log_error "Frontend build failed - apps/web/dist/index.html not found"
         exit 1
     fi
 

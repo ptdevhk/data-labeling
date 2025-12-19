@@ -9,7 +9,7 @@ from svc.core import auth
 from svc.routes import views
 
 # Path to frontend build directory
-FRONTEND_DIST = Path(__file__).parent.parent / "web" / "dist"
+FRONTEND_DIST = Path(__file__).parent.parent / "apps" / "web" / "dist"
 
 
 def create_app() -> FastAPI:

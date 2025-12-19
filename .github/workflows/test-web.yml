@@ -37,8 +37,11 @@ jobs:
         with:
           filters: |
             frontend:
-              - 'web/**'
+              - 'apps/web/**'
+              - 'packages/react-image-annotate/**'
               - '.github/workflows/test-web.yml'
+              - 'package.json'
+              - 'bun.lock'
       
       # Skip if only backend changed
       - name: Skip tests for backend-only changes
@@ -58,9 +61,8 @@ jobs:
 
       - name: Install Dependencies
         if: steps.filter.outputs.frontend == 'true'
-        working-directory: ./web
         run: |
-          echo "Installing frontend dependencies..."
+          echo "Installing workspace dependencies..."
           # Use --ignore-scripts to skip native module compilation (sharp, canvas, etc.)
           # This avoids libvips build failures on macOS ARM64
           bun install --ignore-scripts
@@ -71,9 +73,14 @@ jobs:
           echo "Running frontend linter..."
           make lint-react
 
+      - name: Build Library
+        if: steps.filter.outputs.frontend == 'true'
+        run: |
+          echo "Building react-image-annotate library..."
+          bun run build:lib
+
       - name: Build Frontend
         if: steps.filter.outputs.frontend == 'true'
-        working-directory: ./web
         run: |
           echo "Building frontend..."
-          bun run build
+          bun run build:web
