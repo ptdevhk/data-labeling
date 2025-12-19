@@ -42,6 +42,11 @@ export default defineConfig(({ command, mode }) => {
       extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
       alias: {
         '@': resolve(__dirname, './src'),
+        // Force all React imports to use the same instance from monorepo root
+        'react': resolve(__dirname, '../../node_modules/react'),
+        'react-dom': resolve(__dirname, '../../node_modules/react-dom'),
+        'react/jsx-runtime': resolve(__dirname, '../../node_modules/react/jsx-runtime'),
+        'react/jsx-dev-runtime': resolve(__dirname, '../../node_modules/react/jsx-dev-runtime'),
       },
     },
     server: {
