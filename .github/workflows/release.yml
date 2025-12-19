@@ -136,11 +136,13 @@ jobs:
 
       - name: Install semantic-release dependencies
         run: |
-          # Install semantic-release in isolated directory to avoid workspace:* conflicts
-          mkdir -p .semantic-release
-          cd .semantic-release
+          # Install semantic-release in isolated temp directory to avoid workspace:* conflicts
+          # Using a temp directory outside the repo avoids npm seeing the root package.json
+          RELEASE_DIR=$(mktemp -d)
+          echo "RELEASE_DIR=$RELEASE_DIR" >> $GITHUB_ENV
+          cd "$RELEASE_DIR"
           npm init -y
-          npm install --no-save \
+          npm install \
             semantic-release@^24.0.0 \
             @semantic-release/changelog@^6.0.3 \
             @semantic-release/commit-analyzer@^13.0.0 \
@@ -174,8 +176,8 @@ jobs:
           echo "Running semantic-release with PAT..."
           echo "Git user: $(git config user.name || echo 'not set')"
           echo "Git email: $(git config user.email || echo 'not set')"
-          # Run from isolated directory but execute in repo root
-          ./.semantic-release/node_modules/.bin/semantic-release
+          # Run semantic-release from temp directory installation
+          "$RELEASE_DIR/node_modules/.bin/semantic-release"
 
       - name: Read new version
         id: version
