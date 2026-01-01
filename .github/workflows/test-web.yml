@@ -29,7 +29,7 @@ jobs:
         node-version: ["20"]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       
       # Check if frontend files changed
       - uses: dorny/paths-filter@v3
