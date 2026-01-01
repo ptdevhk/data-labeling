@@ -93,7 +93,7 @@ jobs:
         if: steps.config-check.outputs.configured == 'true'
         id: ssh-setup
         continue-on-error: true
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
 
@@ -295,7 +295,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
 
@@ -319,7 +319,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
 
